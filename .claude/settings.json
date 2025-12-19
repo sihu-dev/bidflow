@@ -48,9 +48,50 @@
   },
   "project": {
     "name": "BIDFLOW",
-    "description": "입찰 자동화 시스템 - 제조업 SME 맞춤",
+    "description": "입찰 자동화 시스템 - 제조업 SME 맞춤 (IO block)",
     "type": "next-app",
     "framework": "next-15"
+  },
+  "skills": {
+    "enabled": true,
+    "autoDiscover": true,
+    "available": [
+      "bid-automation",
+      "security-review",
+      "api-integration"
+    ]
+  },
+  "commands": {
+    "enabled": true,
+    "autoComplete": true,
+    "available": [
+      "bid",
+      "api",
+      "security"
+    ]
+  },
+  "agents": {
+    "enabled": true,
+    "available": [
+      "bid-matcher",
+      "proposal-writer",
+      "security-auditor"
+    ]
+  },
+  "context": {
+    "requiredFiles": [
+      "CLAUDE.md",
+      ".forge/BID_AUTOMATION_SPEC.md"
+    ],
+    "optionalFiles": [
+      ".forge/TECH_ARCHITECTURE.md",
+      ".forge/UI_DESIGN_SPEC.md"
+    ]
+  },
+  "techStack": {
+    "frontend": ["next.js@15", "typescript@5", "tailwindcss"],
+    "backend": ["supabase", "upstash-redis"],
+    "apis": ["ted-api", "g2b-api", "sam-api"]
   },
   "performance": {
     "parallelTools": true,
