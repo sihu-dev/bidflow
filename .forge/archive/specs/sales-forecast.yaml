@@ -1,0 +1,172 @@
+# ═══════════════════════════════════════════════════════════════
+# QRY-005: FOLIO 매출 예측 시스템
+# ═══════════════════════════════════════════════════════════════
+
+query_id: QRY-005
+app: folio
+feature: sales-forecast
+created_at: 2024-12-19
+status: in_progress
+
+# ───────────────────────────────────────────────────────────────
+# 기능 개요
+# ───────────────────────────────────────────────────────────────
+
+overview:
+  name: AI 매출 예측 시스템
+  description: |
+    과거 매출 데이터와 외부 요인을 분석하여 미래 매출을 예측
+    소상공인의 비즈니스 의사결정 지원
+
+  value_proposition:
+    - 계절성/트렌드 기반 매출 예측
+    - 날씨, 휴일, 이벤트 등 외부 요인 반영
+    - 경쟁사 동향 영향 분석
+    - 재고/인력 계획 수립 지원
+
+# ───────────────────────────────────────────────────────────────
+# 사용자 스토리
+# ───────────────────────────────────────────────────────────────
+
+user_stories:
+  - id: US-001
+    as: 소상공인
+    want: 다음 주/월 예상 매출 확인
+    so_that: 재고 발주량 결정
+
+  - id: US-002
+    as: 점주
+    want: 요일별/시간대별 매출 패턴 파악
+    so_that: 인력 스케줄 최적화
+
+  - id: US-003
+    as: 사업자
+    want: 매출에 영향 주는 요인 분석
+    so_that: 마케팅 전략 수립
+
+# ───────────────────────────────────────────────────────────────
+# 나노인자 설계 (L0 → L3)
+# ───────────────────────────────────────────────────────────────
+
+nano_factors:
+  L0_atoms:
+    description: 기본 타입 정의
+    components:
+      - name: ISalesRecord
+        purpose: 매출 기록
+        fields:
+          - date, dayOfWeek, timeSlot
+          - revenue, transactionCount
+          - avgTicket, customerCount
+
+      - name: IExternalFactor
+        purpose: 외부 요인
+        fields:
+          - weather (온도, 강수량)
+          - holiday (공휴일, 지역축제)
+          - event (프로모션, 할인행사)
+          - competition (경쟁사 이벤트)
+
+      - name: ISalesForecast
+        purpose: 예측 결과
+        fields:
+          - period (일/주/월)
+          - predictedRevenue
+          - confidenceInterval
+          - factors (영향 요인별 기여도)
+
+      - name: ISeasonalPattern
+        purpose: 계절성 패턴
+        fields:
+          - dayOfWeek, monthOfYear
+          - hourOfDay, weekOfMonth
+          - index (계절 지수)
+
+  L1_molecules:
+    description: 시계열 분석 유틸
+    components:
+      - name: time-series.ts
+        functions:
+          - decompose (추세/계절성/잔차 분해)
+          - calculateMovingAverage
+          - detectSeasonality
+          - smoothExponential
+
+      - name: forecast-calc.ts
+        functions:
+          - simpleMovingAverage
+          - exponentialSmoothing
+          - calculateGrowthRate
+          - adjustForFactors
+
+  L2_cells:
+    description: 서비스 및 저장소
+    components:
+      - name: sales-data-service.ts
+        purpose: 매출 데이터 제공
+        methods:
+          - getSalesHistory
+          - aggregateByPeriod
+          - getSalesMetrics
+
+      - name: external-factor-service.ts
+        purpose: 외부 요인 데이터
+        methods:
+          - getWeatherData
+          - getHolidayCalendar
+          - getLocalEvents
+
+      - name: forecast-repository.ts
+        purpose: 예측 결과 저장
+        methods:
+          - saveForecast
+          - getForecast
+          - compareForecastVsActual
+
+  L3_tissues:
+    description: 예측 에이전트
+    components:
+      - name: SalesForecastAgent
+        purpose: 매출 예측 오케스트레이션
+        methods:
+          - generateForecast (예측 생성)
+          - analyzePatterns (패턴 분석)
+          - evaluateAccuracy (정확도 평가)
+          - explainForecast (예측 설명)
+
+# ───────────────────────────────────────────────────────────────
+# 예측 모델 흐름
+# ───────────────────────────────────────────────────────────────
+
+forecast_flow:
+  1_data_collection:
+    - 과거 매출 데이터 수집
+    - 외부 요인 데이터 수집
+    - 데이터 전처리/정규화
+
+  2_pattern_analysis:
+    - 시계열 분해 (추세/계절성/잔차)
+    - 요일/시간대별 패턴 추출
+    - 외부 요인 상관관계 분석
+
+  3_forecast_generation:
+    - 기본 예측 (이동평균/지수평활)
+    - 계절성 조정
+    - 외부 요인 보정
+    - 신뢰구간 계산
+
+  4_explanation:
+    - 예측 근거 설명
+    - 주요 영향 요인 리스트
+    - 리스크 요인 알림
+
+# ───────────────────────────────────────────────────────────────
+# 수락 기준
+# ───────────────────────────────────────────────────────────────
+
+acceptance_criteria:
+  - 최소 30일 과거 데이터로 예측 가능
+  - 일별/주별/월별 예측 지원
+  - 예측 정확도 MAPE 20% 이내
+  - 신뢰구간 (80%, 95%) 제공
+  - 예측 근거 자연어 설명

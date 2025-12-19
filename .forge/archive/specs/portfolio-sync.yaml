@@ -1,0 +1,328 @@
+# ============================================
+# FORGE LABS 기능 명세서
+# QUERY-001: Feature Analysis
+# ============================================
+
+feature:
+  id: "FEAT-2024-001"
+  name: "portfolio-sync"
+  app: "hephaitos"
+  priority: "P0"
+  created: "2024-12-19"
+  status: "analysis"
+
+# ============================================
+# 1. 문제 정의
+# ============================================
+problem:
+  statement: |
+    암호화폐 투자자가 여러 거래소에 분산된 자산을
+    통합적으로 관리하고 모니터링할 수 없음
+
+  pain_points:
+    - "거래소마다 별도 로그인 필요"
+    - "통합 수익률 계산이 어려움"
+    - "포지션 변동 실시간 파악 불가"
+    - "세금 신고용 거래내역 취합 번거로움"
+
+  alternatives:
+    - name: "수동 스프레드시트"
+      weakness: "업데이트 누락, 시간 소모"
+    - name: "유료 포트폴리오 앱"
+      weakness: "월 구독료, 거래소 지원 제한"
+    - name: "거래소 직접 확인"
+      weakness: "분산된 정보, 통합 뷰 없음"
+
+# ============================================
+# 2. 사용자 스토리
+# ============================================
+user_stories:
+  - id: "US-001"
+    as: "암호화폐 투자자"
+    want: "바이낸스, 업비트, 빗썸 잔고를 한눈에 보고 싶다"
+    so_that: "전체 자산 현황을 즉시 파악할 수 있다"
+    priority: "P0"
+
+  - id: "US-002"
+    as: "다중 거래소 사용자"
+    want: "통합 수익률과 손익을 확인하고 싶다"
+    so_that: "투자 성과를 정확히 평가할 수 있다"
+    priority: "P0"
+
+  - id: "US-003"
+    as: "트레이더"
+    want: "잔고 변동 시 알림을 받고 싶다"
+    so_that: "중요한 변동을 놓치지 않을 수 있다"
+    priority: "P1"
+
+  - id: "US-004"
+    as: "세금 신고자"
+    want: "거래내역을 엑셀로 내보내고 싶다"
+    so_that: "세금 신고 자료를 쉽게 준비할 수 있다"
+    priority: "P2"
+
+# ============================================
+# 3. 수락 기준 (Acceptance Criteria)
+# ============================================
+acceptance_criteria:
+  - id: "AC-001"
+    story: "US-001"
+    given: "사용자가 거래소 API 키를 등록했을 때"
+    when: "대시보드에 접속하면"
+    then: "모든 거래소의 잔고가 USD 기준으로 통합 표시된다"
+
+  - id: "AC-002"
+    story: "US-001"
+    given: "API 키가 유효할 때"
+    when: "동기화 버튼을 누르면"
+    then: "30초 이내에 최신 잔고가 반영된다"
+
+  - id: "AC-003"
+    story: "US-002"
+    given: "과거 잔고 스냅샷이 있을 때"
+    when: "수익률 탭을 선택하면"
+    then: "일/주/월/전체 수익률이 차트로 표시된다"
+
+  - id: "AC-004"
+    story: "US-003"
+    given: "알림 설정이 활성화되었을 때"
+    when: "잔고가 설정 임계값 이상 변동하면"
+    then: "푸시 알림 또는 이메일이 발송된다"
+
+  - id: "AC-005"
+    story: "US-004"
+    given: "거래내역 데이터가 있을 때"
+    when: "내보내기 버튼을 클릭하면"
+    then: "기간별 거래내역이 Excel 파일로 다운로드된다"
+
+# ============================================
+# 4. 나노인자 분해
+# ============================================
+nano_factors:
+  L0_atoms:
+    - name: "ExchangeType"
+      path: "packages/types/src/hephaitos/exchange.ts"
+      description: "거래소 종류 enum (binance, upbit, bithumb, ...)"
+
+    - name: "IAsset"
+      path: "packages/types/src/hephaitos/asset.ts"
+      description: "자산 인터페이스 (symbol, amount, price, value)"
+
+    - name: "IPortfolio"
+      path: "packages/types/src/hephaitos/portfolio.ts"
+      description: "포트폴리오 인터페이스 (거래소별 자산 집합)"
+
+    - name: "IPortfolioSnapshot"
+      path: "packages/types/src/hephaitos/snapshot.ts"
+      description: "포트폴리오 스냅샷 (시점별 가치 기록)"
+
+    - name: "EXCHANGE_CONFIG"
+      path: "packages/types/src/hephaitos/constants.ts"
+      description: "거래소별 API 설정 상수"
+
+  L1_molecules:
+    - name: "normalizeBalance"
+      path: "packages/utils/src/balance.ts"
+      description: "거래소별 잔고 응답을 표준 형식으로 정규화"
+
+    - name: "calculatePnL"
+      path: "packages/utils/src/pnl.ts"
+      description: "손익 계산 유틸리티"
+
+    - name: "convertCurrency"
+      path: "packages/utils/src/currency.ts"
+      description: "통화 변환 유틸리티 (8개 통화 지원)"
+
+    - name: "validateApiKey"
+      path: "packages/utils/src/validation.ts"
+      description: "API 키 형식 검증"
+
+  L2_cells:
+    - name: "ExchangeService"
+      path: "packages/core/src/services/exchange-service.ts"
+      description: "거래소 API 통합 서비스 (팩토리 패턴)"
+      interface: "IExchangeService"
+      methods:
+        - "getBalance(exchange, credentials): Promise<IAsset[]>"
+        - "getTransactions(exchange, credentials, period): Promise<ITransaction[]>"
+
+    - name: "PortfolioRepository"
+      path: "packages/core/src/repositories/portfolio-repository.ts"
+      description: "포트폴리오 데이터 저장소 (Supabase)"
+      interface: "IPortfolioRepository"
+      methods:
+        - "save(portfolio): Promise<void>"
+        - "getByUserId(userId): Promise<IPortfolio[]>"
+        - "getSnapshots(portfolioId, period): Promise<IPortfolioSnapshot[]>"
+
+  L3_tissues:
+    - name: "PortfolioSyncAgent"
+      path: "apps/hephaitos/src/agents/portfolio-sync-agent.ts"
+      description: "포트폴리오 동기화 에이전트"
+      responsibilities:
+        - "다중 거래소 병렬 조회"
+        - "잔고 정규화 및 통합"
+        - "스냅샷 저장"
+        - "변동 감지 및 알림"
+      dependencies:
+        - "ExchangeService"
+        - "PortfolioRepository"
+        - "NotificationService"
+
+  L4_organs:
+    - name: "PortfolioAPI"
+      path: "apps/hephaitos/src/api/portfolio.ts"
+      description: "포트폴리오 REST API"
+      endpoints:
+        - "GET /api/portfolio - 전체 포트폴리오 조회"
+        - "POST /api/portfolio/sync - 동기화 트리거"
+        - "GET /api/portfolio/history - 수익률 이력"
+        - "GET /api/portfolio/export - Excel 내보내기"
+
+# ============================================
+# 5. 의존성 매핑
+# ============================================
+dependencies:
+  internal:
+    - package: "@forge/types"
+      reason: "L0 타입 정의"
+    - package: "@forge/utils"
+      reason: "정규화, 계산 유틸리티"
+    - package: "@forge/crawler"
+      reason: "거래소 API 크롤링"
+    - package: "@forge/excel-export"
+      reason: "Excel 내보내기"
+    - package: "@forge/supabase"
+      reason: "데이터 저장"
+
+  external:
+    - name: "Binance API"
+      type: "REST"
+      auth: "API Key + Secret"
+      rate_limit: "1200/min"
+      docs: "https://binance-docs.github.io/apidocs/"
+
+    - name: "Upbit API"
+      type: "REST"
+      auth: "JWT (Access Key + Secret)"
+      rate_limit: "600/min"
+      docs: "https://docs.upbit.com/"
+
+    - name: "Bithumb API"
+      type: "REST"
+      auth: "HMAC-SHA512"
+      rate_limit: "300/min"
+      docs: "https://apidocs.bithumb.com/"
+
+# ============================================
+# 6. 리스크 평가
+# ============================================
+risks:
+  - id: "RISK-001"
+    risk: "API 레이트 리밋 초과"
+    probability: "HIGH"
+    impact: "MEDIUM"
+    mitigation: |
+      - 캐싱 레이어 도입 (5분 TTL)
+      - 배치 처리로 요청 최소화
+      - 지수 백오프 재시도
+
+  - id: "RISK-002"
+    risk: "거래소 API 변경/중단"
+    probability: "MEDIUM"
+    impact: "HIGH"
+    mitigation: |
+      - 어댑터 패턴으로 거래소별 분리
+      - 장애 감지 및 알림 시스템
+      - 대체 API 엔드포인트 준비
+
+  - id: "RISK-003"
+    risk: "API 키 보안 유출"
+    probability: "LOW"
+    impact: "CRITICAL"
+    mitigation: |
+      - 클라이언트 사이드 키 저장 금지
+      - Supabase Vault 암호화 저장
+      - 읽기 전용 API 키만 허용 권장
+
+  - id: "RISK-004"
+    risk: "환율 데이터 지연"
+    probability: "MEDIUM"
+    impact: "LOW"
+    mitigation: |
+      - 다중 환율 소스 (CoinGecko, Binance)
+      - 캐시된 환율 폴백
+
+# ============================================
+# 7. 데이터 모델
+# ============================================
+data_model:
+  tables:
+    - name: "portfolios"
+      columns:
+        - "id: UUID PRIMARY KEY"
+        - "user_id: UUID REFERENCES auth.users"
+        - "exchange: exchange_type"
+        - "name: VARCHAR(100)"
+        - "api_key_encrypted: TEXT"
+        - "created_at: TIMESTAMPTZ"
+        - "synced_at: TIMESTAMPTZ"
+
+    - name: "portfolio_assets"
+      columns:
+        - "id: UUID PRIMARY KEY"
+        - "portfolio_id: UUID REFERENCES portfolios"
+        - "symbol: VARCHAR(20)"
+        - "amount: DECIMAL(24,8)"
+        - "avg_buy_price: DECIMAL(24,8)"
+        - "updated_at: TIMESTAMPTZ"
+
+    - name: "portfolio_snapshots"
+      columns:
+        - "id: UUID PRIMARY KEY"
+        - "portfolio_id: UUID REFERENCES portfolios"
+        - "total_value_usd: DECIMAL(24,2)"
+        - "asset_breakdown: JSONB"
+        - "recorded_at: TIMESTAMPTZ"
+
+# ============================================
+# 8. 구현 우선순위
+# ============================================
+implementation_order:
+  phase_1:
+    name: "MVP"
+    items:
+      - "L0: 타입 정의"
+      - "L1: normalizeBalance, convertCurrency"
+      - "L2: ExchangeService (Binance only)"
+      - "L3: PortfolioSyncAgent (기본)"
+      - "L4: GET /api/portfolio"
+    duration: "2일"
+
+  phase_2:
+    name: "확장"
+    items:
+      - "L2: Upbit, Bithumb 어댑터"
+      - "L2: PortfolioRepository"
+      - "L3: 스냅샷 저장 기능"
+      - "L4: POST /api/portfolio/sync"
+    duration: "1.5일"
+
+  phase_3:
+    name: "고급 기능"
+    items:
+      - "L1: calculatePnL"
+      - "L3: 알림 기능"
+      - "L4: /api/portfolio/history, /export"
+    duration: "1일"
+
+# ============================================
+# 메타데이터
+# ============================================
+metadata:
+  query_id: "QRY-2024-001"
+  query_type: "feature-analysis"
+  total_nano_factors: 14
+  estimated_effort: "4.5일"
+  next_query: "architecture-design"
+  next_target: "ExchangeService"

@@ -1,0 +1,157 @@
+# ═══════════════════════════════════════════════════════════════
+# QRY-006: DRYON 알람 관리 시스템
+# ═══════════════════════════════════════════════════════════════
+
+query_id: QRY-006
+app: dryon
+feature: alarm-management
+created_at: 2024-12-19
+status: in_progress
+
+# ───────────────────────────────────────────────────────────────
+# 기능 개요
+# ───────────────────────────────────────────────────────────────
+
+overview:
+  name: 공정 알람 관리 시스템
+  description: |
+    슬러지 건조 공정의 이상 상태 감지 및 알람 관리
+    QRY-003 센서 최적화와 연동하여 통합 모니터링
+
+  value_proposition:
+    - 실시간 이상 상태 감지
+    - 알람 우선순위 자동 분류
+    - 알람 이력 관리 및 분석
+    - 에스컬레이션 자동화
+
+# ───────────────────────────────────────────────────────────────
+# 알람 우선순위 체계
+# ───────────────────────────────────────────────────────────────
+
+alarm_priority:
+  critical:
+    response_time: 즉시
+    examples:
+      - 온도 임계값 초과 (화재 위험)
+      - 압력 이상 (폭발 위험)
+      - 긴급 정지 신호
+
+  high:
+    response_time: 15분 이내
+    examples:
+      - 품질 기준 미달
+      - 에너지 효율 급락
+      - 장비 진동 이상
+
+  medium:
+    response_time: 1시간 이내
+    examples:
+      - 유지보수 필요
+      - 파라미터 드리프트
+      - 경고 임계값 도달
+
+  low:
+    response_time: 8시간 이내
+    examples:
+      - 정보성 알림
+      - 예방 점검 알림
+      - 통계 보고
+
+# ───────────────────────────────────────────────────────────────
+# 나노인자 설계 (L0 → L3)
+# ───────────────────────────────────────────────────────────────
+
+nano_factors:
+  L0_atoms:
+    description: 기본 타입 정의
+    components:
+      - name: IAlarm
+        purpose: 알람 정의
+        fields:
+          - id, code, name
+          - priority (critical/high/medium/low)
+          - category (safety/quality/efficiency/maintenance)
+          - status (active/acknowledged/resolved)
+
+      - name: IAlarmRule
+        purpose: 알람 규칙
+        fields:
+          - triggeredCondition (조건)
+          - thresholds (임계값들)
+          - deadband (데드밴드)
+          - delay (지연 시간)
+
+      - name: IAlarmEvent
+        purpose: 알람 이벤트
+        fields:
+          - alarmId, triggeredAt
+          - sensorValues (트리거 시점 값)
+          - acknowledgedBy, resolvedBy
+          - rootCause, resolution
+
+      - name: IEscalation
+        purpose: 에스컬레이션 규칙
+        fields:
+          - level, after (시간)
+          - notifyTo (알림 대상)
+          - actions (자동 조치)
+
+  L1_molecules:
+    description: 알람 평가 유틸
+    components:
+      - name: alarm-eval.ts
+        functions:
+          - evaluateThreshold (임계값 평가)
+          - checkDeadband (데드밴드 체크)
+          - calculateAlarmScore (알람 점수)
+          - prioritizeAlarms (우선순위 정렬)
+
+  L2_cells:
+    description: 서비스 및 저장소
+    components:
+      - name: alarm-repository.ts
+        purpose: 알람 정의/이벤트 저장
+        methods:
+          - saveAlarm, getAlarm
+          - saveEvent, getActiveEvents
+          - getEventHistory
+
+      - name: notification-service.ts
+        purpose: 알림 발송
+        methods:
+          - sendNotification
+          - escalate
+
+  L3_tissues:
+    description: 알람 관리 에이전트
+    components:
+      - name: AlarmManagerAgent
+        purpose: 알람 관리 오케스트레이션
+        methods:
+          - evaluateSensorState (센서 상태 평가)
+          - triggerAlarm (알람 발생)
+          - acknowledgeAlarm (알람 확인)
+          - resolveAlarm (알람 해제)
+          - getAlarmDashboard (대시보드)
+
+# ───────────────────────────────────────────────────────────────
+# QRY-003 연동
+# ───────────────────────────────────────────────────────────────
+
+integration:
+  sensor_optimizer:
+    - 센서 상태 공유
+    - 최적화 권장사항 → 알람 조건 연동
+    - 학습 결과 → 동적 임계값 조정
+
+# ───────────────────────────────────────────────────────────────
+# 수락 기준
+# ───────────────────────────────────────────────────────────────
+
+acceptance_criteria:
+  - 4단계 알람 우선순위 지원
+  - 임계값 기반 자동 알람 발생
+  - 데드밴드/지연 시간 적용
+  - 알람 확인/해제 워크플로우
+  - 에스컬레이션 자동화
+  - 알람 이력 조회/분석

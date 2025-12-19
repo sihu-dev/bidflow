@@ -1,0 +1,81 @@
+# FORGE LABS 현재 쿼리 상태
+# 자동 업데이트됨
+
+current_query:
+  id: "QRY-2024-001"
+  feature: "portfolio-sync"
+  phase: "completed"
+  app: "hephaitos"
+  started_at: "2024-12-19T00:00:00Z"
+  completed_at: "2024-12-19T01:00:00Z"
+
+  progress:
+    analysis: "completed"
+    L0_design: "completed"
+    L0_implement: "completed"
+    L1_design: "completed"
+    L1_implement: "completed"
+    L2_design: "completed"
+    L2_implement: "completed"
+    L3_design: "completed"
+    L3_implement: "completed"
+
+  artifacts:
+    specs:
+      - path: ".forge/specs/portfolio-sync.yaml"
+        type: "feature-spec"
+    designs:
+      - path: ".forge/specs/arch/L0-portfolio-types.md"
+        type: "architecture-design"
+    implementations:
+      # L0 - Types
+      - path: "packages/types/src/hephaitos/exchange.ts"
+        level: "L0"
+      - path: "packages/types/src/hephaitos/asset.ts"
+        level: "L0"
+      - path: "packages/types/src/hephaitos/portfolio.ts"
+        level: "L0"
+      - path: "packages/types/src/hephaitos/credentials.ts"
+        level: "L0"
+      # L1 - Utils
+      - path: "packages/utils/src/balance.ts"
+        level: "L1"
+      - path: "packages/utils/src/currency.ts"
+        level: "L1"
+      - path: "packages/utils/src/pnl.ts"
+        level: "L1"
+      - path: "packages/utils/src/validation.ts"
+        level: "L1"
+      # L2 - Services
+      - path: "packages/core/src/services/exchange-service.ts"
+        level: "L2"
+      - path: "packages/core/src/repositories/portfolio-repository.ts"
+        level: "L2"
+      # L3 - Agents
+      - path: "apps/hephaitos/src/agents/portfolio-sync-agent.ts"
+        level: "L3"
+
+system_status:
+  initialized: true
+  ready: true
+  last_update: "2024-12-19T01:00:00Z"
+
+available_apps:
+  - name: hephaitos
+    description: "트레이딩 AI 에이전트 엔진"
+    status: "active"
+    features:
+      - "portfolio-sync (completed)"
+  - name: folio
+    description: "소상공인 AI SaaS"
+    status: "ready"
+  - name: dryon
+    description: "산업 IoT AI"
+    status: "ready"
+
+next_query_id: "QRY-2024-002"
+
+# 다음 가능한 작업:
+# 1. /forge feature competitor-monitor --app folio --priority P1
+# 2. /forge feature sensor-optimizer --app dryon --priority P0
+# 3. /forge verify portfolio-sync --files "apps/hephaitos/**/*"

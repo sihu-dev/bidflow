@@ -1,0 +1,134 @@
+# QRY-009: Energy Monitor
+# DRYON - 에너지 소비 모니터링 및 효율화
+
+query_id: QRY-009
+app: dryon
+feature: energy-monitor
+version: 1.0.0
+created: 2025-12-19
+
+# ═══════════════════════════════════════════════════════════════
+# 개요
+# ═══════════════════════════════════════════════════════════════
+description: |
+  슬러지 건조 공정의 에너지 소비 모니터링 및 효율화 시스템.
+  실시간 에너지 사용량 추적 및 최적화 추천.
+
+goals:
+  - 실시간 에너지 소비 모니터링
+  - 에너지 효율 지표 (SEC, COP) 계산
+  - 피크 부하 관리 및 예측
+  - 에너지 비용 분석
+  - 효율화 추천 생성
+
+# ═══════════════════════════════════════════════════════════════
+# 나노팩터 계층 구조
+# ═══════════════════════════════════════════════════════════════
+layers:
+  L0_types:
+    path: packages/types/src/dryon/energy.ts
+    entities:
+      - EnergyType (전기/가스/스팀)
+      - IEnergyReading (에너지 계측값)
+      - IEnergyConsumption (소비 집계)
+      - IEfficiencyMetrics (효율 지표)
+      - IEnergyTariff (요금제)
+      - IEnergyCost (비용 분석)
+      - IPeakDemand (피크 수요)
+      - IEfficiencyRecommendation (효율화 추천)
+
+  L1_utils:
+    path: packages/utils/src/energy-calc.ts
+    functions:
+      - calculateSEC: 비에너지소비량 (kWh/kg)
+      - calculateCOP: 성능계수
+      - calculateEfficiency: 건조 효율
+      - calculateEnergyCost: 에너지 비용
+      - calculatePeakDemand: 피크 수요
+      - calculateLoadFactor: 부하율
+      - calculatePowerFactor: 역률
+      - detectAnomalies: 이상 감지
+      - predictConsumption: 소비 예측
+
+  L2_repositories:
+    path: packages/core/src/repositories/energy-repository.ts
+    interfaces:
+      - IEnergyRepository: 에너지 데이터 CRUD
+    implementations:
+      - InMemoryEnergyRepository
+
+  L3_agent:
+    path: apps/dryon/src/agents/energy-monitor-agent.ts
+    class: EnergyMonitorAgent
+    methods:
+      - recordReading: 계측값 기록
+      - getConsumptionSummary: 소비 요약
+      - calculateEfficiency: 효율 계산
+      - analyzeCosts: 비용 분석
+      - getPeakAnalysis: 피크 분석
+      - getRecommendations: 효율화 추천
+      - getDashboard: 대시보드 데이터
+
+# ═══════════════════════════════════════════════════════════════
+# 핵심 지표
+# ═══════════════════════════════════════════════════════════════
+metrics:
+  specific_energy_consumption:
+    name: SEC (비에너지소비량)
+    formula: kWh / kg (건조 슬러지)
+    target: "< 1.0 kWh/kg"
+    description: 슬러지 1kg 건조에 소요되는 에너지
+
+  coefficient_of_performance:
+    name: COP (성능계수)
+    formula: 열출력 / 전기입력
+    target: "> 3.0"
+    description: 히트펌프 효율 지표
+
+  drying_efficiency:
+    name: 건조 효율
+    formula: (수분제거량 × 잠열) / 투입에너지
+    target: "> 70%"
+
+  load_factor:
+    name: 부하율
+    formula: 평균전력 / 피크전력
+    target: "> 60%"
+
+  power_factor:
+    name: 역률
+    formula: 유효전력 / 피상전력
+    target: "> 0.95"
+
+# ═══════════════════════════════════════════════════════════════
+# 에너지 타입
+# ═══════════════════════════════════════════════════════════════
+energy_types:
+  electricity:
+    unit: kWh
+    cost_unit: 원/kWh
+    peak_tracking: true
+
+  natural_gas:
+    unit: Nm³
+    cost_unit: 원/Nm³
+    conversion: 10.5 kWh/Nm³
+
+  steam:
+    unit: ton
+    cost_unit: 원/ton
+    conversion: 640 kWh/ton
+
+# ═══════════════════════════════════════════════════════════════
+# 요금제 구조
+# ═══════════════════════════════════════════════════════════════
+tariff_structure:
+  time_of_use:
+    peak: "10:00-12:00, 13:00-17:00 (여름철)"
+    shoulder: "09:00-10:00, 12:00-13:00, 17:00-23:00"
+    off_peak: "23:00-09:00"
+
+  demand_charge:
+    base: 기본요금 (계약전력 기준)
+    demand: 수요요금 (최대수요전력 기준)
+    energy: 전력량요금 (사용량 기준)

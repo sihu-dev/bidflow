@@ -1,0 +1,220 @@
+# FORGE LABS 설계 결정 메모리
+# 프로젝트 전체 설계 결정 이력
+
+version: "1.0.0"
+created_at: "2024-12-19"
+
+# ============================================
+# 아키텍처 결정 기록 (ADR)
+# ============================================
+
+decisions:
+  # ADR-001: 모노레포 구조
+  - id: "ADR-001"
+    title: "모노레포 구조 채택"
+    status: "accepted"
+    date: "2024-12-19"
+    context: |
+      3개의 앱(hephaitos, folio, dryon)과 공유 패키지들을 관리해야 함.
+      코드 재사용성, 일관된 버전 관리, 통합 빌드/테스트가 필요.
+    decision: |
+      Turborepo + pnpm workspace 기반 모노레포 구조 채택.
+      - apps/: 3개 앱
+      - packages/: 공유 패키지 (@forge/*)
+    consequences:
+      positive:
+        - 코드 공유 용이
+        - 원자적 커밋 가능
+        - 통합 CI/CD
+      negative:
+        - 초기 설정 복잡
+        - 빌드 시간 증가 가능
+
+  # ADR-002: 나노인자 계층 구조
+  - id: "ADR-002"
+    title: "나노인자 6단계 계층 구조"
+    status: "accepted"
+    date: "2024-12-19"
+    context: |
+      복잡한 시스템을 체계적으로 설계하고 구현하기 위한 프레임워크 필요.
+      각 레벨별 명확한 책임과 의존성 규칙 필요.
+    decision: |
+      L0-L5 6단계 나노인자 계층 구조 적용:
+      - L0 (Atoms): 타입, 상수
+      - L1 (Molecules): 유틸 함수
+      - L2 (Cells): 서비스
+      - L3 (Tissues): 에이전트
+      - L4 (Organs): API 레이어
+      - L5 (System): 전체 앱
+    consequences:
+      positive:
+        - 명확한 설계 가이드라인
+        - 의존성 방향 명확
+        - 테스트 용이성
+      negative:
+        - 학습 곡선 존재
+        - 작은 기능도 여러 레벨 필요
+
+  # ADR-003: 듀얼 LLM 전략
+  - id: "ADR-003"
+    title: "OpenAI + Anthropic 듀얼 LLM"
+    status: "accepted"
+    date: "2024-12-19"
+    context: |
+      AI 기능의 안정성과 품질을 위해 단일 제공자 의존 회피.
+      작업 유형별 최적 모델 선택 가능해야 함.
+    decision: |
+      - 기본: OpenAI GPT-4o (빠른 응답, 일반 작업)
+      - 폴백: Anthropic Claude (복잡한 분석, 긴 컨텍스트)
+      - 자동 전환: 오류 시 또는 작업 특성에 따라
+    consequences:
+      positive:
+        - 장애 대응력 향상
+        - 작업별 최적화
+        - 벤더 종속 회피
+      negative:
+        - 복잡한 추상화 필요
+        - 비용 관리 필요
+
+  # ADR-004: Supabase 통합 백엔드
+  - id: "ADR-004"
+    title: "Supabase 통합 백엔드"
+    status: "accepted"
+    date: "2024-12-19"
+    context: |
+      빠른 개발 속도와 운영 부담 최소화 필요.
+      실시간 기능, 인증, 스토리지 등 통합 솔루션 필요.
+    decision: |
+      Supabase를 메인 백엔드로 사용:
+      - PostgreSQL: 주 데이터베이스
+      - Realtime: 실시간 업데이트
+      - Auth: 사용자 인증
+      - Storage: 파일 저장
+      - Edge Functions: 서버리스 로직
+    consequences:
+      positive:
+        - 빠른 개발
+        - 관리 오버헤드 최소화
+        - 확장성
+      negative:
+        - Supabase 종속
+        - 복잡한 쿼리 제한
+
+# ============================================
+# 기술 표준
+# ============================================
+
+standards:
+  language:
+    typescript:
+      version: "5.x"
+      strict_mode: true
+      no_any: true
+      target: "ES2022"
+      module: "ESNext"
+
+  formatting:
+    prettier:
+      semi: true
+      single_quote: true
+      tab_width: 2
+      trailing_comma: "es5"
+
+  linting:
+    eslint:
+      extends:
+        - "@typescript-eslint/recommended"
+        - "prettier"
+      rules:
+        no_console: "warn"
+        no_unused_vars: "error"
+
+  naming:
+    files: "kebab-case"
+    classes: "PascalCase"
+    functions: "camelCase"
+    constants: "UPPER_SNAKE_CASE"
+    interfaces: "IPascalCase"
+    types: "PascalCase"
+
+  git:
+    branch_naming: "feature/{{FEATURE_NAME}}"
+    commit_format: "type(scope): description"
+    commit_types:
+      - feat
+      - fix
+      - docs
+      - style
+      - refactor
+      - test
+      - chore
+
+# ============================================
+# 의존성 그래프
+# ============================================
+
+dependency_graph:
+  packages:
+    "@forge/types":
+      level: 0
+      depends_on: []
+
+    "@forge/utils":
+      level: 1
+      depends_on:
+        - "@forge/types"
+
+    "@forge/crawler":
+      level: 2
+      depends_on:
+        - "@forge/types"
+        - "@forge/utils"
+
+    "@forge/llm-extract":
+      level: 2
+      depends_on:
+        - "@forge/types"
+        - "@forge/utils"
+
+    "@forge/excel-export":
+      level: 2
+      depends_on:
+        - "@forge/types"
+        - "@forge/utils"
+
+    "@forge/supabase":
+      level: 2
+      depends_on:
+        - "@forge/types"
+
+    "@forge/core":
+      level: 3
+      depends_on:
+        - "@forge/crawler"
+        - "@forge/llm-extract"
+        - "@forge/excel-export"
+        - "@forge/supabase"
+
+  apps:
+    hephaitos:
+      level: 5
+      depends_on:
+        - "@forge/core"
+        - "@forge/crawler"
+        - "@forge/llm-extract"
+
+    folio:
+      level: 5
+      depends_on:
+        - "@forge/core"
+        - "@forge/crawler"
+        - "@forge/llm-extract"
+        - "@forge/excel-export"
+
+    dryon:
+      level: 5
+      depends_on:
+        - "@forge/core"
+        - "@forge/crawler"
+        - "@forge/llm-extract"
+        - "@forge/excel-export"
