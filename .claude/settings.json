@@ -1,0 +1,60 @@
+{
+  "$schema": "https://claude.ai/schemas/claude-code-settings.json",
+  "version": "2.1",
+  "model": "opusplan",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Read(**/*)",
+      "Edit(bidflow/**/*)",
+      "Edit(types/**/*)",
+      "Write(bidflow/**/*)",
+      "Write(types/**/*)",
+      "mcp__github__*"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/credentials*)",
+      "Bash(rm -rf /)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "alwaysThinkingEnabled": true,
+  "cleanupPeriodDays": 14,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  },
+  "project": {
+    "name": "BIDFLOW",
+    "description": "입찰 자동화 시스템 - 제조업 SME 맞춤",
+    "type": "next-app",
+    "framework": "next-15"
+  },
+  "performance": {
+    "parallelTools": true,
+    "cacheResults": true,
+    "maxConcurrentTasks": 5
+  }
+}

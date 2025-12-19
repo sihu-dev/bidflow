@@ -1,8 +1,25 @@
-# BIDFLOW 입찰 자동화 시스템
+# BIDFLOW 입찰 자동화 시스템 (IO block)
 
 > **목적**: 제조업 SME를 위한 입찰 자동화
 > **기술 스택**: Next.js 15 + Supabase + TailwindCSS
 > **포트**: 3010
+> **모델**: opusplan (Opus 계획 + Sonnet 실행)
+
+---
+
+## Claude Code 자동화 설정
+
+```yaml
+모델: opusplan (하이브리드)
+자율성: acceptEdits (편집 자동 승인)
+Extended Thinking: 활성화
+Hooks: PostToolUse (자동 포맷팅)
+```
+
+### 권장 작업 패턴
+1. `/init` - 프로젝트 컨텍스트 초기화
+2. `think hard` - 복잡한 문제 깊은 사고
+3. `#` 키 - 반복 지침 CLAUDE.md에 저장
 
 ---
 
