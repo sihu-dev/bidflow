@@ -11,9 +11,8 @@ import { PricingPreview } from '@/components/landing/PricingPreview';
 import { FAQ } from '@/components/landing/FAQ';
 import { CTA } from '@/components/landing/CTA';
 
-// Code Splitting: SpreadsheetDemo를 클라이언트 사이드에서만 로드
-// ssr: false 설정으로 초기 HTML 번들에서 제외 (13.5KB → 약 2-3KB)
-// Trade-off: SEO 손실 (Google은 JS 실행하므로 큰 문제 없음)
+// Code Splitting: SpreadsheetDemo를 별도 청크로 분리하여 초기 로드 최적화
+// SSR 유지하여 SEO 손실 없음
 const SpreadsheetDemo = dynamic(
   () => import('@/components/landing/SpreadsheetDemo').then((mod) => ({ default: mod.SpreadsheetDemo })),
   {
@@ -25,7 +24,6 @@ const SpreadsheetDemo = dynamic(
         </div>
       </div>
     ),
-    ssr: false, // 클라이언트 사이드만 (번들 사이즈 감소)
   }
 );
 
