@@ -166,6 +166,16 @@
       "description": "Multi-tenant 아키텍처 검증 - tenant_id 격리, JWT 전파, RLS 정책 검증",
       "model": "sonnet",
       "file": ".claude/agents/multi-tenant-auditor.md"
+    },
+    "org-scorer": {
+      "description": "기관 점수 관리 전문가 - 175점 매칭 시스템의 기관 점수(50점) 데이터 수집 및 가중치 관리",
+      "model": "sonnet",
+      "file": ".claude/agents/org-scorer.md"
+    },
+    "ops-monitor": {
+      "description": "운영 모니터링 전문가 - Sentry 에러 추적, Slack/Email 알림, 성능 메트릭 수집",
+      "model": "sonnet",
+      "file": ".claude/agents/ops-monitor.md"
     }
   },
   "design": {
