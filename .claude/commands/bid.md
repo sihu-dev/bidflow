@@ -1,3 +1,10 @@
+---
+description: "입찰 자동화 워크플로우 - 공고 검색, 제품 매칭, 제안서 생성, 현황 조회"
+argument-hint: "[search|match|generate|status] [query|options]"
+model: sonnet
+allowed-tools: Read, Grep, Glob, Bash, WebFetch
+---
+
 # /bid 명령어
 
 입찰 자동화 워크플로우 실행

@@ -1,3 +1,9 @@
+---
+name: code-review
+description: "Opus 4.5 종합 코드 검수 - 품질/보안/성능/UI/테스트 5개 카테고리 (100점 만점)"
+allowed-tools: Read, Grep, Glob, Bash, Task
+---
+
 # Opus 4.5 코드 리뷰 스킬
 
 > Claude Opus 4.5를 활용한 종합 코드 검수

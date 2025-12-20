@@ -95,6 +95,66 @@
       "description": "UX/UI 전문 감사관 - 모노크롬 디자인, 반응형, 접근성 검수",
       "model": "sonnet",
       "file": ".claude/agents/uxui-auditor.md"
+    },
+    "bid-analyzer": {
+      "description": "입찰 공고 분석 전문가 - 공고 적합성 평가, 리스크 분석",
+      "model": "sonnet",
+      "file": ".claude/agents/bid-analyzer.md"
+    },
+    "competitive-intel": {
+      "description": "경쟁 정보 분석가 - 시장 동향, 경쟁사 분석, 전략 제안",
+      "model": "sonnet",
+      "file": ".claude/agents/competitive-intel.md"
+    },
+    "compliance-checker": {
+      "description": "규정 준수 검토관 - 입찰 자격 요건, 법적 준수 사항 확인",
+      "model": "sonnet",
+      "file": ".claude/agents/compliance-checker.md"
+    },
+    "cost-estimator": {
+      "description": "비용 추정 전문가 - 입찰가 산정, 수익성 분석",
+      "model": "sonnet",
+      "file": ".claude/agents/cost-estimator.md"
+    },
+    "design-monitor": {
+      "description": "디자인 시스템 모니터 - 모노크롬 팔레트 준수 실시간 감시",
+      "model": "sonnet",
+      "file": ".claude/agents/design-monitor.md"
+    },
+    "e2e-tester": {
+      "description": "E2E 테스트 전문가 - Playwright 기반 브라우저 테스트 실행",
+      "model": "sonnet",
+      "file": ".claude/agents/e2e-tester.md"
+    },
+    "error-fixer": {
+      "description": "에러 수정 전문가 - TypeScript, ESLint 에러 자동 분석 및 수정",
+      "model": "sonnet",
+      "file": ".claude/agents/error-fixer.md"
+    },
+    "explore": {
+      "description": "코드베이스 탐색 전문가 - 파일 구조, 의존성, 패턴 분석",
+      "model": "haiku",
+      "file": ".claude/agents/explore.md"
+    },
+    "mcp-auditor": {
+      "description": "MCP 종합 검수관 - Playwright+Sequential Thinking 기반 품질 검수",
+      "model": "sonnet",
+      "file": ".claude/agents/mcp-auditor.md"
+    },
+    "security-scanner": {
+      "description": "보안 스캐너 - 취약점 패턴 탐지, 시크릿 노출 검사",
+      "model": "sonnet",
+      "file": ".claude/agents/security-scanner.md"
+    },
+    "spreadsheet-agent": {
+      "description": "스프레드시트 전문가 - Handsontable 기반 데이터 그리드 개발",
+      "model": "sonnet",
+      "file": ".claude/agents/spreadsheet-agent.md"
+    },
+    "test-generator": {
+      "description": "테스트 코드 생성기 - 유닛/통합/E2E 테스트 자동 생성",
+      "model": "sonnet",
+      "file": ".claude/agents/test-generator.md"
     }
   },
   "design": {

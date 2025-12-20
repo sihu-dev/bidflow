@@ -1,3 +1,10 @@
+---
+description: "보안 검토 및 취약점 분석 - OWASP Top 10, 인증/인가, 입력 검증, Rate Limiting"
+argument-hint: "[audit|check-env|validate-api|scan] [options]"
+model: sonnet
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # /security 명령어
 
 보안 검토 및 취약점 분석

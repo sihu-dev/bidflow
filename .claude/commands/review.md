@@ -1,3 +1,10 @@
+---
+description: "Opus 4.5 전문 코드 리뷰어 - 품질/보안/성능/UI/테스트 5개 카테고리 검수 (100점 만점)"
+argument-hint: "[file_path] [--focus code|security|design|performance]"
+model: opus
+allowed-tools: Read, Grep, Glob, Bash, Task
+---
+
 # /review 명령어
 
 Opus 4.5 전문 코드 리뷰어를 호출하여 종합 코드 검수를 실행합니다.
