@@ -3,6 +3,36 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // 소스 디렉토리 설정
+  distDir: '.next',
+
+  // 서버 외부 패키지 설정 (Handsontable SSR 호환성)
+  serverExternalPackages: ['handsontable', '@handsontable/react'],
+
+  // 실험적 기능
+  experimental: {
+    // App Router 설정
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+
+  // 정적 생성 제외 페이지
+  generateBuildId: async () => 'bidflow-build',
+
+  // 페이지 최적화 설정 - Handsontable 호환성
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
+
+  // Webpack 설정
+  webpack: (config) => {
+    return config;
+  },
+
   // 보안 헤더
   async headers() {
     return [

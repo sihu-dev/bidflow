@@ -20,8 +20,10 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./bidflow/src/*"],
-      "@/types/*": ["./types/*"]
+      "@/*": ["./src/*"],
+      "@/types": ["./types/index.ts"],
+      "@/types/*": ["./types/*"],
+      "@forge-labs/types/bidding": ["./types/index.ts"]
     }
   },
   "include": [
@@ -29,9 +31,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "bidflow/**/*.ts",
-    "bidflow/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "bidflow", ".bidflow_backup"]
 }

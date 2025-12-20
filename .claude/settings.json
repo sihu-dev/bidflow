@@ -1,6 +1,5 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings.json",
-  "version": "2.1",
   "model": "opusplan",
   "permissions": {
     "defaultMode": "acceptEdits",
@@ -15,9 +14,13 @@
       "Bash(wc:*)",
       "Read(**/*)",
       "Edit(bidflow/**/*)",
+      "Edit(src/**/*)",
       "Edit(types/**/*)",
+      "Edit(.claude/**/*)",
       "Write(bidflow/**/*)",
+      "Write(src/**/*)",
       "Write(types/**/*)",
+      "Write(.claude/**/*)",
       "mcp__github__*"
     ],
     "deny": [
@@ -27,24 +30,9 @@
       "Bash(rm -rf /)"
     ]
   },
-  "env": {
-    "NODE_ENV": "development"
-  },
-  "alwaysThinkingEnabled": true,
+  "env": {},
   "cleanupPeriodDays": 14,
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -56,58 +44,24 @@
           }
         ]
       }
-    ]
-  },
-  "project": {
-    "name": "BIDFLOW",
-    "description": "입찰 자동화 시스템 - 제조업 SME 맞춤 (IO block)",
-    "type": "next-app",
-    "framework": "next-15"
-  },
-  "skills": {
-    "enabled": true,
-    "autoDiscover": true,
-    "available": [
-      "bid-automation",
-      "security-review",
-      "api-integration"
-    ]
-  },
-  "commands": {
-    "enabled": true,
-    "autoComplete": true,
-    "available": [
-      "bid",
-      "api",
-      "security"
-    ]
-  },
-  "agents": {
-    "enabled": true,
-    "available": [
-      "bid-matcher",
-      "proposal-writer",
-      "security-auditor"
-    ]
-  },
-  "context": {
-    "requiredFiles": [
-      "CLAUDE.md",
-      ".forge/BID_AUTOMATION_SPEC.md"
     ],
-    "optionalFiles": [
-      ".forge/TECH_ARCHITECTURE.md",
-      ".forge/UI_DESIGN_SPEC.md"
+    "PreCommit": [
+      {
+        "type": "command",
+        "command": "npm run typecheck 2>&1 | tail -20",
+        "timeout": 60000
+      },
+      {
+        "type": "command",
+        "command": "npm run lint 2>&1 | tail -20",
+        "timeout": 30000
+      }
     ]
   },
-  "techStack": {
-    "frontend": ["next.js@15", "typescript@5", "tailwindcss"],
-    "backend": ["supabase", "upstash-redis"],
-    "apis": ["ted-api", "g2b-api", "sam-api"]
-  },
-  "performance": {
-    "parallelTools": true,
-    "cacheResults": true,
-    "maxConcurrentTasks": 5
+  "autoQualityCheck": {
+    "enabled": true,
+    "onFileEdit": ["prettier"],
+    "beforeCommit": ["typecheck", "lint"],
+    "afterBuild": ["test"]
   }
 }
