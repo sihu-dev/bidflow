@@ -9,34 +9,34 @@ const footerLinks = {
     title: '제품',
     links: [
       { href: '/features', label: '기능' },
+      { href: '/features/collection', label: '공고 수집' },
+      { href: '/features/ai-matching', label: 'AI 매칭' },
+      { href: '/features/proposal', label: '제안서 생성' },
       { href: '/pricing', label: '요금제' },
+    ],
+  },
+  solutions: {
+    title: '솔루션',
+    links: [
+      { href: '/use-cases/manufacturing', label: '제조업' },
+      { href: '/use-cases/construction', label: '건설업' },
+      { href: '/use-cases/it-services', label: 'IT 서비스' },
+      { href: '/integrations', label: '연동 플랫폼' },
+    ],
+  },
+  resources: {
+    title: '리소스',
+    links: [
       { href: '/docs', label: '문서' },
-      { href: '/changelog', label: '업데이트' },
+      { href: '/features/api', label: 'API' },
+      { href: '/support', label: '고객 지원' },
     ],
   },
   company: {
     title: '회사',
     links: [
       { href: '/about', label: '회사 소개' },
-      { href: '/blog', label: '블로그' },
-      { href: '/careers', label: '채용' },
       { href: '/contact', label: '문의하기' },
-    ],
-  },
-  legal: {
-    title: '정책',
-    links: [
-      { href: '/privacy', label: '개인정보처리방침' },
-      { href: '/terms', label: '이용약관' },
-      { href: '/security', label: '보안' },
-    ],
-  },
-  support: {
-    title: '지원',
-    links: [
-      { href: '/help', label: '도움말' },
-      { href: '/api', label: 'API' },
-      { href: '/status', label: '서비스 상태' },
     ],
   },
 };

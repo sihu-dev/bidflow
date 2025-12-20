@@ -79,7 +79,7 @@ export function ClientSpreadsheet(props: SpreadsheetViewProps) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-800 mx-auto mb-4"></div>
           <p className="text-gray-600">스프레드시트 로딩 중...</p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export function ClientSpreadsheet(props: SpreadsheetViewProps) {
   if (!mod) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <p className="text-red-600">스프레드시트 로드 실패</p>
+        <p className="text-neutral-700">스프레드시트 로드 실패</p>
       </div>
     );
   }

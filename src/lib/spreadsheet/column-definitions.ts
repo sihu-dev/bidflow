@@ -27,15 +27,15 @@ export const STATUS_LABELS: Record<string, string> = {
   cancelled: '취소',
 };
 
-/** 상태 색상 */
+/** 상태 색상 (모노크롬) */
 export const STATUS_COLORS: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-800',
-  reviewing: 'bg-yellow-100 text-yellow-800',
-  preparing: 'bg-purple-100 text-purple-800',
-  submitted: 'bg-green-100 text-green-800',
-  won: 'bg-emerald-100 text-emerald-800',
-  lost: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800',
+  new: 'bg-neutral-200 text-neutral-800',
+  reviewing: 'bg-neutral-300 text-neutral-800',
+  preparing: 'bg-neutral-400 text-neutral-900',
+  submitted: 'bg-neutral-500 text-white',
+  won: 'bg-neutral-800 text-white',
+  lost: 'bg-neutral-100 text-neutral-500',
+  cancelled: 'bg-neutral-100 text-neutral-400',
 };
 
 /** 우선순위 색상 */

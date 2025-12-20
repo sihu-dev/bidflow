@@ -161,7 +161,7 @@ function ExecuteDialog({
                 <div key={v.name} className="space-y-1">
                   <label className="text-sm text-muted-foreground">
                     {v.description || v.name}
-                    {v.required && <span className="text-red-500 ml-1">*</span>}
+                    {v.required && <span className="text-neutral-600 ml-1">*</span>}
                   </label>
                   <Input
                     placeholder={v.default || `{{${v.name}}}`}

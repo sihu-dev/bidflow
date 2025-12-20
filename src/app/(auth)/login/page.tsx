@@ -5,26 +5,81 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
+import { Eye, AlertCircle } from 'lucide-react';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement login logic with Supabase
-    console.log('Login attempt:', { email, password });
-    setTimeout(() => setIsLoading(false), 1000);
+    setError(null);
+
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      // 개발 모드: Supabase 미설정 시 데모 모드로 이동
+      router.push('/dashboard?demo=true');
+      return;
+    }
+
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        if (signInError.message.includes('Invalid login credentials')) {
+          setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        } else {
+          setError(signInError.message);
+        }
+        return;
+      }
+
+      if (data.user) {
+        router.push('/dashboard');
+      }
+    } catch {
+      setError('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github') => {
-    // TODO: Implement social login with Supabase
-    console.log('Social login:', provider);
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      router.push('/dashboard?demo=true');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) setError(error.message);
+    } catch {
+      setError('소셜 로그인 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDemoMode = () => {
+    router.push('/dashboard?demo=true');
   };
 
   return (
@@ -34,6 +89,31 @@ export default function LoginPage() {
         <p className="text-muted-foreground mt-2">
           BIDFLOW에 다시 오신 것을 환영합니다
         </p>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-3 rounded-lg bg-neutral-100 border border-neutral-300 flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-neutral-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-neutral-700">{error}</p>
+        </div>
+      )}
+
+      {/* Demo Mode Button */}
+      <Button
+        variant="outline"
+        className="w-full mb-4 border-dashed border-2"
+        onClick={handleDemoMode}
+      >
+        <Eye className="w-5 h-5 mr-2" />
+        로그인 없이 둘러보기
+      </Button>
+
+      <div className="relative mb-4">
+        <Separator />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+          또는 로그인
+        </span>
       </div>
 
       {/* Social Login Buttons */}

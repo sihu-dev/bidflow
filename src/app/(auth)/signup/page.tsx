@@ -5,35 +5,111 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Eye, AlertCircle } from 'lucide-react';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [company, setCompany] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) {
-      alert('이용약관에 동의해주세요.');
+      setError('이용약관에 동의해주세요.');
       return;
     }
+
     setIsLoading(true);
-    // TODO: Implement signup logic with Supabase
-    console.log('Signup attempt:', { name, email, password, company });
-    setTimeout(() => setIsLoading(false), 1000);
+    setError(null);
+
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      // 개발 모드: Supabase 미설정 시 데모 모드로 이동
+      setSuccess(true);
+      setTimeout(() => router.push('/dashboard?demo=true'), 1500);
+      return;
+    }
+
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+            company_name: company,
+          },
+        },
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) {
+          setError('이미 등록된 이메일입니다. 로그인을 시도해주세요.');
+        } else {
+          setError(signUpError.message);
+        }
+        return;
+      }
+
+      if (data.user) {
+        setSuccess(true);
+        setTimeout(() => router.push('/dashboard'), 1500);
+      }
+    } catch {
+      setError('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github') => {
-    // TODO: Implement social login with Supabase
-    console.log('Social signup:', provider);
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    const supabase = getSupabaseBrowserClient();
+
+    if (!supabase) {
+      router.push('/dashboard?demo=true');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      if (error) setError(error.message);
+    } catch {
+      setError('소셜 로그인 중 오류가 발생했습니다.');
+    }
   };
+
+  const handleDemoMode = () => {
+    router.push('/dashboard?demo=true');
+  };
+
+  if (success) {
+    return (
+      <div className="w-full max-w-sm text-center">
+        <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="w-8 h-8 text-neutral-800" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">가입 완료!</h1>
+        <p className="text-muted-foreground">대시보드로 이동합니다...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-sm">
@@ -42,6 +118,31 @@ export default function SignupPage() {
         <p className="text-muted-foreground mt-2">
           14일 무료 체험 · 신용카드 불필요
         </p>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-3 rounded-lg bg-neutral-100 border border-neutral-300 flex items-start gap-2">
+          <AlertCircle className="w-5 h-5 text-neutral-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-neutral-700">{error}</p>
+        </div>
+      )}
+
+      {/* Demo Mode Button */}
+      <Button
+        variant="outline"
+        className="w-full mb-4 border-dashed border-2"
+        onClick={handleDemoMode}
+      >
+        <Eye className="w-5 h-5 mr-2" />
+        로그인 없이 둘러보기
+      </Button>
+
+      <div className="relative mb-4">
+        <Separator />
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+          또는 계정 만들기
+        </span>
       </div>
 
       {/* Social Login Buttons */}
@@ -179,15 +280,15 @@ export default function SignupPage() {
         <p className="text-sm font-medium mb-3">무료 체험에 포함된 기능:</p>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-neutral-700" />
             모든 Pro 기능 14일간 무료
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-neutral-700" />
             무제한 공고 분석
           </li>
           <li className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-neutral-700" />
             AI 제안서 초안 생성
           </li>
         </ul>

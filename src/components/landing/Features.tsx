@@ -1,7 +1,7 @@
 /**
- * 핵심 기능 섹션
+ * 핵심 기능 섹션 - 모노크롬
  */
-import { Search, Sparkles, FileText, Bell } from 'lucide-react';
+import { Search, Zap, FileText, Bell } from 'lucide-react';
 
 const features = [
   {
@@ -10,7 +10,7 @@ const features = [
     description: '나라장터, TED, SAM.gov 등 주요 플랫폼에서 관련 공고를 실시간으로 자동 수집합니다.',
   },
   {
-    icon: Sparkles,
+    icon: Zap,
     title: 'AI 매칭 분석',
     description: '귀사 제품과 공고 요구사항을 AI가 분석하여 적합도를 자동으로 평가합니다.',
   },
@@ -28,31 +28,34 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-20" id="features">
+    <section className="py-24 bg-white" id="features">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
             입찰 업무를 자동화하세요
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-neutral-500">
             복잡한 입찰 프로세스를 AI가 대신 처리합니다.
             핵심 업무에만 집중하세요.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, idx) => (
             <div
               key={feature.title}
-              className="relative p-6 rounded-xl border bg-card hover:shadow-lg transition-shadow"
+              className="relative p-6 rounded-2xl border border-neutral-200 bg-white hover:border-neutral-400 hover:shadow-lg transition-all group"
             >
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                <feature.icon className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-xl bg-neutral-100 group-hover:bg-neutral-900 flex items-center justify-center mb-5 transition-colors">
+                <feature.icon className="w-6 h-6 text-neutral-600 group-hover:text-white transition-colors" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-neutral-900 mb-2">{feature.title}</h3>
+              <p className="text-sm text-neutral-500 leading-relaxed">{feature.description}</p>
+              <div className="absolute top-4 right-4 text-xs font-mono text-neutral-300">
+                0{idx + 1}
+              </div>
             </div>
           ))}
         </div>

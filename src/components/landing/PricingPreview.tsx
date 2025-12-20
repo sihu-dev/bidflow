@@ -1,8 +1,8 @@
 /**
- * 요금제 미리보기 섹션
+ * 요금제 미리보기 섹션 - 모노크롬
  */
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -57,55 +57,62 @@ const plans = [
 
 export function PricingPreview() {
   return (
-    <section className="py-20 bg-muted/30" id="pricing">
+    <section className="py-24 bg-neutral-50" id="pricing">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
             심플한 요금제
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-neutral-500">
             필요에 맞는 플랜을 선택하세요. 언제든 변경 가능합니다.
           </p>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.name}
               className={cn(
-                'relative p-6 rounded-xl border bg-card',
-                plan.highlighted && 'border-primary shadow-lg scale-105'
+                'relative p-8 rounded-2xl border bg-white',
+                plan.highlighted
+                  ? 'border-neutral-900 shadow-xl scale-105'
+                  : 'border-neutral-200'
               )}
             >
               {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-neutral-900 text-white text-xs font-medium rounded-full">
                   인기
                 </div>
               )}
 
               <div className="mb-6">
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <h3 className="text-xl font-semibold text-neutral-900">{plan.name}</h3>
+                <p className="text-sm text-neutral-500 mt-1">{plan.description}</p>
               </div>
 
               <div className="mb-6">
-                <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">{plan.period}</span>
+                <span className="text-4xl font-bold text-neutral-900">{plan.price}</span>
+                <span className="text-neutral-500">{plan.period}</span>
               </div>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                  <li key={feature} className="flex items-center gap-2 text-sm text-neutral-600">
+                    <Check className="w-4 h-4 text-neutral-900 flex-shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Button
-                className="w-full"
+                className={cn(
+                  'w-full',
+                  plan.highlighted
+                    ? 'bg-neutral-900 hover:bg-neutral-800 text-white'
+                    : 'border-neutral-300 hover:bg-neutral-50'
+                )}
                 variant={plan.highlighted ? 'default' : 'outline'}
                 asChild
               >
@@ -121,9 +128,10 @@ export function PricingPreview() {
         <div className="text-center mt-12">
           <Link
             href="/pricing"
-            className="text-sm text-primary hover:underline"
+            className="inline-flex items-center gap-1 text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
           >
-            요금제 자세히 보기 →
+            요금제 자세히 보기
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

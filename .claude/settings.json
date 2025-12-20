@@ -41,6 +41,12 @@
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
             "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/scripts/code-quality-check.py",
+            "timeout": 30000,
+            "blocking": true
           }
         ]
       }
@@ -60,8 +66,30 @@
   },
   "autoQualityCheck": {
     "enabled": true,
-    "onFileEdit": ["prettier"],
+    "onFileEdit": ["prettier", "code-quality-check"],
     "beforeCommit": ["typecheck", "lint"],
     "afterBuild": ["test"]
+  },
+  "agents": {
+    "opus-reviewer": {
+      "description": "Opus 4.5 전문 코드 리뷰어",
+      "model": "opus",
+      "file": ".claude/agents/opus-reviewer.md"
+    },
+    "security-auditor": {
+      "description": "보안 감사 전문가 (OWASP Top 10)",
+      "model": "sonnet",
+      "file": ".claude/agents/security-auditor.md"
+    }
+  },
+  "design": {
+    "system": "monochrome",
+    "colors": {
+      "primary": "#171717",
+      "secondary": "#262626",
+      "background": "#fafafa",
+      "border": "#e5e5e5"
+    },
+    "forbidden": ["indigo", "purple", "blue", "green", "red", "yellow", "pink", "orange", "teal", "cyan", "emerald", "violet", "fuchsia", "rose", "amber", "lime", "sky"]
   }
 }

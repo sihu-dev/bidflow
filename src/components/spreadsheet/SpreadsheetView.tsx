@@ -10,7 +10,8 @@ import { HotTable, HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import { HyperFormula } from 'hyperformula';
 import Handsontable from 'handsontable';
-import 'handsontable/dist/handsontable.full.css';
+import 'handsontable/styles/handsontable.min.css';
+import 'handsontable/styles/ht-theme-main.min.css';
 
 import { Toolbar } from './Toolbar';
 import { SidePanel } from './SidePanel';
@@ -160,7 +161,7 @@ function deadlineRenderer(
 
   const dday = document.createElement('span');
   const ddayText = calculateDDay(value);
-  dday.className = `text-xs ${ddayText.startsWith('D-') && parseInt(ddayText.slice(2)) <= 3 ? 'text-red-600 font-bold' : 'text-gray-500'}`;
+  dday.className = `text-xs ${ddayText.startsWith('D-') && parseInt(ddayText.slice(2)) <= 3 ? 'text-neutral-700 font-bold' : 'text-gray-500'}`;
   dday.textContent = ddayText;
 
   container.appendChild(date);
@@ -194,7 +195,7 @@ function scoreRenderer(
   bar.className = 'w-12 h-2 bg-gray-200 rounded-full overflow-hidden';
 
   const fill = document.createElement('div');
-  fill.className = `h-full ${percent >= 70 ? 'bg-green-500' : percent >= 40 ? 'bg-yellow-500' : 'bg-red-400'}`;
+  fill.className = `h-full ${percent >= 70 ? 'bg-neutral-800' : percent >= 40 ? 'bg-neutral-500' : 'bg-neutral-400'}`;
   fill.style.width = `${percent}%`;
 
   bar.appendChild(fill);
@@ -216,33 +217,50 @@ function keywordsRenderer(
   row: number,
   col: number,
   prop: string | number,
-  value: string[]
+  value: string | string[]
 ) {
   td.innerHTML = '';
   td.className = 'htLeft htMiddle';
 
-  if (!value || !Array.isArray(value)) return td;
+  if (!value) return td;
+
+  // 문자열이면 배열로 변환 (쉼표 구분)
+  const keywords = Array.isArray(value) ? value : String(value).split(',').map(s => s.trim()).filter(Boolean);
+
+  if (keywords.length === 0) return td;
 
   const container = document.createElement('div');
   container.className = 'flex flex-wrap gap-1';
 
-  value.slice(0, 3).forEach(keyword => {
+  keywords.slice(0, 3).forEach(keyword => {
     const tag = document.createElement('span');
     tag.className = 'px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded';
     tag.textContent = keyword;
     container.appendChild(tag);
   });
 
-  if (value.length > 3) {
+  if (keywords.length > 3) {
     const more = document.createElement('span');
     more.className = 'text-xs text-gray-400';
-    more.textContent = `+${value.length - 3}`;
+    more.textContent = `+${keywords.length - 3}`;
     container.appendChild(more);
   }
 
   td.appendChild(container);
 
   return td;
+}
+
+// ============================================================================
+// 헬퍼 함수
+// ============================================================================
+
+// HyperFormula가 배열을 처리하지 못하므로 keywords를 문자열로 변환
+function transformBidData(bids: Bid[]): Bid[] {
+  return bids.map(bid => ({
+    ...bid,
+    keywords: Array.isArray(bid.keywords) ? bid.keywords.join(', ') : bid.keywords,
+  })) as unknown as Bid[];
 }
 
 // ============================================================================
@@ -258,14 +276,15 @@ export function SpreadsheetView({
   // TODO: onBidCreate will be used for new bid creation
   void _onBidCreate;
   const hotRef = useRef<HotTableClass | null>(null);
-  const [data, setData] = useState<Bid[]>(initialData);
+  // 초기 데이터를 미리 변환하여 HyperFormula 파싱 오류 방지
+  const [data, setData] = useState<Bid[]>(() => transformBidData(initialData));
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 데이터 업데이트
+  // 데이터 업데이트 (initialData 변경 시)
   useEffect(() => {
-    setData(initialData);
+    setData(transformBidData(initialData));
   }, [initialData]);
 
   // 셀 변경 핸들러
@@ -383,7 +402,7 @@ export function SpreadsheetView({
         />
 
         {/* 테이블 */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden ht-theme-main">
           <HotTable
             ref={hotRef}
             data={data}
@@ -400,7 +419,7 @@ export function SpreadsheetView({
             afterChange={handleAfterChange}
             afterSelectionEnd={(row: number) => handleAfterSelectionEnd(row)}
             // 스타일
-            className="htCustom"
+            className="htCustom ht-theme-main"
             // 컨텍스트 메뉴
             contextMenu={['row_above', 'row_below', '---------', 'remove_row', '---------', 'copy', 'cut']}
             // 정렬

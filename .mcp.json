@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {
+        "PLAYWRIGHT_HEADLESS": "true"
+      }
+    },
+    "puppeteer": {
+      "command": "node",
+      "args": ["/home/sihu2129/node_modules/@modelcontextprotocol/server-puppeteer/dist/index.js"],
+      "env": {
+        "PUPPETEER_HEADLESS": "true"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-sequential-thinking"]
+    }
+  }
+}

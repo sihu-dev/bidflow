@@ -1,10 +1,10 @@
 /**
- * FAQ 섹션
+ * FAQ 섹션 - 모노크롬
  */
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const faqs = [
@@ -34,14 +34,14 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section className="py-20">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
             자주 묻는 질문
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-neutral-500">
             궁금한 점이 있으신가요?
           </p>
         </div>
@@ -49,26 +49,32 @@ export function FAQ() {
         {/* FAQ List */}
         <div className="max-w-3xl mx-auto">
           {faqs.map((faq, index) => (
-            <div key={index} className="border-b">
+            <div key={index} className="border-b border-neutral-200">
               <button
-                className="w-full py-5 flex items-center justify-between text-left"
+                className="w-full py-6 flex items-center justify-between text-left group"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
-                <span className="font-medium pr-8">{faq.question}</span>
-                <ChevronDown
-                  className={cn(
-                    'w-5 h-5 text-muted-foreground transition-transform flex-shrink-0',
-                    openIndex === index && 'rotate-180'
+                <span className="font-medium text-neutral-900 pr-8 group-hover:text-neutral-600 transition-colors">
+                  {faq.question}
+                </span>
+                <div className={cn(
+                  'w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-colors',
+                  openIndex === index ? 'bg-neutral-900' : 'bg-neutral-100'
+                )}>
+                  {openIndex === index ? (
+                    <Minus className="w-3.5 h-3.5 text-white" />
+                  ) : (
+                    <Plus className="w-3.5 h-3.5 text-neutral-600" />
                   )}
-                />
+                </div>
               </button>
               <div
                 className={cn(
-                  'overflow-hidden transition-all',
-                  openIndex === index ? 'max-h-96 pb-5' : 'max-h-0'
+                  'overflow-hidden transition-all duration-300',
+                  openIndex === index ? 'max-h-96 pb-6' : 'max-h-0'
                 )}
               >
-                <p className="text-muted-foreground">{faq.answer}</p>
+                <p className="text-neutral-500 leading-relaxed">{faq.answer}</p>
               </div>
             </div>
           ))}
