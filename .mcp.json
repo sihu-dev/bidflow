@@ -8,8 +8,8 @@
       }
     },
     "puppeteer": {
-      "command": "node",
-      "args": ["/home/sihu2129/node_modules/@modelcontextprotocol/server-puppeteer/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
       "env": {
         "PUPPETEER_HEADLESS": "true"
       }
