@@ -17,6 +17,23 @@
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@anthropic/mcp-sequential-thinking"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-context7"],
+      "env": {}
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "/home/sihu2129/bidflow/.claude/memory.json"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/sihu2129/bidflow"],
+      "env": {}
     }
   }
 }

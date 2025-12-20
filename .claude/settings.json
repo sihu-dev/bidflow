@@ -72,14 +72,29 @@
   },
   "agents": {
     "opus-reviewer": {
-      "description": "Opus 4.5 전문 코드 리뷰어",
+      "description": "Opus 4.5 전문 코드 리뷰어 - 6가지 관점 종합 검수. /review 또는 주요 기능 완료 후 자동 호출",
       "model": "opus",
       "file": ".claude/agents/opus-reviewer.md"
     },
     "security-auditor": {
-      "description": "보안 감사 전문가 (OWASP Top 10)",
+      "description": "보안 감사 전문가 (OWASP Top 10) - /security 명령으로 호출",
       "model": "sonnet",
       "file": ".claude/agents/security-auditor.md"
+    },
+    "data-connector": {
+      "description": "V2 데이터 커넥터 전문가 - TED/SAM.gov API 연동, 공고 수집. /sync 명령으로 호출",
+      "model": "sonnet",
+      "file": ".claude/agents/data-connector.md"
+    },
+    "code-reviewer": {
+      "description": "코드 리뷰 전문 에이전트 - 품질, 보안, 성능 관점 분석",
+      "model": "sonnet",
+      "file": ".claude/agents/code-reviewer.md"
+    },
+    "uxui-auditor": {
+      "description": "UX/UI 전문 감사관 - 모노크롬 디자인, 반응형, 접근성 검수",
+      "model": "sonnet",
+      "file": ".claude/agents/uxui-auditor.md"
     }
   },
   "design": {
