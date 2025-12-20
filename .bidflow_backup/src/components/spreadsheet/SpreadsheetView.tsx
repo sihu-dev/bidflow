@@ -1,0 +1,387 @@
+'use client';
+
+/**
+ * BIDFLOW 스프레드시트 뷰
+ * Handsontable 기반 입찰 관리 테이블
+ */
+
+import { useRef, useState, useCallback, useEffect } from 'react';
+import { HotTable } from '@handsontable/react';
+import { registerAllModules } from 'handsontable/registry';
+import Handsontable from 'handsontable';
+import 'handsontable/dist/handsontable.full.css';
+
+import { Toolbar } from './Toolbar';
+import { SidePanel } from './SidePanel';
+import {
+  BID_COLUMNS,
+  STATUS_LABELS,
+  STATUS_COLORS,
+  PRIORITY_COLORS,
+  SOURCE_LABELS,
+  calculateDDay,
+  formatAmount,
+} from '@/lib/spreadsheet/column-definitions';
+
+// Handsontable 모듈 등록
+registerAllModules();
+
+// ============================================================================
+// 타입 정의
+// ============================================================================
+
+export interface Bid {
+  id: string;
+  source: string;
+  external_id: string;
+  title: string;
+  organization: string;
+  deadline: string;
+  estimated_amount: number | null;
+  status: string;
+  priority: string;
+  type: string;
+  keywords: string[];
+  url: string | null;
+  match_score?: number;
+  ai_summary?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface SpreadsheetViewProps {
+  initialData?: Bid[];
+  onBidUpdate?: (id: string, updates: Partial<Bid>) => Promise<void>;
+  onBidCreate?: (bid: Partial<Bid>) => Promise<void>;
+  onRefresh?: () => Promise<void>;
+}
+
+// ============================================================================
+// 커스텀 셀 렌더러
+// ============================================================================
+
+function statusRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: string
+) {
+  td.innerHTML = '';
+  td.className = 'htCenter htMiddle';
+
+  if (!value) return td;
+
+  const badge = document.createElement('span');
+  badge.textContent = STATUS_LABELS[value] || value;
+  badge.className = `inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${STATUS_COLORS[value] || 'bg-gray-100 text-gray-800'}`;
+  td.appendChild(badge);
+
+  return td;
+}
+
+function priorityRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: string
+) {
+  td.innerHTML = '';
+  td.className = 'htCenter htMiddle';
+
+  if (!value) return td;
+
+  const icon = PRIORITY_COLORS[value] || '⚪';
+  td.textContent = icon;
+
+  return td;
+}
+
+function sourceRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: string
+) {
+  td.innerHTML = '';
+  td.className = 'htCenter htMiddle text-xs';
+
+  td.textContent = SOURCE_LABELS[value] || value;
+
+  return td;
+}
+
+function amountRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: number | null
+) {
+  td.innerHTML = '';
+  td.className = 'htRight htMiddle';
+
+  td.textContent = formatAmount(value);
+
+  return td;
+}
+
+function deadlineRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: string
+) {
+  td.innerHTML = '';
+  td.className = 'htCenter htMiddle';
+
+  if (!value) return td;
+
+  const container = document.createElement('div');
+  container.className = 'flex flex-col items-center';
+
+  const date = document.createElement('span');
+  date.className = 'text-sm';
+  date.textContent = value.slice(0, 10);
+
+  const dday = document.createElement('span');
+  const ddayText = calculateDDay(value);
+  dday.className = `text-xs ${ddayText.startsWith('D-') && parseInt(ddayText.slice(2)) <= 3 ? 'text-red-600 font-bold' : 'text-gray-500'}`;
+  dday.textContent = ddayText;
+
+  container.appendChild(date);
+  container.appendChild(dday);
+  td.appendChild(container);
+
+  return td;
+}
+
+function scoreRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: number
+) {
+  td.innerHTML = '';
+  td.className = 'htCenter htMiddle';
+
+  if (value === undefined || value === null) {
+    td.textContent = '-';
+    return td;
+  }
+
+  const percent = Math.round(value * 100);
+  const container = document.createElement('div');
+  container.className = 'flex items-center gap-1';
+
+  const bar = document.createElement('div');
+  bar.className = 'w-12 h-2 bg-gray-200 rounded-full overflow-hidden';
+
+  const fill = document.createElement('div');
+  fill.className = `h-full ${percent >= 70 ? 'bg-green-500' : percent >= 40 ? 'bg-yellow-500' : 'bg-red-400'}`;
+  fill.style.width = `${percent}%`;
+
+  bar.appendChild(fill);
+
+  const label = document.createElement('span');
+  label.className = 'text-xs text-gray-600';
+  label.textContent = `${percent}%`;
+
+  container.appendChild(bar);
+  container.appendChild(label);
+  td.appendChild(container);
+
+  return td;
+}
+
+function keywordsRenderer(
+  instance: Handsontable,
+  td: HTMLTableCellElement,
+  row: number,
+  col: number,
+  prop: string | number,
+  value: string[]
+) {
+  td.innerHTML = '';
+  td.className = 'htLeft htMiddle';
+
+  if (!value || !Array.isArray(value)) return td;
+
+  const container = document.createElement('div');
+  container.className = 'flex flex-wrap gap-1';
+
+  value.slice(0, 3).forEach(keyword => {
+    const tag = document.createElement('span');
+    tag.className = 'px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded';
+    tag.textContent = keyword;
+    container.appendChild(tag);
+  });
+
+  if (value.length > 3) {
+    const more = document.createElement('span');
+    more.className = 'text-xs text-gray-400';
+    more.textContent = `+${value.length - 3}`;
+    container.appendChild(more);
+  }
+
+  td.appendChild(container);
+
+  return td;
+}
+
+// ============================================================================
+// 메인 컴포넌트
+// ============================================================================
+
+export function SpreadsheetView({
+  initialData = [],
+  onBidUpdate,
+  onBidCreate,
+  onRefresh,
+}: SpreadsheetViewProps) {
+  const hotRef = useRef<any>(null);
+  const [data, setData] = useState<Bid[]>(initialData);
+  const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
+  const [sidePanelOpen, setSidePanelOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 데이터 업데이트
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
+  // 셀 변경 핸들러
+  const handleAfterChange = useCallback(
+    async (changes: Handsontable.CellChange[] | null, source: string) => {
+      if (source === 'loadData' || !changes) return;
+
+      for (const [row, prop, oldValue, newValue] of changes) {
+        if (oldValue === newValue) continue;
+
+        const bid = data[row];
+        if (!bid || !onBidUpdate) continue;
+
+        try {
+          await onBidUpdate(bid.id, { [prop as string]: newValue });
+        } catch (error) {
+          console.error('업데이트 실패:', error);
+        }
+      }
+    },
+    [data, onBidUpdate]
+  );
+
+  // 행 선택 핸들러
+  const handleAfterSelectionEnd = useCallback(
+    (row: number) => {
+      const bid = data[row];
+      if (bid) {
+        setSelectedBid(bid);
+        setSidePanelOpen(true);
+      }
+    },
+    [data]
+  );
+
+  // 새로고침 핸들러
+  const handleRefresh = useCallback(async () => {
+    if (!onRefresh) return;
+
+    setIsLoading(true);
+    try {
+      await onRefresh();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [onRefresh]);
+
+  // 열 설정 (렌더러 적용)
+  const columns = BID_COLUMNS.map(col => {
+    switch (col.data) {
+      case 'status':
+        return { ...col, renderer: statusRenderer };
+      case 'priority':
+        return { ...col, renderer: priorityRenderer };
+      case 'source':
+        return { ...col, renderer: sourceRenderer };
+      case 'estimated_amount':
+        return { ...col, renderer: amountRenderer };
+      case 'deadline':
+        return { ...col, renderer: deadlineRenderer };
+      case 'match_score':
+        return { ...col, renderer: scoreRenderer };
+      case 'keywords':
+        return { ...col, renderer: keywordsRenderer };
+      default:
+        return col;
+    }
+  });
+
+  return (
+    <div className="flex h-full">
+      {/* 메인 영역 */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* 툴바 */}
+        <Toolbar
+          onRefresh={handleRefresh}
+          isLoading={isLoading}
+          totalCount={data.length}
+        />
+
+        {/* 테이블 */}
+        <div className="flex-1 overflow-hidden">
+          <HotTable
+            ref={hotRef}
+            data={data}
+            columns={columns}
+            colHeaders={BID_COLUMNS.map(c => c.title || '')}
+            rowHeaders
+            height="100%"
+            stretchH="all"
+            licenseKey="non-commercial-and-evaluation"
+            // 성능 최적화
+            renderAllRows={false}
+            viewportRowRenderingOffset={20}
+            // 이벤트
+            afterChange={handleAfterChange}
+            afterSelectionEnd={(row: number) => handleAfterSelectionEnd(row)}
+            // 스타일
+            className="htCustom"
+            // 컨텍스트 메뉴
+            contextMenu={['row_above', 'row_below', '---------', 'remove_row', '---------', 'copy', 'cut']}
+            // 정렬
+            columnSorting
+            // 필터
+            filters
+            dropdownMenu={['filter_by_condition', 'filter_by_value', 'filter_action_bar']}
+          />
+        </div>
+      </div>
+
+      {/* 사이드 패널 */}
+      {sidePanelOpen && selectedBid && (
+        <SidePanel
+          bid={selectedBid}
+          onClose={() => setSidePanelOpen(false)}
+          onUpdate={async (updates) => {
+            if (onBidUpdate) {
+              await onBidUpdate(selectedBid.id, updates);
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export default SpreadsheetView;
