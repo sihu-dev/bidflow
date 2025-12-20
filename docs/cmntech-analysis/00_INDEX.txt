@@ -1,0 +1,97 @@
+# CMNTech 분석 자료 인덱스
+
+> **생성일**: 2025-12-21
+> **회사명**: (주)씨엠엔텍 / (주)에이치에스씨엠티
+> **주요 제품**: 유량계, 열량계 (5개 제품 라인업)
+
+---
+
+## 파일 목록
+
+### 01. 제품 카탈로그
+파일: 01_PRODUCT_CATALOG_CMENTECH.txt
+내용: 씨엠엔텍 5개 제품 상세 스펙, 입찰 키워드, 타겟 기관
+
+### 02. 제품 데이터 정의
+파일: 02_PRODUCTS_DATA.txt
+내용: TypeScript 인터페이스, 5개 제품 데이터 구조
+
+### 03. 목업 입찰 데이터
+파일: 03_MOCK_BIDS_DATA.txt
+내용: 6개 샘플 입찰 데이터, 제품 매칭 예시
+
+### 04. AI 스마트 함수
+파일: 04_AI_SMART_FUNCTIONS.txt
+내용: 5개 AI 함수 정의 (AI_SUMMARY, AI_SCORE, AI_MATCH 등)
+
+### 05. 제품 매칭 로직
+파일: 05_PRODUCT_MATCHER_LOGIC.txt
+내용: 공고-제품 자동 매칭 알고리즘, 점수 계산 방식
+
+### 06. 입찰 데이터 소스
+파일: 06_BID_DATA_SOURCES.txt
+내용: 45+ 데이터 소스, 크롤링 우선순위, 월간 데이터량
+
+### 07. 엔터프라이즈 기획
+파일: 07_ENTERPRISE_PLAN.txt
+내용: AI 바우처 사업 기획, 핵심 기능, 예상 효과
+
+### 08. 팀 포지셔닝
+파일: 08_TEAM_POSITIONING.txt
+내용: 팀 비전, 타겟 시장, 로드맵
+
+### 09. Phase 3 로드맵 요약
+파일: 09_PHASE3_ROADMAP_SUMMARY.txt
+내용: 개발 로드맵, 실행 일정, 크롤링 스케줄
+
+---
+
+## CMNTech 5개 제품 요약
+
+| ID | 제품명 | 카테고리 | 우선순위 |
+|----|--------|----------|----------|
+| UR-1000PLUS | 다회선 초음파 유량계 | 상수도 | P1 (핵심) |
+| MF-1000C | 일체형 전자 유량계 | 상거래 | P2 |
+| UR-1010PLUS | 비만관형 유량계 | 하수처리 | P1 (핵심) |
+| SL-3000PLUS | 개수로 유량계 | 하천/수로 | P2 |
+| EnerRay | 초음파 열량계 | 에너지 | P3 |
+
+---
+
+## 주요 타겟 기관
+
+- 한국수자원공사 (K-water)
+- 서울시 상수도사업본부
+- 환경부 / 환경공단
+- 한국전력공사
+- 한국농어촌공사
+- 지역난방공사
+
+---
+
+## 원본 파일 위치
+
+| 원본 | 위치 |
+|------|------|
+| 제품 카탈로그 | .forge/PRODUCT_CATALOG_CMENTECH.md |
+| 제품 TS 데이터 | src/lib/data/products.ts |
+| 목업 입찰 데이터 | src/lib/data/mock-bids.ts |
+| AI 함수 정의 | src/lib/data/ai-functions.ts |
+| 제품 매칭 로직 | src/lib/clients/product-matcher.ts |
+| 데이터 소스 | .forge/BID_DATA_SOURCES.md |
+| 엔터프라이즈 기획 | .forge/AI_VOUCHER_ENTERPRISE_PLAN.md |
+| 팀 포지셔닝 | .forge/TEAM_POSITIONING.md |
+| Phase 3 로드맵 | .forge/PHASE_3_ROADMAP.md |
+
+---
+
+## 참고사항
+
+- "부대표" 관련 별도 문서는 발견되지 않음
+- 회사 연락처: 031-702-4910 | cmsonic@cmentech.co.kr
+- 설치 실적: 25년간 1.5만대 이상
+
+---
+
+*BIDFLOW CMNTech 분석 자료 v1.0*
+*2025-12-21*

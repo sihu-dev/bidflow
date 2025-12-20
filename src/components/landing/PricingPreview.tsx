@@ -11,11 +11,12 @@ const plans = [
     name: 'Starter',
     price: '무료',
     period: '',
-    description: '입찰 자동화 시작하기',
+    description: 'CMNTech 입찰 시작하기',
     features: [
+      'CMNTech 3개 제품 등록',
       '월 50건 공고 분석',
-      '1개 플랫폼 연동',
-      '기본 AI 분석',
+      '=AI_SUMMARY() 함수만',
+      '나라장터 연동',
       '이메일 알림',
     ],
     cta: '무료로 시작',
@@ -25,14 +26,14 @@ const plans = [
     name: 'Pro',
     price: '₩99,000',
     period: '/월',
-    description: '성장하는 기업을 위한',
+    description: '본격적인 입찰 자동화',
     features: [
+      '무제한 제품 등록',
       '무제한 공고 분석',
-      '모든 플랫폼 연동',
-      '고급 AI 분석 & 제안서',
+      '모든 AI 함수 (5종)',
+      'TED, SAM.gov, 한전 포함',
+      '제안서 자동 생성',
       'Slack 연동',
-      '팀 협업 (5명)',
-      '우선 지원',
     ],
     cta: '14일 무료 체험',
     highlighted: true,
@@ -44,11 +45,11 @@ const plans = [
     description: '맞춤형 솔루션',
     features: [
       'Pro 모든 기능',
+      '전용 AI 모델 학습',
+      '제품 카탈로그 연동',
       '무제한 팀원',
-      '전용 계정 매니저',
       'SLA 보장',
       '온프레미스 옵션',
-      'API 우선 접근',
     ],
     cta: '영업팀 문의',
     highlighted: false,
@@ -65,7 +66,7 @@ export function PricingPreview() {
             심플한 요금제
           </h2>
           <p className="mt-4 text-lg text-neutral-500">
-            필요에 맞는 플랜을 선택하세요. 언제든 변경 가능합니다.
+            CMNTech 제품 입찰 규모에 맞는 플랜을 선택하세요.
           </p>
         </div>
 

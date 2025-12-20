@@ -5,22 +5,25 @@ import { Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    quote: '입찰 공고 검토 시간이 80% 이상 줄었습니다. 덕분에 더 많은 입찰에 참여할 수 있게 되었어요.',
-    author: '김철수',
-    title: '대표이사',
-    company: '(주)한국계측기',
+    quote: 'UR-1000PLUS 관련 공고를 자동으로 찾아주니 입찰 준비 시간이 80% 이상 줄었습니다. 이제 제안서 작성에만 집중할 수 있어요.',
+    author: '김영훈',
+    title: '영업부장',
+    company: '씨엠엔텍',
+    product: 'UR-1000PLUS',
   },
   {
-    quote: 'AI 매칭 기능이 정말 정확해요. 우리 제품에 딱 맞는 공고만 추천해주니 시간 낭비가 없습니다.',
-    author: '이영희',
-    title: '영업팀장',
-    company: '정밀기기(주)',
+    quote: 'TED에서 EnerRay 열량계 관련 EU 공고를 놓치지 않고 확인할 수 있어서 해외 입찰 성공률이 크게 올랐습니다.',
+    author: '이수진',
+    title: '해외사업팀장',
+    company: '씨엠엔텍',
+    product: 'EnerRay',
   },
   {
-    quote: '해외 입찰도 놓치지 않고 확인할 수 있어서 좋습니다. TED, SAM.gov 공고를 한 곳에서 관리해요.',
-    author: '박민수',
-    title: '해외사업부장',
-    company: '글로벌텍',
+    quote: 'UR-1010PLUS 비만관 유량계에 딱 맞는 하수처리장 공고만 AI가 골라주니 정확도가 정말 높습니다.',
+    author: '박준호',
+    title: '기술영업',
+    company: '씨엠엔텍',
+    product: 'UR-1010PLUS',
   },
 ];
 
@@ -34,7 +37,7 @@ export function Testimonials() {
             고객들의 이야기
           </h2>
           <p className="mt-4 text-lg text-neutral-500">
-            BIDFLOW를 사용하고 계신 기업들의 생생한 후기
+            CMNTech 제품 입찰에 BIDFLOW를 활용하는 분들의 후기
           </p>
         </div>
 
@@ -54,18 +57,23 @@ export function Testimonials() {
               </blockquote>
 
               {/* Author */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-white">
-                    {testimonial.author[0]}
-                  </span>
-                </div>
-                <div>
-                  <div className="font-semibold text-sm text-neutral-900">{testimonial.author}</div>
-                  <div className="text-xs text-neutral-500">
-                    {testimonial.title} · {testimonial.company}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-neutral-900 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-white">
+                      {testimonial.author[0]}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm text-neutral-900">{testimonial.author}</div>
+                    <div className="text-xs text-neutral-500">
+                      {testimonial.title} · {testimonial.company}
+                    </div>
                   </div>
                 </div>
+                <span className="px-2 py-1 bg-neutral-200 rounded text-xs font-mono text-neutral-700">
+                  {testimonial.product}
+                </span>
               </div>
             </div>
           ))}

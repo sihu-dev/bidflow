@@ -11,11 +11,22 @@ export function CTA() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-            지금 바로 입찰 자동화를 시작하세요
+            CMNTech 5개 제품 입찰 자동화를 시작하세요
           </h2>
           <p className="mt-4 text-lg text-neutral-400">
-            14일 무료 체험 후 결정하세요. 신용카드 없이 바로 시작할 수 있습니다.
+            UR-1000PLUS부터 EnerRay까지, 14일 무료 체험 후 결정하세요.
           </p>
+          {/* Product Pills */}
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {['UR-1000PLUS', 'MF-1000C', 'UR-1010PLUS', 'SL-3000PLUS', 'EnerRay'].map((product) => (
+              <span
+                key={product}
+                className="px-3 py-1.5 bg-neutral-800 rounded-full text-xs text-neutral-300 font-mono"
+              >
+                {product}
+              </span>
+            ))}
+          </div>
           <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"

@@ -1,28 +1,28 @@
 /**
- * 핵심 기능 섹션 - 모노크롬
+ * 핵심 기능 섹션 - CMNTech 제품 매칭 버전
  */
-import { Search, Zap, FileText, Bell } from 'lucide-react';
+import { Search, Target, Sparkles, FileText } from 'lucide-react';
 
 const features = [
   {
     icon: Search,
-    title: '스마트 공고 수집',
-    description: '나라장터, TED, SAM.gov 등 주요 플랫폼에서 관련 공고를 실시간으로 자동 수집합니다.',
+    title: '유량계 공고 자동 수집',
+    description: '나라장터, TED, SAM.gov, 한전에서 유량계/열량계 관련 공고를 AI가 자동으로 찾아 분류합니다.',
   },
   {
-    icon: Zap,
-    title: 'AI 매칭 분석',
-    description: '귀사 제품과 공고 요구사항을 AI가 분석하여 적합도를 자동으로 평가합니다.',
+    icon: Target,
+    title: '5가지 제품 자동 매칭',
+    description: 'UR-1000PLUS, MF-1000C, UR-1010PLUS, SL-3000PLUS, EnerRay와 공고 요구사항을 자동 매칭합니다.',
+  },
+  {
+    icon: Sparkles,
+    title: 'AI 스마트 함수',
+    description: '=AI_SCORE(), =AI_MATCH() 등 스프레드시트에서 AI 분석을 수식처럼 바로 실행합니다.',
   },
   {
     icon: FileText,
-    title: '제안서 초안 생성',
-    description: '공고 분석 결과를 바탕으로 제안서 초안을 AI가 자동으로 작성해 드립니다.',
-  },
-  {
-    icon: Bell,
-    title: '마감 알림',
-    description: '중요 공고의 마감일을 자동으로 추적하고 이메일/Slack으로 알려드립니다.',
+    title: '맞춤 제안서 생성',
+    description: '매칭된 제품 정보와 공고 분석 결과를 바탕으로 제안서 초안을 자동 생성합니다.',
   },
 ];
 
@@ -33,7 +33,7 @@ export function Features() {
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
-            입찰 업무를 자동화하세요
+            CMNTech 제품 입찰 자동화
           </h2>
           <p className="mt-4 text-lg text-neutral-500">
             복잡한 입찰 프로세스를 AI가 대신 처리합니다.

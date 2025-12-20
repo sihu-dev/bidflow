@@ -1,26 +1,26 @@
 /**
- * 작동 방식 섹션 - 모노크롬
+ * 작동 방식 섹션 - CMNTech 제품 매칭 버전
  */
-import { Upload, Zap, Trophy } from 'lucide-react';
+import { Package, Sparkles, Trophy } from 'lucide-react';
 
 const steps = [
   {
-    icon: Upload,
+    icon: Package,
     step: '01',
-    title: '제품 정보 등록',
-    description: '귀사의 제품/서비스 정보를 등록하면 AI가 분석하여 매칭 기준을 학습합니다.',
+    title: 'CMNTech 제품 등록',
+    description: 'UR-1000PLUS, MF-1000C 등 5개 유량계/열량계 제품이 기본 등록되어 있습니다. 추가 제품도 등록 가능합니다.',
   },
   {
-    icon: Zap,
+    icon: Sparkles,
     step: '02',
-    title: 'AI 자동 매칭',
-    description: '매일 수백 개의 새 공고를 분석하고, 적합한 공고를 자동으로 찾아 알려드립니다.',
+    title: 'AI 공고 매칭',
+    description: 'AI가 매일 수백 개의 공고를 분석하여 초음파유량계, 비만관형 등 적합한 제품을 자동 매칭합니다.',
   },
   {
     icon: Trophy,
     step: '03',
     title: '입찰 준비 완료',
-    description: '분석 결과와 제안서 초안을 활용하여 빠르게 입찰에 참여하세요.',
+    description: '매칭 점수, AI 요약, 갭 분석 결과로 빠르게 입찰 여부를 결정하고 제안서를 작성하세요.',
   },
 ];
 
