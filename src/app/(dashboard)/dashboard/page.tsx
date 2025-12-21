@@ -8,8 +8,9 @@
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import type { Bid } from '@/components/spreadsheet/SpreadsheetView';
 
 // Handsontable 동적 로드
 const ClientSpreadsheet = dynamic(
@@ -284,8 +285,56 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const isDemo = searchParams?.get('demo') === 'true';
   const [showBanner, setShowBanner] = useState(true);
+  const [bids, setBids] = useState<Bid[]>(SAMPLE_BIDS as unknown as Bid[]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const stats = calculateStats(SAMPLE_BIDS);
+  const stats = calculateStats(bids as unknown as typeof SAMPLE_BIDS);
+
+  // Bid 수정 API 호출
+  const handleBidUpdate = useCallback(async (id: string, updates: Partial<Bid>) => {
+    try {
+      const response = await fetch(`/api/v1/bids/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update bid');
+      }
+
+      // 로컬 상태 업데이트
+      setBids(prev => prev.map(bid =>
+        bid.id === id ? { ...bid, ...updates } : bid
+      ));
+    } catch (error) {
+      console.error('Bid update failed:', error);
+      throw error;
+    }
+  }, []);
+
+  // 새로고침 API 호출
+  const handleRefresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/v1/bids');
+      if (!response.ok) {
+        throw new Error('Failed to fetch bids');
+      }
+      const data = await response.json();
+      if (data.data) {
+        setBids(data.data);
+      }
+    } catch (error) {
+      console.error('Refresh failed:', error);
+      // 데모 모드에서는 샘플 데이터 유지
+      if (isDemo) {
+        setBids(SAMPLE_BIDS as unknown as Bid[]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isDemo]);
 
   return (
     <main className="h-screen flex flex-col bg-slate-50">
@@ -380,15 +429,16 @@ export default function DashboardPage() {
       </div>
 
       {/* 스프레드시트 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+          </div>
+        )}
         <ClientSpreadsheet
-          initialData={SAMPLE_BIDS}
-          onBidUpdate={async (_id, _updates) => {
-            // TODO: Implement bid update API call
-          }}
-          onRefresh={async () => {
-            // TODO: Implement refresh API call
-          }}
+          initialData={bids}
+          onBidUpdate={handleBidUpdate}
+          onRefresh={handleRefresh}
         />
       </div>
     </main>
