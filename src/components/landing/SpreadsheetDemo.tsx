@@ -24,6 +24,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import {
@@ -90,18 +91,50 @@ export function SpreadsheetDemo() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors">
-                    <Filter className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">필터</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors">
-                    <BarChart3 className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">분석</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors">
-                    <Download className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">내보내기</span>
-                  </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors"
+                          aria-label="필터 열기"
+                        >
+                          <Filter className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span className="hidden sm:inline">필터</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="sm:hidden">
+                        <p>필터</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors"
+                          aria-label="분석 열기"
+                        >
+                          <BarChart3 className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span className="hidden sm:inline">분석</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="sm:hidden">
+                        <p>분석</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded-md transition-colors"
+                          aria-label="데이터 내보내기"
+                        >
+                          <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span className="hidden sm:inline">내보내기</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="sm:hidden">
+                        <p>내보내기</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 
@@ -112,8 +145,8 @@ export function SpreadsheetDemo() {
                 </div>
                 <div className="h-5 w-px bg-neutral-200" />
                 <div className="flex items-center gap-2 flex-1">
-                  <Zap className="w-4 h-4 text-neutral-400" />
-                  <span className="text-sm text-neutral-500 font-mono">
+                  <Zap className="w-4 h-4 text-neutral-400" aria-hidden="true" />
+                  <span className="text-sm text-neutral-500 font-mono" aria-label={`AI 매칭 결과: ${selectedBid?.matchedProduct || '없음'}`}>
                     =AI_MATCH() → <span className="text-neutral-900">{selectedBid?.matchedProduct || '-'}</span>
                   </span>
                 </div>
@@ -121,10 +154,13 @@ export function SpreadsheetDemo() {
                   <button
                     onClick={() => setShowFunctions(!showFunctions)}
                     className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-900 text-white text-xs font-medium rounded-md hover:bg-neutral-800 transition-colors"
+                    aria-label={showFunctions ? 'AI 함수 메뉴 닫기' : 'AI 함수 메뉴 열기'}
+                    aria-expanded={showFunctions}
+                    aria-haspopup="true"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                     AI 함수
-                    <ChevronDown className={cn('w-3 h-3 transition-transform', showFunctions && 'rotate-180')} />
+                    <ChevronDown className={cn('w-3 h-3 transition-transform', showFunctions && 'rotate-180')} aria-hidden="true" />
                   </button>
 
                   {/* AI Functions Dropdown */}
@@ -138,6 +174,7 @@ export function SpreadsheetDemo() {
                           key={fn.name}
                           className="w-full px-3 py-2 text-left hover:bg-neutral-50 transition-colors"
                           onClick={() => setShowFunctions(false)}
+                          aria-label={`${fn.name} 함수: ${fn.description}`}
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <code className="text-xs font-mono text-neutral-900 font-medium">{fn.syntax}</code>
@@ -151,20 +188,20 @@ export function SpreadsheetDemo() {
               </div>
 
               {/* Spreadsheet Grid */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto" role="region" aria-label="입찰 공고 목록">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-neutral-50 border-b">
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-10">No</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">출처</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider min-w-[200px]">공고명</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider hidden lg:table-cell">발주기관</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">추정가</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-16">마감</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">상태</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-12 hidden md:table-cell">우선</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-24">매칭</th>
-                      <th className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider hidden xl:table-cell">제품</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-10">No</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">출처</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider min-w-[150px] sm:min-w-[200px]">공고명</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider hidden lg:table-cell">발주기관</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">추정가</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-16">마감</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-20">상태</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-12 hidden md:table-cell">우선</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-24">매칭</th>
+                      <th scope="col" className="px-3 py-2.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider hidden xl:table-cell">제품</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -240,7 +277,7 @@ export function SpreadsheetDemo() {
 
             {/* Side Panel */}
             {showSidePanel && selectedBid && (
-              <div className="hidden lg:block w-80 rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden flex-shrink-0">
+              <div className="hidden md:block w-64 lg:w-80 rounded-2xl border border-neutral-200 bg-white shadow-xl overflow-hidden flex-shrink-0">
                 {/* Panel Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b bg-neutral-50">
                   <div className="flex items-center gap-2">
@@ -249,8 +286,9 @@ export function SpreadsheetDemo() {
                   <button
                     onClick={() => setShowSidePanel(false)}
                     className="p-1 hover:bg-neutral-200 rounded transition-colors"
+                    aria-label="상세 패널 닫기"
                   >
-                    <X className="w-4 h-4 text-neutral-500" />
+                    <X className="w-4 h-4 text-neutral-500" aria-hidden="true" />
                   </button>
                 </div>
 

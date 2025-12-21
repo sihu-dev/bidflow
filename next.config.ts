@@ -1,10 +1,14 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   // 소스 디렉토리 설정
   distDir: '.next',
+
+  // 현재 디렉토리를 워크스페이스 루트로 명시 (부모 lockfile 무시)
+  outputFileTracingRoot: path.resolve(__dirname),
 
   // 서버 외부 패키지 설정 (Handsontable SSR 호환성)
   serverExternalPackages: ['handsontable', '@handsontable/react'],

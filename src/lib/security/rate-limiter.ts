@@ -30,7 +30,9 @@ function getRedis(): Redis | null {
 
   if (!url || !token) {
     if (isDevelopment) {
-      console.warn('[DEV] Upstash Redis 미설정 - Rate Limiting 비활성화');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[DEV] Upstash Redis 미설정 - Rate Limiting 비활성화');
+      }
       redisAvailable = false;
       return null;
     }

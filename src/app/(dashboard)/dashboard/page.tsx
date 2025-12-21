@@ -282,7 +282,7 @@ function calculateStats(bids: typeof SAMPLE_BIDS) {
 
 export default function DashboardPage() {
   const searchParams = useSearchParams();
-  const isDemo = searchParams.get('demo') === 'true';
+  const isDemo = searchParams?.get('demo') === 'true';
   const [showBanner, setShowBanner] = useState(true);
 
   const stats = calculateStats(SAMPLE_BIDS);

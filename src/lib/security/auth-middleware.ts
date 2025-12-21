@@ -63,7 +63,9 @@ function createSupabaseClient(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     if (isDevelopment) {
-      console.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
+      }
       return null;
     }
     throw new Error('Supabase 환경 변수가 설정되지 않았습니다');

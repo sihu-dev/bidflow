@@ -557,7 +557,9 @@ export function getBidRepository(): IBidRepository {
   // 개발 모드에서 환경 변수 미설정 시 Mock 사용
   if (!supabaseUrl || !supabaseKey) {
     if (isDevelopment) {
-      console.warn('[DEV] Supabase 미설정 - Mock Repository 사용');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[DEV] Supabase 미설정 - Mock Repository 사용');
+      }
       bidRepositoryInstance = new MockBidRepository();
       return bidRepositoryInstance;
     }
