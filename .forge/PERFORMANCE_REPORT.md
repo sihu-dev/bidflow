@@ -2,7 +2,7 @@
 
 > **분석일**: 2025-12-21
 > **환경**: Next.js 15.5.9 Production Build
-> **분석 도구**: Next.js Build Analyzer
+> **분석 도구**: @next/bundle-analyzer, Next.js Build Output
 
 ---
 
@@ -23,17 +23,42 @@
 
 ---
 
-## 2. 청크 분석
+## 2. 청크 분석 (Bundle Analyzer)
 
-### 대형 청크 (Top 10)
+### 전체 통계
 
-| 파일 | 사이즈 | 원인 | 개선 방안 |
-|------|--------|------|----------|
-| `8056.js` | **1.6 MB** | Handsontable | 동적 임포트 적용됨 ✅ |
-| `6edf0643.js` | **912 KB** | HyperFormula | 수식 기능 제거 검토 |
-| `3509.js` | **197 KB** | 공통 유틸 | 트리쉐이킹 확인 필요 |
-| `framework.js` | **186 KB** | React | 정상 (필수) |
-| `1255.js` | **169 KB** | UI 라이브러리 | Radix 번들 최적화 검토 |
+```
+총 청크 수: 90개
+총 사이즈: 4.4 MB (미압축)
+```
+
+### 대형 청크 상세 분석
+
+| 파일 | 원본 | Gzip | 패키지 | 상태 |
+|------|------|------|--------|------|
+| `8056.js` | **1.6 MB** | 401 KB | Handsontable | ✅ 동적 임포트 |
+| `6edf0643.js` | **912 KB** | 250 KB | HyperFormula | ⚠️ 분리 검토 |
+| `3509.js` | **200 KB** | ~50 KB | Moment.js 등 | ⚠️ 경량화 검토 |
+| `framework.js` | **188 KB** | ~50 KB | React Core | ✅ 필수 |
+| `4bd1b696.js` | **172 KB** | 53 KB | React DOM | ✅ 필수 |
+| `1255.js` | **172 KB** | 45 KB | Radix UI + Lucide | ✅ 트리쉐이킹 적용 |
+
+### 패키지별 분석
+
+#### Handsontable (1.6 MB → 401 KB gzip)
+- **용도**: 엑셀 스타일 스프레드시트 UI
+- **현재 상태**: 동적 임포트로 초기 로딩에서 제외 ✅
+- **로딩 시점**: 대시보드 및 데모 페이지 접근 시
+
+#### HyperFormula (912 KB → 250 KB gzip)
+- **용도**: 스프레드시트 수식 엔진 (=SUM, =AI_SCORE 등)
+- **현재 상태**: Handsontable과 함께 번들됨
+- **개선안**: 수식 미사용 시 제외 가능
+
+#### Lucide React (37 MB node_modules → 트리쉐이킹 후 최소화)
+- **사용 아이콘**: 91개
+- **트리쉐이킹**: ✅ 적용됨 (번들에서 "lucide" 참조 2개만 감지)
+- **상태**: 정상
 
 ### Handsontable 최적화 현황
 
