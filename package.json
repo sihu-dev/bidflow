@@ -17,6 +17,7 @@
     "db:reset": "supabase db reset"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@handsontable/react": "^16.2.0",
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-context-menu": "^2.2.16",
