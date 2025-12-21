@@ -45,3 +45,11 @@ supabase/.temp/
 # Misc
 *.tsbuildinfo
 .turbo/
+# Verification and Testing
+screenshot*.js
+screenshots/
+font-verification*.json
+console-error*.json
+FONT_*.txt
+FONT_*.md
+README_FONT_*.md
