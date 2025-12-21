@@ -13,22 +13,22 @@ import {
 
 describe('formula-engine', () => {
   // ============================================================================
-  // validateFormula 테스트
+  // validateFormula 테스트 (async)
   // ============================================================================
   describe('validateFormula', () => {
     describe('유효한 수식 (리터럴 값만 사용)', () => {
-      it('단순 숫자 수식', () => {
-        const result = validateFormula('=1+2+3');
+      it('단순 숫자 수식', async () => {
+        const result = await validateFormula('=1+2+3');
         expect(result.valid).toBe(true);
       });
 
-      it('괄호 연산', () => {
-        const result = validateFormula('=(1+2)*3');
+      it('괄호 연산', async () => {
+        const result = await validateFormula('=(1+2)*3');
         expect(result.valid).toBe(true);
       });
 
-      it('음수 처리', () => {
-        const result = validateFormula('=-5+10');
+      it('음수 처리', async () => {
+        const result = await validateFormula('=-5+10');
         expect(result.valid).toBe(true);
       });
     });
@@ -36,41 +36,41 @@ describe('formula-engine', () => {
     describe('셀 참조 수식 (빈 셀 참조 시 결과값 반환)', () => {
       // HyperFormula는 빈 셀 참조 시 0으로 처리하거나 에러 반환
       // 수식 구문 자체는 유효하지만 실행 결과가 에러일 수 있음
-      it('SUM 함수 - 리터럴', () => {
+      it('SUM 함수 - 리터럴', async () => {
         // SUM(1,2,3)은 파싱 에러 없이 실행됨
-        const result = validateFormula('=1+2+3');
+        const result = await validateFormula('=1+2+3');
         expect(result.valid).toBe(true);
       });
 
-      it('셀 범위 참조는 빈 셀이라 에러 가능', () => {
+      it('셀 범위 참조는 빈 셀이라 에러 가능', async () => {
         // 빈 시트에서 A1:A10 참조 시 HyperFormula 동작에 따라 결과 다름
-        const result = validateFormula('=SUM(A1:A10)');
+        const result = await validateFormula('=SUM(A1:A10)');
         // 유효하거나 에러일 수 있음 (HyperFormula 설정에 따라)
         expect(typeof result.valid).toBe('boolean');
       });
     });
 
     describe('일반 값 (수식이 아닌 경우)', () => {
-      it('일반 텍스트는 항상 유효', () => {
-        expect(validateFormula('Hello World')).toEqual({ valid: true });
+      it('일반 텍스트는 항상 유효', async () => {
+        expect(await validateFormula('Hello World')).toEqual({ valid: true });
       });
 
-      it('숫자 문자열은 항상 유효', () => {
-        expect(validateFormula('12345')).toEqual({ valid: true });
+      it('숫자 문자열은 항상 유효', async () => {
+        expect(await validateFormula('12345')).toEqual({ valid: true });
       });
 
-      it('한글 문자열은 항상 유효', () => {
-        expect(validateFormula('테스트 문자열')).toEqual({ valid: true });
+      it('한글 문자열은 항상 유효', async () => {
+        expect(await validateFormula('테스트 문자열')).toEqual({ valid: true });
       });
 
-      it('빈 문자열은 유효', () => {
-        expect(validateFormula('')).toEqual({ valid: true });
+      it('빈 문자열은 유효', async () => {
+        expect(await validateFormula('')).toEqual({ valid: true });
       });
     });
 
     describe('잘못된 수식', () => {
-      it('존재하지 않는 함수는 에러', () => {
-        const result = validateFormula('=NONEXISTENT_FUNCTION()');
+      it('존재하지 않는 함수는 에러', async () => {
+        const result = await validateFormula('=NONEXISTENT_FUNCTION()');
         expect(result.valid).toBe(false);
         expect(result.error).toBeDefined();
       });
