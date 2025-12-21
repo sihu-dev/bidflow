@@ -41,69 +41,47 @@ interface SiteInfo {
 }
 
 // ============================================
-// Mock Data
+// API Functions
 // ============================================
 
-const mockSite: SiteInfo = {
-  id: 'site-001',
-  name: '용인 하수처리장',
-  type: 'public_wwtp',
-  status: 'online',
-  lastUpdate: new Date(),
-};
+async function fetchSiteInfo(siteId: string): Promise<SiteInfo> {
+  const res = await fetch(`/api/v1/sludge/sites/${siteId}`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch site info');
+  const json = await res.json();
+  return {
+    id: json.data.id,
+    name: json.data.name,
+    type: json.data.type,
+    status: 'online', // TODO: 실제 상태 계산
+    lastUpdate: new Date(),
+  };
+}
 
-const mockReadings: SensorReading[] = [
-  {
-    sensorId: 'sensor-001',
-    sensorName: 'UR-1010PLUS #1',
-    sensorType: 'flow_ur1010',
-    value: 245.8,
-    unit: 'm³/h',
-    timestamp: new Date(),
-    trend: 'up',
-    status: 'normal',
-  },
-  {
-    sensorId: 'sensor-002',
-    sensorName: 'SL-3000PLUS 방류',
-    sensorType: 'flow_sl3000',
-    value: 198.2,
-    unit: 'm³/h',
-    timestamp: new Date(),
-    trend: 'stable',
-    status: 'normal',
-  },
-  {
-    sensorId: 'sensor-003',
-    sensorName: '유입수 온도',
-    sensorType: 'temperature',
-    value: 18.5,
-    unit: '°C',
-    timestamp: new Date(),
-    trend: 'down',
-    status: 'normal',
-  },
-  {
-    sensorId: 'sensor-004',
-    sensorName: 'pH 센서',
-    sensorType: 'ph',
-    value: 7.2,
-    unit: 'pH',
-    timestamp: new Date(),
-    trend: 'stable',
-    status: 'normal',
-  },
-  {
-    sensorId: 'sensor-005',
-    sensorName: 'SS 농도',
-    sensorType: 'ss_concentration',
-    value: 185,
-    unit: 'mg/L',
-    timestamp: new Date(),
-    trend: 'up',
-    status: 'warning',
-  },
-];
+async function fetchSensorReadings(siteId: string): Promise<SensorReading[]> {
+  const res = await fetch(`/api/v1/sludge/sites/${siteId}/sensors`, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch sensor readings');
+  const json = await res.json();
+
+  const sensors = json.data.sensors || [];
+  const readings = json.data.readings || {};
+  const alerts = json.data.alerts || [];
+
+  return sensors.map((sensor: any) => {
+    const reading = readings[sensor.id];
+    const hasAlert = alerts.some((a: any) => a.sensorId === sensor.id);
+
+    return {
+      sensorId: sensor.id,
+      sensorName: sensor.name,
+      sensorType: sensor.type,
+      value: reading ? reading.value : 0,
+      unit: sensor.unit,
+      timestamp: reading ? new Date(reading.timestamp) : new Date(),
+      trend: 'stable' as const, // TODO: 트렌드 계산
+      status: hasAlert ? 'warning' : 'normal',
+    };
+  });
+}
 
 // ============================================
 // Components
@@ -196,38 +174,84 @@ function MonitoringContent() {
   const searchParams = useSearchParams();
   const siteId = searchParams.get('site') || 'site-001';
 
-  const [site, setSite] = useState<SiteInfo>(mockSite);
-  const [readings, setReadings] = useState<SensorReading[]>(mockReadings);
+  const [site, setSite] = useState<SiteInfo | null>(null);
+  const [readings, setReadings] = useState<SensorReading[]>([]);
   const [isLive, setIsLive] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    loadData();
+  }, [siteId]);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [siteData, readingsData] = await Promise.all([
+        fetchSiteInfo(siteId),
+        fetchSensorReadings(siteId),
+      ]);
+      setSite(siteData);
+      setReadings(readingsData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+      console.error('[Monitoring]', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // 자동 새로고침 (5초마다)
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
-      // TODO: API 호출로 교체
-      setReadings((prev) =>
-        prev.map((r) => ({
-          ...r,
-          value: r.value + (Math.random() - 0.5) * 5,
-          timestamp: new Date(),
-        }))
-      );
+    const interval = setInterval(async () => {
+      try {
+        const readingsData = await fetchSensorReadings(siteId);
+        setReadings(readingsData);
+      } catch (err) {
+        console.error('[Auto Refresh]', err);
+      }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [autoRefresh]);
+  }, [autoRefresh, siteId]);
 
-  const handleRefresh = () => {
-    // TODO: API 호출
-    setReadings((prev) =>
-      prev.map((r) => ({
-        ...r,
-        timestamp: new Date(),
-      }))
-    );
+  const handleRefresh = async () => {
+    await loadData();
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 text-neutral-400 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-500">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !site) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-neutral-400 mx-auto mb-4" />
+          <p className="text-neutral-900 font-medium mb-2">데이터 로드 실패</p>
+          <p className="text-neutral-500">{error || '사이트를 찾을 수 없습니다'}</p>
+          <button
+            onClick={handleRefresh}
+            className="mt-4 px-4 py-2 text-sm bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">

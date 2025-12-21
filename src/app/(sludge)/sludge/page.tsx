@@ -40,48 +40,27 @@ interface DashboardStats {
 }
 
 // ============================================
-// Mock Data (TODO: API 연동)
+// API Functions
 // ============================================
 
-const mockStats: DashboardStats = {
-  totalSites: 3,
-  activeSensors: 12,
-  alertsToday: 2,
-  avgEfficiency: 87.5,
-};
+async function fetchStats(): Promise<DashboardStats> {
+  const res = await fetch('/api/v1/sludge/stats', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch stats');
+  const json = await res.json();
+  return json.data;
+}
 
-const mockSites: Site[] = [
-  {
-    id: 'site-001',
-    name: '용인 하수처리장',
-    type: 'public_wwtp',
-    address: '경기도 용인시 기흥구',
-    capacityM3Day: 50000,
-    status: 'online',
-    sensorsCount: 5,
-    alertsCount: 0,
-  },
-  {
-    id: 'site-002',
-    name: '화성 바이오가스 시설',
-    type: 'biogas',
-    address: '경기도 화성시',
-    capacityM3Day: 10000,
-    status: 'warning',
-    sensorsCount: 4,
-    alertsCount: 2,
-  },
-  {
-    id: 'site-003',
-    name: '안산 산업폐수 처리장',
-    type: 'industrial',
-    address: '경기도 안산시 단원구',
-    capacityM3Day: 20000,
-    status: 'online',
-    sensorsCount: 3,
-    alertsCount: 0,
-  },
-];
+async function fetchSites(): Promise<Site[]> {
+  const res = await fetch('/api/v1/sludge/sites', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch sites');
+  const json = await res.json();
+  return json.data.map((site: any) => ({
+    ...site,
+    status: 'online' as const, // TODO: 실제 상태 계산
+    sensorsCount: 0, // TODO: 센서 카운트
+    alertsCount: 0, // TODO: 알림 카운트
+  }));
+}
 
 // ============================================
 // Components
@@ -214,15 +193,38 @@ function QuickAction({
 // ============================================
 
 export default function SludgeDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>(mockStats);
-  const [sites, setSites] = useState<Site[]>(mockSites);
-  const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalSites: 0,
+    activeSensors: 0,
+    alertsToday: 0,
+    avgEfficiency: 0,
+  });
+  const [sites, setSites] = useState<Site[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const [statsData, sitesData] = await Promise.all([fetchStats(), fetchSites()]);
+      setStats(statsData);
+      setSites(sitesData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+      console.error('[Sludge Dashboard]', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRefresh = async () => {
-    setIsLoading(true);
-    // TODO: API 호출
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
+    await loadData();
   };
 
   return (
