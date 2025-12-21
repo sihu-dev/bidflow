@@ -308,17 +308,18 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* 헤더 - Supabase 스타일 */}
-      <header className="bg-white border-b border-slate-200 px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      {/* 헤더 - 반응형 */}
+      <header className="bg-white border-b border-slate-200 px-4 md:px-6 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-4 md:gap-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-slate-900 rounded flex items-center justify-center">
               <span className="text-white text-xs font-bold">B</span>
             </div>
-            <span className="text-base font-semibold text-slate-900">BIDFLOW</span>
+            <span className="text-base font-semibold text-slate-900 hidden sm:inline">BIDFLOW</span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          {/* 데스크톱 네비게이션 */}
+          <nav className="hidden md:flex items-center gap-1">
             <Link href="/dashboard" className="px-3 py-1.5 text-sm font-medium text-slate-900 bg-slate-100 rounded">
               Bids
             </Link>
@@ -334,11 +335,11 @@ export default function DashboardPage() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {isDemo ? (
             <Link
               href="/signup"
-              className="px-4 py-1.5 text-sm font-medium text-white bg-slate-900 rounded hover:bg-slate-800"
+              className="px-3 md:px-4 py-1.5 text-sm font-medium text-white bg-slate-900 rounded hover:bg-slate-800"
             >
               Sign up
             </Link>
@@ -350,28 +351,28 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* 통계 바 - 미니멀 데이터 뷰 */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center gap-6">
-          {/* 메트릭 그리드 */}
-          <div className="flex items-center gap-6">
+      {/* 통계 바 - 반응형 */}
+      <div className="bg-white border-b border-slate-200 px-4 md:px-6 py-3 overflow-x-auto">
+        <div className="flex items-center gap-4 md:gap-6 min-w-max md:min-w-0">
+          {/* 메트릭 그리드 - 모바일에서 핵심만 */}
+          <div className="flex items-center gap-3 md:gap-6">
             <Metric label="Total" value={stats.total} />
             <div className="w-px h-8 bg-slate-200" />
             <Metric label="New" value={stats.new} highlight={stats.new > 0} />
-            <Metric label="Review" value={stats.reviewing} />
-            <Metric label="Prepare" value={stats.preparing} />
-            <div className="w-px h-8 bg-slate-200" />
+            <Metric label="Review" value={stats.reviewing} className="hidden sm:flex" />
+            <Metric label="Prepare" value={stats.preparing} className="hidden sm:flex" />
+            <div className="w-px h-8 bg-slate-200 hidden md:block" />
             <Metric label="Urgent" value={stats.urgent} warning={stats.urgent > 0} />
-            <Metric label="High Match" value={stats.highMatch} success />
-            <div className="w-px h-8 bg-slate-200" />
-            <Metric label="Won" value={stats.won} success />
-            <Metric label="Lost" value={stats.lost} />
+            <Metric label="High Match" value={stats.highMatch} success className="hidden lg:flex" />
+            <div className="w-px h-8 bg-slate-200 hidden lg:block" />
+            <Metric label="Won" value={stats.won} success className="hidden md:flex" />
+            <Metric label="Lost" value={stats.lost} className="hidden md:flex" />
           </div>
 
           {/* 총 추정가 */}
-          <div className="ml-auto flex items-center gap-2">
-            <span className="text-xs text-slate-500">Est. Total</span>
-            <span className="text-lg font-mono font-semibold text-slate-900">
+          <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs text-slate-500 hidden sm:inline">Est. Total</span>
+            <span className="text-base md:text-lg font-mono font-semibold text-slate-900">
               ₩{(stats.totalAmount / 100000000).toFixed(1)}B
             </span>
           </div>
@@ -400,19 +401,21 @@ function Metric({
   value,
   highlight,
   warning,
-  success
+  success,
+  className
 }: {
   label: string;
   value: number;
   highlight?: boolean;
   warning?: boolean;
   success?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col">
+    <div className={cn("flex flex-col", className)}>
       <span className="text-xs text-slate-500 uppercase tracking-wider">{label}</span>
       <span className={cn(
-        'text-xl font-semibold font-mono',
+        'text-lg md:text-xl font-semibold font-mono',
         warning ? 'text-neutral-700' :
         success ? 'text-neutral-800' :
         highlight ? 'text-neutral-700' :
