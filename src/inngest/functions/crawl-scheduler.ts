@@ -7,6 +7,7 @@ import { inngest } from '../client';
 import { NaraJangtoClient } from '@/lib/clients/narajangto-api';
 import { getBidRepository } from '@/lib/domain/repositories/bid-repository';
 import { createISODateString, createKRW, type CreateInput, type BidData } from '@/types';
+import { sendNotification, type BidNotificationData } from '@/lib/notifications';
 
 // ============================================================================
 // 스케줄된 크롤링 작업
@@ -100,8 +101,29 @@ export const scheduledCrawl = inngest.createFunction(
     // Step 3: 알림 발송 (새 공고가 있는 경우)
     if (savedCount > 0) {
       await step.run('send-notification', async () => {
-        // TODO: 알림 발송 구현
-        logger.info(`${savedCount}건의 새 공고 알림 발송 예정`);
+        // 저장된 공고 데이터를 알림용으로 변환
+        const notificationBids: BidNotificationData[] = naraResults.slice(0, savedCount).map(bid => ({
+          id: bid.external_id,
+          title: bid.title,
+          organization: bid.organization,
+          deadline: typeof bid.deadline === 'string' ? bid.deadline : new Date(bid.deadline).toISOString(),
+          estimatedAmount: bid.estimated_amount,
+          url: bid.url,
+        }));
+
+        // Slack 알림 발송
+        const results = await sendNotification(['slack'], {
+          type: 'new_bids',
+          bids: notificationBids,
+        });
+
+        const success = results.filter(r => r.success).length;
+        const failed = results.filter(r => !r.success);
+
+        logger.info(`알림 발송 완료: ${success}/${results.length} 성공`);
+        if (failed.length > 0) {
+          logger.warn('알림 발송 실패:', failed.map(r => `${r.channel}: ${r.error}`));
+        }
       });
     }
 
@@ -196,11 +218,47 @@ export const deadlineReminder = inngest.createFunction(
 
     logger.info(`마감 임박: D-3=${d3Bids.length}건, D-1=${d1Bids.length}건`);
 
-    // 알림 발송
-    if (d3Bids.length > 0 || d1Bids.length > 0) {
-      await step.run('send-deadline-notification', async () => {
-        // TODO: 알림 발송 구현
-        logger.info('마감 임박 알림 발송 예정');
+    // D-3 알림 발송
+    if (d3Bids.length > 0) {
+      await step.run('send-d3-notification', async () => {
+        const notificationBids: BidNotificationData[] = d3Bids.map(bid => ({
+          id: bid.id,
+          title: bid.title,
+          organization: bid.organization,
+          deadline: bid.deadline,
+          estimatedAmount: bid.estimatedAmount ? Number(bid.estimatedAmount) : null,
+          url: bid.url,
+          daysRemaining: 3,
+        }));
+
+        const results = await sendNotification(['slack'], {
+          type: 'deadline_d3',
+          bids: notificationBids,
+        });
+
+        logger.info(`D-3 알림 발송: ${results.filter(r => r.success).length}/${results.length} 성공`);
+      });
+    }
+
+    // D-1 알림 발송
+    if (d1Bids.length > 0) {
+      await step.run('send-d1-notification', async () => {
+        const notificationBids: BidNotificationData[] = d1Bids.map(bid => ({
+          id: bid.id,
+          title: bid.title,
+          organization: bid.organization,
+          deadline: bid.deadline,
+          estimatedAmount: bid.estimatedAmount ? Number(bid.estimatedAmount) : null,
+          url: bid.url,
+          daysRemaining: 1,
+        }));
+
+        const results = await sendNotification(['slack'], {
+          type: 'deadline_d1',
+          bids: notificationBids,
+        });
+
+        logger.info(`D-1 알림 발송: ${results.filter(r => r.success).length}/${results.length} 성공`);
       });
     }
 
