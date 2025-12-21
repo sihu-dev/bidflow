@@ -1,13 +1,14 @@
 import type { NextConfig } from 'next';
 import path from 'path';
 import bundleAnalyzer from '@next/bundle-analyzer';
-import createNextIntlPlugin from 'next-intl/plugin';
+// NOTE: next-intl 미들웨어는 app/[locale] 구조 전환 후 활성화
+// import createNextIntlPlugin from 'next-intl/plugin';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+// const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -84,4 +85,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(withBundleAnalyzer(nextConfig));
+// i18n 미들웨어 비활성화 (app/[locale] 구조 전환 후 활성화)
+// export default withNextIntl(withBundleAnalyzer(nextConfig));
+export default withBundleAnalyzer(nextConfig);
