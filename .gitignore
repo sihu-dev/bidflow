@@ -16,7 +16,8 @@ build/
 .env.*.local
 
 # IDE
-.vscode/
+.vscode/*.log
+.vscode/.ropeproject
 .idea/
 *.swp
 *.swo
