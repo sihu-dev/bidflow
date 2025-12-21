@@ -1,3 +1,10 @@
+---
+description: "Opus 4.5 기반 종합 검수 - 코드, 콘솔, UX/UI, E2E, 보안 통합 검사 (150점 만점)"
+argument-hint: "[--all|--quick|--code|--console|--uxui|--e2e|--security|--file PATH]"
+model: opus
+allowed-tools: Read, Grep, Glob, Bash, Task
+---
+
 # /audit 명령어
 
 Opus 4.5 기반 종합 검수 시스템 - 코드, 콘솔, UX/UI, E2E 통합 검사

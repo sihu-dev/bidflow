@@ -1,3 +1,9 @@
+---
+name: full-audit
+description: "코드/콘솔/UX/E2E/보안 통합 검수 - 4개 에이전트 협업 (150점 만점)"
+allowed-tools: Read, Grep, Glob, Bash, Task, mcp__playwright__*
+---
+
 # 종합 검수 스킬 (Full Audit)
 
 > 코드, 콘솔, UX/UI, E2E, 보안 통합 검수

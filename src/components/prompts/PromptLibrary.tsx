@@ -285,7 +285,7 @@ export function PromptLibrary({
             </Button>
           )}
         </SheetTrigger>
-        <SheetContent className="w-[420px] sm:max-w-[420px] p-0 flex flex-col">
+        <SheetContent className="w-full sm:w-[420px] sm:max-w-[90vw] p-0 flex flex-col">
           <SheetHeader className="p-4 pb-0">
             <SheetTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary" />

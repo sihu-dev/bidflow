@@ -4,6 +4,15 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createClient } from '@supabase/supabase-js';
+import { sendSlackMessage } from '@/lib/notifications/slack';
+import { sendEmail } from '@/lib/notifications/email';
+
+// Supabase 클라이언트 (서비스 역할)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // 문의 스키마
 const contactSchema = z.object({
@@ -33,19 +42,86 @@ export async function POST(request: NextRequest) {
 
     const data = result.data;
 
-    // TODO: 실제 구현 시 다음 중 하나 선택:
-    // 1. Supabase에 저장
-    // 2. 이메일 발송 (Resend, SendGrid 등)
-    // 3. Slack/Discord 알림
+    // 메타데이터 수집
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+                     request.headers.get('x-real-ip') ||
+                     'unknown';
+    const userAgent = request.headers.get('user-agent') || '';
+    const referrer = request.headers.get('referer') || '';
 
-    // 데모: 콘솔 로그
-    console.log('[Contact API] New inquiry:', {
+    // UTM 파라미터 (쿼리스트링에서 추출)
+    const url = new URL(request.url);
+    const utmSource = url.searchParams.get('utm_source');
+    const utmMedium = url.searchParams.get('utm_medium');
+    const utmCampaign = url.searchParams.get('utm_campaign');
+
+    // 1. Supabase에 저장
+    const { data: submission, error: dbError } = await supabase
+      .from('contact_submissions')
+      .insert({
+        name: data.name,
+        email: data.email,
+        company: data.company || null,
+        phone: data.phone || null,
+        inquiry_type: data.inquiryType,
+        message: data.message,
+        status: 'pending',
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        referrer: referrer,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+      })
+      .select('id')
+      .single();
+
+    if (dbError) {
+      console.error('[Contact API] DB Error:', dbError);
+      // DB 오류가 있어도 Slack 알림은 시도
+    }
+
+    const inquiryId = submission?.id || `INQ-${Date.now()}`;
+
+    // 2. Slack 알림 발송
+    try {
+      await sendSlackMessage({
+        text: `📬 *새 문의 접수*`,
+        attachments: [
+          {
+            color: '#2563eb',
+            fields: [
+              { title: '이름', value: data.name, short: true },
+              { title: '회사', value: data.company || '-', short: true },
+              { title: '이메일', value: data.email, short: true },
+              { title: '연락처', value: data.phone || '-', short: true },
+              { title: '문의 유형', value: getInquiryTypeName(data.inquiryType), short: true },
+              { title: 'ID', value: String(inquiryId).substring(0, 8), short: true },
+              { title: '내용', value: data.message.length > 200 ? data.message.substring(0, 200) + '...' : data.message, short: false },
+            ],
+            footer: `접수일시: ${new Date().toLocaleString('ko-KR')}`,
+          },
+        ],
+      });
+    } catch (slackError) {
+      console.error('[Contact API] Slack Error:', slackError);
+    }
+
+    // 3. 접수 확인 이메일 발송 (문의자에게)
+    try {
+      await sendEmail({
+        to: data.email,
+        subject: '[BIDFLOW] 문의가 접수되었습니다',
+        html: createConfirmationEmailHtml(data.name, inquiryId),
+      });
+    } catch (emailError) {
+      console.error('[Contact API] Email Error:', emailError);
+    }
+
+    console.log('[Contact API] New inquiry saved:', {
+      id: inquiryId,
       name: data.name,
-      company: data.company || '-',
-      email: data.email,
-      phone: data.phone || '-',
       type: data.inquiryType,
-      message: data.message.substring(0, 100) + '...',
       timestamp: new Date().toISOString(),
     });
 
@@ -53,7 +129,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: '문의가 성공적으로 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.',
-      id: `INQ-${Date.now()}`,
+      id: inquiryId,
     });
   } catch (error) {
     console.error('[Contact API] Error:', error);
@@ -62,6 +138,62 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// 문의 유형 이름 변환
+function getInquiryTypeName(code: string): string {
+  const types: Record<string, string> = {
+    demo: '데모 요청',
+    pricing: '가격 문의',
+    technical: '기술 문의',
+    partnership: '파트너십',
+    support: '기술 지원',
+    other: '기타',
+  };
+  return types[code] || code;
+}
+
+// 접수 확인 이메일 HTML
+function createConfirmationEmailHtml(name: string, inquiryId: string): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #171717 0%, #262626 100%); color: white; padding: 30px 20px; border-radius: 12px 12px 0 0; text-align: center; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 12px 12px; }
+        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
+        .button { display: inline-block; background: #171717; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin: 0; font-size: 24px;">BIDFLOW</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">문의 접수 확인</p>
+        </div>
+        <div class="content">
+          <h2 style="margin: 0 0 20px 0; color: #171717;">${name}님, 문의해주셔서 감사합니다!</h2>
+          <p>고객님의 문의가 정상적으로 접수되었습니다.</p>
+          <p><strong>접수번호:</strong> ${String(inquiryId).substring(0, 8).toUpperCase()}</p>
+          <p>담당자가 확인 후 빠른 시일 내에 연락드리겠습니다.<br>보통 1~2 영업일 내에 답변을 받으실 수 있습니다.</p>
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'}" class="button">
+              BIDFLOW 바로가기
+            </a>
+          </div>
+        </div>
+        <div class="footer">
+          <p>본 메일은 발신 전용입니다. 추가 문의사항은 웹사이트를 통해 연락해주세요.</p>
+          <p>© ${new Date().getFullYear()} BIDFLOW. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
 }
 
 // OPTIONS (CORS preflight)

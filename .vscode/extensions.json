@@ -1,0 +1,34 @@
+{
+  "recommendations": [
+    // 필수
+    "ms-vscode-remote.remote-wsl",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+
+    // TypeScript
+    "ms-vscode.vscode-typescript-next",
+    "yoavbls.pretty-ts-errors",
+
+    // React/Next.js
+    "formulahendry.auto-rename-tag",
+    "dsznajder.es7-react-js-snippets",
+
+    // 테스트
+    "ms-playwright.playwright",
+    "vitest.explorer",
+
+    // Git
+    "eamodio.gitlens",
+
+    // 생산성
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "streetsidesoftware.code-spell-checker",
+    "pkief.material-icon-theme",
+
+    // Supabase
+    "supabase.supabase-postgres"
+  ],
+  "unwantedRecommendations": []
+}

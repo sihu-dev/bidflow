@@ -1,3 +1,10 @@
+---
+description: "MCP 기반 종합 품질 검수 - Playwright E2E, 콘솔 오류, 반응형, 접근성, 성능 (200점 만점)"
+argument-hint: "[--quick|--console|--e2e|--responsive|--page PATH]"
+model: sonnet
+allowed-tools: Read, Bash, mcp__playwright__*
+---
+
 # /mcp-audit 명령어
 
 MCP(Playwright + Sequential Thinking)를 활용한 종합 품질 검수

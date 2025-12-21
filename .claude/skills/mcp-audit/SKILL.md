@@ -1,3 +1,9 @@
+---
+name: mcp-audit
+description: "MCP 기반 종합 품질 검수 - Playwright E2E, 콘솔 오류, 반응형, 접근성, 성능 (200점 만점)"
+allowed-tools: Read, Bash, mcp__playwright__*, mcp__sequential-thinking__*
+---
+
 # MCP 기반 종합 검수 마스터 프롬프트
 
 > **버전**: 1.0.0

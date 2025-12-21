@@ -158,7 +158,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
   const keywordArray = bid.keywords || [];
 
   return (
-    <div className="w-[400px] border-l border-slate-200 bg-white flex flex-col h-full animate-slide-in">
+    <div className="w-full md:w-[360px] lg:w-[400px] border-l border-slate-200 bg-white flex flex-col h-full animate-slide-in">
       {/* 헤더 */}
       <div className="flex items-start justify-between p-4 border-b border-slate-100">
         <div className="flex-1 min-w-0">

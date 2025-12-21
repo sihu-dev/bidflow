@@ -1,12 +1,12 @@
 /**
- * 통계/성과 섹션 - 모노크롬
+ * 통계/성과 섹션 - CMNTech 제품 매칭 버전
  */
 
 const stats = [
-  { value: '80%', label: '입찰 분석 시간 절감' },
-  { value: '3배', label: '입찰 참여율 증가' },
-  { value: '500+', label: '월간 처리 공고' },
-  { value: '24/7', label: '자동 모니터링' },
+  { value: '92%', label: '평균 제품 매칭 정확도' },
+  { value: '5+', label: 'CMNTech 연동 제품' },
+  { value: '150+', label: '월간 분석 공고수' },
+  { value: '3.2x', label: '입찰 참여율 증가' },
 ];
 
 export function Stats() {

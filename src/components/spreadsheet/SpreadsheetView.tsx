@@ -8,7 +8,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { HotTable, HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
-import { HyperFormula } from 'hyperformula';
 import Handsontable from 'handsontable';
 import 'handsontable/styles/handsontable.min.css';
 import 'handsontable/styles/ht-theme-main.min.css';
@@ -25,13 +24,35 @@ import {
   formatAmount,
 } from '@/lib/spreadsheet/column-definitions';
 import { exportToExcel, exportToCSV, exportToJSON } from '@/lib/spreadsheet/excel-export';
-import { hyperFormulaConfig } from '@/lib/spreadsheet/formula-engine';
 
 // Handsontable 모듈 등록
 registerAllModules();
 
-// HyperFormula 인스턴스 (수식 엔진)
-const hyperformulaInstance = HyperFormula.buildEmpty(hyperFormulaConfig);
+// HyperFormula lazy load 상태를 위한 전역 캐시
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let hyperformulaInstanceCache: any = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let hyperformulaLoadPromise: Promise<any> | null = null;
+
+// HyperFormula lazy loader
+async function loadHyperFormula() {
+  if (hyperformulaInstanceCache) {
+    return hyperformulaInstanceCache;
+  }
+
+  if (!hyperformulaLoadPromise) {
+    hyperformulaLoadPromise = (async () => {
+      const [{ HyperFormula }, { hyperFormulaConfig }] = await Promise.all([
+        import('hyperformula'),
+        import('@/lib/spreadsheet/formula-engine'),
+      ]);
+      hyperformulaInstanceCache = HyperFormula.buildEmpty(hyperFormulaConfig);
+      return hyperformulaInstanceCache;
+    })();
+  }
+
+  return hyperformulaLoadPromise;
+}
 
 // ============================================================================
 // 타입 정의
@@ -281,6 +302,20 @@ export function SpreadsheetView({
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [formulaEngine, setFormulaEngine] = useState<any>(null);
+
+  // HyperFormula lazy load
+  useEffect(() => {
+    // 수식 기능이 필요한 경우에만 로드 (첫 렌더링 후 백그라운드 로드)
+    const timer = setTimeout(() => {
+      loadHyperFormula().then(engine => {
+        setFormulaEngine(engine);
+      });
+    }, 1000); // 1초 후 백그라운드 로드
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // 데이터 업데이트 (initialData 변경 시)
   useEffect(() => {
@@ -427,10 +462,8 @@ export function SpreadsheetView({
             // 필터
             filters
             dropdownMenu={['filter_by_condition', 'filter_by_value', 'filter_action_bar']}
-            // 수식 엔진 (HyperFormula)
-            formulas={{
-              engine: hyperformulaInstance,
-            }}
+            // 수식 엔진 (HyperFormula) - lazy load 후 활성화
+            {...(formulaEngine ? { formulas: { engine: formulaEngine } } : {})}
           />
         </div>
       </div>

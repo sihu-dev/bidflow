@@ -51,11 +51,13 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
 
   if (!RESEND_API_KEY) {
     if (isDevelopment) {
-      console.log('[Email DEV] 이메일 발송 (시뮬레이션):');
-      console.log(`  To: ${recipients.join(', ')}`);
-      console.log(`  Subject: ${subject}`);
-      console.log(`  From: ${from}`);
-      if (html) console.log(`  HTML: ${html.substring(0, 200)}...`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Email DEV] 이메일 발송 (시뮬레이션):');
+        console.log(`  To: ${recipients.join(', ')}`);
+        console.log(`  Subject: ${subject}`);
+        console.log(`  From: ${from}`);
+        if (html) console.log(`  HTML: ${html.substring(0, 200)}...`);
+      }
       return { success: true, id: 'dev-mock-id' };
     }
     return { success: false, error: 'RESEND_API_KEY가 설정되지 않았습니다' };

@@ -64,12 +64,11 @@ export function validateEnv(): Env {
   if (!parsed.success) {
     const errors = parsed.error.errors.map((e) => `  - ${e.path.join('.')}: ${e.message}`);
 
-    console.error('❌ 환경 변수 검증 실패:');
-    console.error(errors.join('\n'));
-
     if (process.env.NODE_ENV === 'production') {
       throw new Error(`환경 변수 검증 실패:\n${errors.join('\n')}`);
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
+      console.error('❌ 환경 변수 검증 실패:');
+      console.error(errors.join('\n'));
       console.warn('⚠️ 개발 환경에서는 경고만 표시합니다');
     }
   }
@@ -108,8 +107,8 @@ export function maskApiKey(key: string): string {
 // 시작 시 검증 (개발용)
 // ============================================================================
 
-if (typeof window === 'undefined') {
-  // 서버 사이드에서만 실행
+if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
+  // 서버 사이드 & 개발 환경에서만 실행
   try {
     validateEnv();
     console.log('✅ 환경 변수 검증 완료');

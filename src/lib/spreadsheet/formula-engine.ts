@@ -1,6 +1,6 @@
 /**
  * @module FormulaEngine
- * @description HyperFormula 기반 수식 엔진 설정
+ * @description HyperFormula 기반 수식 엔진 설정 (Lazy Load)
  *
  * Excel 호환 수식 지원:
  * - 수학: SUM, AVERAGE, MIN, MAX, COUNT, ROUND
@@ -8,10 +8,12 @@
  * - 논리: IF, AND, OR, NOT
  * - 참조: VLOOKUP, HLOOKUP, INDEX, MATCH
  * - 날짜: TODAY, NOW, DATE, YEAR, MONTH, DAY
+ *
+ * HyperFormula는 lazy load되어 초기 번들 사이즈를 줄입니다.
  */
 
-import { HyperFormula } from 'hyperformula';
-import type { ConfigParams, RawCellContent } from 'hyperformula';
+// HyperFormula 타입만 import (번들에 포함되지 않음)
+import type { ConfigParams, RawCellContent, HyperFormula as HyperFormulaType } from 'hyperformula';
 
 // HyperFormula 설정
 // Note: functionArgSeparator와 thousandSeparator가 같으면 충돌 발생
@@ -45,23 +47,35 @@ export const hyperFormulaConfig: Partial<ConfigParams> = {
   maxColumns: 1000,
 };
 
+// HyperFormula 동적 로더
+let HyperFormulaModule: typeof import('hyperformula') | null = null;
+
+async function getHyperFormula(): Promise<typeof import('hyperformula')> {
+  if (!HyperFormulaModule) {
+    HyperFormulaModule = await import('hyperformula');
+  }
+  return HyperFormulaModule;
+}
+
 /**
- * HyperFormula 인스턴스 생성
+ * HyperFormula 인스턴스 생성 (Lazy Load)
  */
-export function createFormulaEngine(data?: RawCellContent[][]): HyperFormula {
+export async function createFormulaEngine(data?: RawCellContent[][]): Promise<HyperFormulaType> {
+  const { HyperFormula } = await getHyperFormula();
   const hf = HyperFormula.buildFromArray(data || [[]], hyperFormulaConfig);
   return hf;
 }
 
 /**
- * 수식 유효성 검사
+ * 수식 유효성 검사 (Lazy Load)
  */
-export function validateFormula(formula: string): { valid: boolean; error?: string } {
+export async function validateFormula(formula: string): Promise<{ valid: boolean; error?: string }> {
   if (!formula.startsWith('=')) {
     return { valid: true }; // 일반 값
   }
 
   try {
+    const { HyperFormula } = await getHyperFormula();
     const hf = HyperFormula.buildEmpty(hyperFormulaConfig);
     hf.addSheet('Test');
     hf.setCellContents({ sheet: 0, row: 0, col: 0 }, formula);

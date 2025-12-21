@@ -1,3 +1,10 @@
+---
+description: "외부 API 연동 및 테스트 - TED, SAM.gov, G2B API 상태 확인 및 데이터 조회"
+argument-hint: "[test|fetch|status|config] [ted|sam|g2b] [options]"
+model: sonnet
+allowed-tools: Read, Bash, WebFetch
+---
+
 # /api 명령어
 
 외부 API 연동 및 테스트

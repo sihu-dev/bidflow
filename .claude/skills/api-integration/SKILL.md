@@ -1,3 +1,9 @@
+---
+name: api-integration
+description: "외부 입찰 플랫폼 API 연동 - TED, 나라장터(G2B), SAM.gov API 테스트 및 데이터 조회"
+allowed-tools: Read, Bash, WebFetch
+---
+
 # API 통합 스킬
 
 > 외부 입찰 플랫폼 API 연동

@@ -1,0 +1,163 @@
+# AI 스마트 함수 정의
+
+## 함수 인터페이스
+
+interface AIFunction {
+  name: string;           // 함수명
+  syntax: string;         // 문법
+  description: string;    // 설명
+  example: string;        // 예시
+  output: string;         // 출력 예시
+  icon: string;           // 아이콘
+  category: string;       // 카테고리 (analysis, extraction, matching)
+}
+
+---
+
+## 핵심 AI 함수 (5개)
+
+### 1. AI_SUMMARY - 공고 요약
+
+{
+  name: 'AI_SUMMARY',
+  syntax: '=AI_SUMMARY()',
+  description: '입찰 공고를 2-3문장으로 자동 요약',
+  example: '=AI_SUMMARY()',
+  output: '서울시 상수도사업본부에서 발주한 초음파유량계 구매 입찰입니다.',
+  icon: 'FileText',
+  category: 'analysis',
+}
+
+사용 예시:
+- 셀에 =AI_SUMMARY() 입력
+- 현재 행의 공고를 AI가 분석하여 핵심 내용 2-3문장으로 요약
+
+---
+
+### 2. AI_SCORE - 낙찰 가능성
+
+{
+  name: 'AI_SCORE',
+  syntax: '=AI_SCORE()',
+  description: '낙찰 가능성 점수 예측 (0-100%)',
+  example: '=AI_SCORE()',
+  output: '92',
+  icon: 'TrendingUp',
+  category: 'analysis',
+}
+
+사용 예시:
+- 셀에 =AI_SCORE() 입력
+- 과거 데이터, 요구사항 매칭, 경쟁 상황을 분석하여 0-100% 점수 반환
+
+---
+
+### 3. AI_MATCH - 제품 매칭
+
+{
+  name: 'AI_MATCH',
+  syntax: '=AI_MATCH()',
+  description: '가장 적합한 제품명 자동 추천',
+  example: '=AI_MATCH()',
+  output: 'UR-1000PLUS',
+  icon: 'Target',
+  category: 'matching',
+}
+
+사용 예시:
+- 셀에 =AI_MATCH() 입력
+- 공고 요구사항과 CMNTech 5개 제품을 비교하여 최적 제품 추천
+- UR-1000PLUS, MF-1000C, UR-1010PLUS, SL-3000PLUS, EnerRay 중 선택
+
+---
+
+### 4. AI_KEYWORDS - 키워드 추출
+
+{
+  name: 'AI_KEYWORDS',
+  syntax: '=AI_KEYWORDS()',
+  description: '핵심 키워드 3개 자동 추출',
+  example: '=AI_KEYWORDS()',
+  output: '초음파, 상수도, 유량계',
+  icon: 'Tag',
+  category: 'extraction',
+}
+
+사용 예시:
+- 셀에 =AI_KEYWORDS() 입력
+- 공고 제목과 요구사항에서 핵심 키워드 3개 추출
+- 제품 매칭 및 분류에 활용
+
+---
+
+### 5. AI_DEADLINE - 마감 분석
+
+{
+  name: 'AI_DEADLINE',
+  syntax: '=AI_DEADLINE()',
+  description: '마감일 분석 및 권장 액션 제안',
+  example: '=AI_DEADLINE()',
+  output: 'D-7 - 검토 완료 권장',
+  icon: 'Clock',
+  category: 'analysis',
+}
+
+사용 예시:
+- 셀에 =AI_DEADLINE() 입력
+- D-Day 계산 및 현재 상황에 맞는 권장 액션 제안
+  - D-7 이내: 긴급 검토 필요
+  - D-14 이내: 제안서 준비 시작
+  - D-30 이상: 일반 검토
+
+---
+
+## 확장 AI 함수 (향후 추가 예정)
+
+### 6. AI_RISK - 리스크 분석
+
+{
+  name: 'AI_RISK',
+  syntax: '=AI_RISK()',
+  description: '입찰 리스크 분석',
+  example: '=AI_RISK()',
+  output: '중간 - 경쟁 입찰 예상',
+  icon: 'MessageSquare',
+  category: 'analysis',
+}
+
+---
+
+### 7. AI_PROPOSAL - 제안서 생성
+
+{
+  name: 'AI_PROPOSAL',
+  syntax: '=AI_PROPOSAL()',
+  description: '제안서 초안 생성',
+  example: '=AI_PROPOSAL()',
+  output: '[제안서 템플릿 생성됨]',
+  icon: 'FileText',
+  category: 'analysis',
+}
+
+---
+
+## 함수 분류
+
+카테고리별 분류:
+- analysis: 분석 함수 (AI_SUMMARY, AI_SCORE, AI_DEADLINE, AI_RISK, AI_PROPOSAL)
+- extraction: 추출 함수 (AI_KEYWORDS)
+- matching: 매칭 함수 (AI_MATCH)
+
+---
+
+## 조회 함수
+
+getFunctionsByCategory(category): AIFunction[]
+  - 카테고리별 함수 목록 조회
+
+getAIFunction(name): AIFunction | undefined
+  - 함수명으로 함수 정보 조회
+
+---
+
+*파일 위치: src/lib/data/ai-functions.ts*

@@ -1,0 +1,213 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "refresh": "Refresh",
+    "all": "All",
+    "none": "None"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "aiDashboard": "AI Dashboard",
+    "bids": "Bids",
+    "products": "Products",
+    "settings": "Settings",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout"
+  },
+  "hero": {
+    "title": "AI-Powered Bid Matching",
+    "subtitle": "175-point scoring system automatically discovers optimal bidding opportunities",
+    "cta": {
+      "primary": "Start Free",
+      "secondary": "View Demo"
+    }
+  },
+  "features": {
+    "title": "BIDFLOW Core Features",
+    "subtitle": "Accelerate your business growth with AI-powered bid automation",
+    "items": {
+      "aiMatching": {
+        "title": "AI Matching",
+        "description": "175-point scoring system automatically discovers optimal bids"
+      },
+      "realtime": {
+        "title": "Real-time Monitoring",
+        "description": "Real-time collection from TED, G2B, and SAM.gov"
+      },
+      "notification": {
+        "title": "Smart Alerts",
+        "description": "Instant notifications for deadlines and new opportunities"
+      },
+      "analysis": {
+        "title": "Competitor Analysis",
+        "description": "Bid history-based competitor trend analysis"
+      },
+      "proposal": {
+        "title": "Proposal Generation",
+        "description": "AI-generated customized proposal drafts"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalBids": "Total Bids",
+    "newBids": "New Bids",
+    "deadlineSoon": "Deadline Soon",
+    "highPriority": "High Priority",
+    "status": {
+      "all": "All",
+      "new": "New",
+      "review": "In Review",
+      "applied": "Applied",
+      "skipped": "Skipped"
+    },
+    "actions": {
+      "bid": "Bid",
+      "review": "Review",
+      "skip": "Skip"
+    }
+  },
+  "bid": {
+    "title": "Title",
+    "organization": "Organization",
+    "deadline": "Deadline",
+    "estimatedAmount": "Estimated Amount",
+    "status": "Status",
+    "priority": "Priority",
+    "source": "Source",
+    "daysRemaining": "D-{days}",
+    "expired": "Expired",
+    "priority_high": "High",
+    "priority_medium": "Medium",
+    "priority_low": "Low"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Have questions? We're here to help",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "John Doe",
+      "company": "Company",
+      "companyPlaceholder": "Enter your company name",
+      "email": "Email",
+      "emailPlaceholder": "example@company.com",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 234 567 8900",
+      "inquiryType": "Inquiry Type",
+      "message": "Message",
+      "messagePlaceholder": "Please describe your inquiry in detail",
+      "submit": "Send Message"
+    },
+    "types": {
+      "demo": "Demo Request",
+      "pricing": "Pricing Inquiry",
+      "technical": "Technical Inquiry",
+      "partnership": "Partnership",
+      "support": "Technical Support",
+      "other": "Other"
+    },
+    "success": "Your inquiry has been submitted. We'll get back to you soon."
+  },
+  "pricing": {
+    "title": "Simple Pricing",
+    "subtitle": "Choose the plan that fits your business",
+    "monthly": "mo",
+    "yearly": "yr",
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "price": "Free",
+        "description": "Basic features for small businesses",
+        "features": [
+          "50 bid views per month",
+          "Basic filtering",
+          "Email notifications"
+        ]
+      },
+      "pro": {
+        "name": "Pro",
+        "price": "$79",
+        "description": "Advanced features for growing businesses",
+        "features": [
+          "Unlimited bid views",
+          "AI matching score",
+          "Slack notifications",
+          "Competitor analysis"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Contact",
+        "description": "Custom solutions for large enterprises",
+        "features": [
+          "All Pro features",
+          "Dedicated API",
+          "White-label",
+          "Priority support"
+        ]
+      }
+    },
+    "cta": "Get Started"
+  },
+  "aiDashboard": {
+    "title": "AI Dashboard",
+    "subtitle": "Real-time Sensor Monitoring",
+    "map": {
+      "title": "Sensor Locations",
+      "loading": "Loading map..."
+    },
+    "gauge": {
+      "title": "Flow Rate",
+      "unit": "m³/h"
+    },
+    "metrics": {
+      "temperature": "Temperature",
+      "pressure": "Pressure",
+      "flowRate": "Flow Rate",
+      "status": "Status"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "noAlerts": "No alerts at this time",
+      "warning": "Warning",
+      "critical": "Critical",
+      "info": "Info"
+    },
+    "products": {
+      "ur1010plus": "UR-1010PLUS Ultrasonic Flow Meter",
+      "sl3000plus": "SL-3000PLUS Sludge Sensor",
+      "enerray": "EnerRay Energy Meter"
+    }
+  },
+  "footer": {
+    "company": "Company",
+    "product": "Product",
+    "support": "Support",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© {year} BIDFLOW. All rights reserved."
+  },
+  "error": {
+    "notFound": "Page not found",
+    "serverError": "Server error occurred",
+    "networkError": "Please check your network connection",
+    "unauthorized": "Login required",
+    "forbidden": "Access denied"
+  }
+}

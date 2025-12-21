@@ -63,8 +63,10 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 export async function sendSlackMessage(message: SlackMessage): Promise<void> {
   if (!SLACK_WEBHOOK_URL) {
     if (isDevelopment) {
-      console.log('[Slack DEV] 메시지 발송 (시뮬레이션):');
-      console.log(JSON.stringify(message, null, 2));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Slack DEV] 메시지 발송 (시뮬레이션):');
+        console.log(JSON.stringify(message, null, 2));
+      }
       return;
     }
     throw new Error('SLACK_WEBHOOK_URL이 설정되지 않았습니다');

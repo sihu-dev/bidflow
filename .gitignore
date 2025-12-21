@@ -16,7 +16,8 @@ build/
 .env.*.local
 
 # IDE
-.vscode/
+.vscode/*.log
+.vscode/.ropeproject
 .idea/
 *.swp
 *.swo
@@ -33,6 +34,9 @@ pnpm-debug.log*
 # Testing
 coverage/
 .vitest/
+test-results/
+playwright-report/
+playwright/.cache/
 
 # Supabase
 supabase/.branches/

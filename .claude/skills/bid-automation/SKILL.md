@@ -1,3 +1,9 @@
+---
+name: bid-automation
+description: "제조업 SME 입찰 프로세스 자동화 - 공고 수집, AI 매칭, 제안서 생성"
+allowed-tools: Read, Grep, Glob, Bash, WebFetch
+---
+
 # 입찰 자동화 스킬
 
 > 제조업 SME를 위한 입찰 프로세스 자동화

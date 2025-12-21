@@ -1,0 +1,213 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "success": "성공",
+    "cancel": "취소",
+    "confirm": "확인",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "search": "검색",
+    "filter": "필터",
+    "refresh": "새로고침",
+    "all": "전체",
+    "none": "없음"
+  },
+  "nav": {
+    "home": "홈",
+    "dashboard": "대시보드",
+    "aiDashboard": "AI 대시보드",
+    "bids": "입찰 공고",
+    "products": "제품",
+    "settings": "설정",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃"
+  },
+  "hero": {
+    "title": "AI가 찾아주는 맞춤형 입찰 공고",
+    "subtitle": "175점 스코어링 시스템으로 최적의 입찰 기회를 자동 발굴합니다",
+    "cta": {
+      "primary": "무료로 시작하기",
+      "secondary": "데모 보기"
+    }
+  },
+  "features": {
+    "title": "BIDFLOW 핵심 기능",
+    "subtitle": "AI 기반 입찰 자동화로 비즈니스 성장을 가속화하세요",
+    "items": {
+      "aiMatching": {
+        "title": "AI 매칭",
+        "description": "175점 스코어링 시스템으로 최적의 입찰 공고를 자동 발굴"
+      },
+      "realtime": {
+        "title": "실시간 모니터링",
+        "description": "TED, 나라장터, SAM.gov 입찰 공고 실시간 수집"
+      },
+      "notification": {
+        "title": "스마트 알림",
+        "description": "마감 임박, 신규 공고 등 중요 이벤트 즉시 알림"
+      },
+      "analysis": {
+        "title": "경쟁사 분석",
+        "description": "입찰 이력 기반 경쟁사 동향 분석"
+      },
+      "proposal": {
+        "title": "제안서 생성",
+        "description": "AI가 작성하는 맞춤형 제안서 초안"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "totalBids": "전체 공고",
+    "newBids": "신규 공고",
+    "deadlineSoon": "마감 임박",
+    "highPriority": "높은 우선순위",
+    "status": {
+      "all": "전체",
+      "new": "신규",
+      "review": "검토중",
+      "applied": "지원완료",
+      "skipped": "스킵"
+    },
+    "actions": {
+      "bid": "입찰",
+      "review": "검토",
+      "skip": "스킵"
+    }
+  },
+  "bid": {
+    "title": "공고명",
+    "organization": "발주기관",
+    "deadline": "마감일",
+    "estimatedAmount": "추정가",
+    "status": "상태",
+    "priority": "우선순위",
+    "source": "출처",
+    "daysRemaining": "D-{days}",
+    "expired": "마감됨",
+    "priority_high": "높음",
+    "priority_medium": "중간",
+    "priority_low": "낮음"
+  },
+  "contact": {
+    "title": "문의하기",
+    "subtitle": "궁금한 점이 있으시면 언제든 문의해주세요",
+    "form": {
+      "name": "이름",
+      "namePlaceholder": "홍길동",
+      "company": "회사명",
+      "companyPlaceholder": "회사명을 입력하세요",
+      "email": "이메일",
+      "emailPlaceholder": "example@company.com",
+      "phone": "연락처",
+      "phonePlaceholder": "010-1234-5678",
+      "inquiryType": "문의 유형",
+      "message": "문의 내용",
+      "messagePlaceholder": "문의하실 내용을 상세히 작성해주세요",
+      "submit": "문의 보내기"
+    },
+    "types": {
+      "demo": "데모 요청",
+      "pricing": "가격 문의",
+      "technical": "기술 문의",
+      "partnership": "파트너십",
+      "support": "기술 지원",
+      "other": "기타"
+    },
+    "success": "문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다."
+  },
+  "pricing": {
+    "title": "합리적인 가격",
+    "subtitle": "비즈니스 규모에 맞는 플랜을 선택하세요",
+    "monthly": "월",
+    "yearly": "년",
+    "plans": {
+      "starter": {
+        "name": "스타터",
+        "price": "무료",
+        "description": "소규모 비즈니스를 위한 기본 기능",
+        "features": [
+          "월 50건 공고 조회",
+          "기본 필터링",
+          "이메일 알림"
+        ]
+      },
+      "pro": {
+        "name": "프로",
+        "price": "99,000",
+        "description": "성장하는 비즈니스를 위한 고급 기능",
+        "features": [
+          "무제한 공고 조회",
+          "AI 매칭 스코어",
+          "Slack 알림",
+          "경쟁사 분석"
+        ]
+      },
+      "enterprise": {
+        "name": "엔터프라이즈",
+        "price": "문의",
+        "description": "대기업을 위한 맞춤형 솔루션",
+        "features": [
+          "모든 프로 기능",
+          "전용 API",
+          "화이트라벨",
+          "전담 지원"
+        ]
+      }
+    },
+    "cta": "시작하기"
+  },
+  "aiDashboard": {
+    "title": "AI 대시보드",
+    "subtitle": "실시간 센서 모니터링",
+    "map": {
+      "title": "센서 위치",
+      "loading": "지도 로딩 중..."
+    },
+    "gauge": {
+      "title": "유량",
+      "unit": "m³/h"
+    },
+    "metrics": {
+      "temperature": "온도",
+      "pressure": "압력",
+      "flowRate": "유량",
+      "status": "상태"
+    },
+    "alerts": {
+      "title": "알림",
+      "noAlerts": "현재 알림이 없습니다",
+      "warning": "경고",
+      "critical": "심각",
+      "info": "정보"
+    },
+    "products": {
+      "ur1010plus": "UR-1010PLUS 초음파 유량계",
+      "sl3000plus": "SL-3000PLUS 슬러지 센서",
+      "enerray": "EnerRay 에너지 미터"
+    }
+  },
+  "footer": {
+    "company": "회사 소개",
+    "product": "제품",
+    "support": "지원",
+    "legal": "법적 고지",
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "copyright": "© {year} BIDFLOW. All rights reserved."
+  },
+  "error": {
+    "notFound": "페이지를 찾을 수 없습니다",
+    "serverError": "서버 오류가 발생했습니다",
+    "networkError": "네트워크 연결을 확인해주세요",
+    "unauthorized": "로그인이 필요합니다",
+    "forbidden": "접근 권한이 없습니다"
+  }
+}

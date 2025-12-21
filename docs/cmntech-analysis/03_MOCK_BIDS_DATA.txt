@@ -1,0 +1,187 @@
+# 목업 입찰 데이터 (6개 샘플)
+
+## 입찰 데이터 인터페이스
+
+interface MockBid {
+  id: number;                    // 고유 ID
+  source: string;                // 출처 (narajangto, ted, kwater, kepco)
+  sourceLabel: string;           // 출처 라벨 (나라장터, TED 등)
+  title: string;                 // 공고명
+  organization: string;          // 발주기관
+  estimatedAmount: number;       // 추정가격 (원)
+  deadline: string;              // 마감일 (YYYY-MM-DD)
+  status: string;                // 상태 (new, reviewing, preparing, submitted)
+  statusLabel: string;           // 상태 라벨 (신규, 검토중 등)
+  priority: string;              // 우선순위 (high, medium, low)
+  matchScore: number;            // 매칭 점수 (0-100)
+  matchedProduct: string | null; // 매칭된 제품 ID
+  keywords: string[];            // 핵심 키워드
+  aiSummary: string | null;      // AI 요약
+  dday: string;                  // D-Day 표시 (D-7 등)
+  ddayNum: number;               // D-Day 숫자
+  isUrgent: boolean;             // 긴급 여부 (D-7 이내)
+}
+
+---
+
+## 샘플 입찰 1: 서울시 상수도본부 (UR-1000PLUS)
+
+{
+  id: 1,
+  source: 'narajangto',
+  sourceLabel: '나라장터',
+  title: '[긴급] 서울시 상수도본부 초음파유량계 설치 및 유지관리',
+  organization: '서울시 상수도사업본부',
+  estimatedAmount: 450,000,000원 (4.5억),
+  deadline: '2025-01-28',
+  status: 'reviewing',
+  statusLabel: '검토중',
+  priority: 'high',
+  matchScore: 92,
+  matchedProduct: 'UR-1000PLUS',
+  keywords: ['초음파', '유량계', '상수도'],
+  aiSummary: 'UR-1000PLUS 95% 일치. 대구경 DN300-1000 규격 25대 설치 요구.',
+  dday: 'D-7',
+  isUrgent: true,
+}
+
+---
+
+## 샘플 입찰 2: K-water 정수장 (MF-1000C)
+
+{
+  id: 2,
+  source: 'kwater',
+  sourceLabel: 'K-water',
+  title: 'K-water 정수장 전자유량계 교체 공사',
+  organization: 'K-water 한국수자원공사',
+  estimatedAmount: 280,000,000원 (2.8억),
+  deadline: '2025-02-02',
+  status: 'new',
+  statusLabel: '신규',
+  priority: 'medium',
+  matchScore: 78,
+  matchedProduct: 'MF-1000C',
+  keywords: ['전자', '유량계', '정수장'],
+  aiSummary: null,
+  dday: 'D-12',
+  isUrgent: false,
+}
+
+---
+
+## 샘플 입찰 3: Berlin Water (TED - EU) (UR-1000PLUS)
+
+{
+  id: 3,
+  source: 'ted',
+  sourceLabel: 'TED(EU)',
+  title: 'Water Flow Meters Supply - Berlin Water Authority',
+  organization: 'Berliner Wasserbetriebe',
+  estimatedAmount: 850,000,000원 (8.5억),
+  deadline: '2025-02-15',
+  status: 'preparing',
+  statusLabel: '준비중',
+  priority: 'high',
+  matchScore: 85,
+  matchedProduct: 'UR-1000PLUS',
+  keywords: ['ultrasonic', 'flowmeter', 'water'],
+  aiSummary: '국제입찰 자격요건 필요. CE 인증 보유 업체 우대.',
+  dday: 'D-25',
+  isUrgent: false,
+}
+
+---
+
+## 샘플 입찰 4: 한국전력 발전소 (EnerRay)
+
+{
+  id: 4,
+  source: 'kepco',
+  sourceLabel: '한전',
+  title: '한국전력 발전소 열량계 납품',
+  organization: '한국전력공사',
+  estimatedAmount: 120,000,000원 (1.2억),
+  deadline: '2025-02-08',
+  status: 'new',
+  statusLabel: '신규',
+  priority: 'low',
+  matchScore: 45,
+  matchedProduct: 'EnerRay',
+  keywords: ['열량계', '에너지', '발전소'],
+  aiSummary: null,
+  dday: 'D-18',
+  isUrgent: false,
+}
+
+---
+
+## 샘플 입찰 5: 부산시 하수처리장 (UR-1010PLUS)
+
+{
+  id: 5,
+  source: 'narajangto',
+  sourceLabel: '나라장터',
+  title: '부산시 하수처리장 비만관 유량계 설치',
+  organization: '부산환경공단',
+  estimatedAmount: 95,000,000원 (0.95억),
+  deadline: '2025-01-24',
+  status: 'submitted',
+  statusLabel: '제출완료',
+  priority: 'high',
+  matchScore: 88,
+  matchedProduct: 'UR-1010PLUS',
+  keywords: ['비만관', '하수', '유량계'],
+  aiSummary: 'UR-1010PLUS 적합. 기존 설치 실적 보유 업체 우대.',
+  dday: 'D-3',
+  isUrgent: true,
+}
+
+---
+
+## 샘플 입찰 6: 농어촌공사 (SL-3000PLUS)
+
+{
+  id: 6,
+  source: 'narajangto',
+  sourceLabel: '나라장터',
+  title: '농어촌공사 농업용수로 개수로 유량계 설치',
+  organization: '한국농어촌공사',
+  estimatedAmount: 180,000,000원 (1.8억),
+  deadline: '2025-02-20',
+  status: 'new',
+  statusLabel: '신규',
+  priority: 'medium',
+  matchScore: 72,
+  matchedProduct: 'SL-3000PLUS',
+  keywords: ['개수로', '농업용수', '유량계'],
+  aiSummary: null,
+  dday: 'D-30',
+  isUrgent: false,
+}
+
+---
+
+## 목업 통계
+
+MOCK_STATS = {
+  total: 6,                      // 전체 입찰 수
+  new: 3,                        // 신규 입찰
+  reviewing: 1,                  // 검토중
+  urgent: 2,                     // 긴급 (D-7 이내)
+  highMatch: 4,                  // 높은 매칭 (80% 이상)
+  totalAmount: 1,975,000,000원   // 총 추정가액 (~19.75억)
+}
+
+---
+
+## 금액 포맷팅 함수
+
+formatAmount(amount):
+  - 1억 이상: "4.5억"
+  - 1만 이상: "9,500만"
+  - 1만 미만: "9,500"
+
+---
+
+*파일 위치: src/lib/data/mock-bids.ts*

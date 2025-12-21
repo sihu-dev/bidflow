@@ -1,10 +1,23 @@
 import type { NextConfig } from 'next';
+import path from 'path';
+import bundleAnalyzer from '@next/bundle-analyzer';
+// NOTE: next-intl 미들웨어는 app/[locale] 구조 전환 후 활성화
+// import createNextIntlPlugin from 'next-intl/plugin';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+// const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   // 소스 디렉토리 설정
   distDir: '.next',
+
+  // 현재 디렉토리를 워크스페이스 루트로 명시 (부모 lockfile 무시)
+  outputFileTracingRoot: path.resolve(__dirname),
 
   // 서버 외부 패키지 설정 (Handsontable SSR 호환성)
   serverExternalPackages: ['handsontable', '@handsontable/react'],
@@ -72,4 +85,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// i18n 미들웨어 비활성화 (app/[locale] 구조 전환 후 활성화)
+// export default withNextIntl(withBundleAnalyzer(nextConfig));
+export default withBundleAnalyzer(nextConfig);

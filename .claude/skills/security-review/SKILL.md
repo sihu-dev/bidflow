@@ -1,3 +1,9 @@
+---
+name: security-review
+description: "API 보안 및 입찰 데이터 보호 검토 - Rate Limiting, CSRF, RLS, OWASP Top 10"
+allowed-tools: Read, Grep, Glob, Bash
+---
+
 # 보안 검토 스킬
 
 > API 보안 및 입찰 데이터 보호 검토
