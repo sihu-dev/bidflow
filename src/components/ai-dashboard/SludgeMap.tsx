@@ -4,6 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+// WebGL 지원 여부 확인
+function detectWebGLSupport(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2') || canvas.getContext('experimental-webgl');
+    return !!gl;
+  } catch {
+    return false;
+  }
+}
+
 interface SensorLocation {
   id: string;
   name: string;
@@ -74,47 +85,102 @@ const STATUS_COLORS: Record<SensorLocation['status'], string> = {
   critical: '#171717', // neutral-900 - 위험: 어두움 (강조)
 };
 
+// WebGL 미지원 시 대체 UI
+function SensorListFallback({
+  sensors,
+  selectedSensor,
+  onSelectSensor,
+}: {
+  sensors: SensorLocation[];
+  selectedSensor: SensorLocation | null;
+  onSelectSensor: (sensor: SensorLocation | null) => void;
+}) {
+  return (
+    <div className="w-full h-full bg-neutral-50 rounded-lg overflow-hidden flex flex-col">
+      <div className="p-4 border-b border-neutral-200 bg-white">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-neutral-200 rounded-lg flex items-center justify-center">
+            <span className="text-neutral-600 text-sm">📍</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-neutral-900 text-sm">센서 위치 목록</h3>
+            <p className="text-xs text-neutral-500">지도 표시를 위해 WebGL이 필요합니다</p>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 overflow-auto p-2 space-y-2">
+        {sensors.map((sensor) => (
+          <button
+            key={sensor.id}
+            onClick={() => onSelectSensor(selectedSensor?.id === sensor.id ? null : sensor)}
+            className={`w-full text-left p-3 rounded-lg border transition-all ${
+              selectedSensor?.id === sensor.id
+                ? 'border-neutral-900 bg-neutral-100'
+                : 'border-neutral-200 bg-white hover:border-neutral-400'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: STATUS_COLORS[sensor.status] }}
+                />
+                <span className="font-medium text-neutral-900 text-sm">{sensor.name}</span>
+              </div>
+              <span className="text-xs text-neutral-500">{sensor.type}</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className="text-neutral-600">
+                {sensor.value} {sensor.unit}
+              </span>
+              <span
+                className="uppercase font-medium"
+                style={{ color: STATUS_COLORS[sensor.status] }}
+              >
+                {sensor.status}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+      {/* Legend */}
+      <div className="p-3 border-t border-neutral-200 bg-white">
+        <div className="text-xs font-semibold text-neutral-900 mb-2">센서 상태</div>
+        <div className="flex gap-4">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-neutral-400" />
+            <span className="text-xs text-neutral-600">정상</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-neutral-600" />
+            <span className="text-xs text-neutral-600">경고</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
+            <span className="text-xs text-neutral-600">위험</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SludgeMap() {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<SensorLocation | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [hasWebGL, setHasWebGL] = useState<boolean>(true);
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    // Initialize map
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '&copy; OpenStreetMap Contributors',
-          },
-        },
-        layers: [
-          {
-            id: 'osm',
-            type: 'raster',
-            source: 'osm',
-            paint: {
-              'raster-saturation': -1, // Monochrome filter
-              'raster-contrast': 0.1,
-              'raster-brightness-min': 0.3,
-              'raster-brightness-max': 0.8,
-            },
-          },
-        ],
-      },
-      center: [127.0, 37.5], // Korea center
-      zoom: 6.5,
-    });
-
-    // Add navigation controls
-    map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+    // Check WebGL support
+    if (!detectWebGLSupport()) {
+      setHasWebGL(false);
+      setMapError('WebGL이 지원되지 않습니다');
+      return;
+    }
 
     // Store event handlers for cleanup
     const markerEventHandlers: Array<{
@@ -123,6 +189,41 @@ export function SludgeMap() {
       mouseleaveHandler: () => void;
       clickHandler: () => void;
     }> = [];
+
+    try {
+      // Initialize map
+      map.current = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              attribution: '&copy; OpenStreetMap Contributors',
+            },
+          },
+          layers: [
+            {
+              id: 'osm',
+              type: 'raster',
+              source: 'osm',
+              paint: {
+                'raster-saturation': -1, // Monochrome filter
+                'raster-contrast': 0.1,
+                'raster-brightness-min': 0.3,
+                'raster-brightness-max': 0.8,
+              },
+            },
+          ],
+        },
+        center: [127.0, 37.5], // Korea center
+        zoom: 6.5,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
 
     // Add markers and popups
     DEMO_SENSORS.forEach((sensor) => {
@@ -195,6 +296,11 @@ export function SludgeMap() {
         .setPopup(popup)
         .addTo(map.current);
     });
+    } catch (error) {
+      console.error('[SludgeMap] 지도 초기화 실패:', error);
+      setMapError('지도를 초기화할 수 없습니다');
+      setHasWebGL(false);
+    }
 
     return () => {
       // Cleanup event listeners
@@ -209,6 +315,17 @@ export function SludgeMap() {
       map.current = null;
     };
   }, []);
+
+  // WebGL 미지원 또는 에러 시 Fallback UI 표시
+  if (!hasWebGL || mapError) {
+    return (
+      <SensorListFallback
+        sensors={DEMO_SENSORS}
+        selectedSensor={selectedSensor}
+        onSelectSensor={setSelectedSensor}
+      />
+    );
+  }
 
   return (
     <div className="relative w-full h-full">
