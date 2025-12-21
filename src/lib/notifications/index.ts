@@ -5,6 +5,12 @@
 
 import { sendSlackMessage, type SlackMessage } from './slack';
 import { sendEmail } from './email';
+import {
+  sendKakaoAlimtalk,
+  sendNewBidsAlimtalk,
+  sendDeadlineAlimtalk,
+  ALIMTALK_TEMPLATES,
+} from './kakao';
 
 // ============================================================================
 // 타입 정의
@@ -59,8 +65,8 @@ export async function sendNotification(
           results.push({ channel, success: true });
           break;
         case 'kakao':
-          // TODO: 카카오 알림톡 구현
-          results.push({ channel, success: false, error: '미구현' });
+          await sendKakaoNotification(payload);
+          results.push({ channel, success: true });
           break;
       }
     } catch (error) {
@@ -248,6 +254,60 @@ function formatEmailHtml(payload: NotificationPayload): string {
     </body>
     </html>
   `;
+}
+
+// ============================================================================
+// Kakao 알림톡
+// ============================================================================
+
+async function sendKakaoNotification(payload: NotificationPayload): Promise<void> {
+  const { type, recipients = [], bids } = payload;
+
+  if (recipients.length === 0) {
+    console.warn('[Notification] 카카오 알림톡 수신자가 없습니다');
+    return;
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010';
+
+  for (const recipient of recipients) {
+    switch (type) {
+      case 'new_bids':
+        if (bids.length > 0) {
+          await sendNewBidsAlimtalk(recipient, {
+            bidCount: bids.length,
+            topBidTitle: bids[0].title,
+            topBidOrg: bids[0].organization,
+            url: `${appUrl}/dashboard`,
+          });
+        }
+        break;
+
+      case 'deadline_d3':
+      case 'deadline_d1':
+        for (const bid of bids.slice(0, 5)) {
+          await sendDeadlineAlimtalk(recipient, {
+            daysRemaining: type === 'deadline_d1' ? 1 : 3,
+            bidTitle: bid.title,
+            organization: bid.organization,
+            deadline: bid.deadline,
+            url: bid.url || `${appUrl}/dashboard`,
+          });
+        }
+        break;
+
+      default:
+        // 기타 유형은 기본 템플릿으로 발송
+        await sendKakaoAlimtalk({
+          templateCode: ALIMTALK_TEMPLATES.DAILY_REPORT,
+          recipientNo: recipient,
+          templateParameter: {
+            count: String(bids.length),
+            date: new Date().toISOString().split('T')[0],
+          },
+        });
+    }
+  }
 }
 
 // ============================================================================

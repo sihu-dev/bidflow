@@ -1,52 +1,43 @@
 /**
  * @module middleware
- * @description Next.js 미들웨어 - 테넌트 감지 및 쿠키 설정
+ * @description Next.js 미들웨어 - i18n 라우팅 및 보안
  */
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { TENANTS } from '@/config/tenants';
 
-const TENANT_COOKIE = 'bidflow_tenant';
+import { NextRequest, NextResponse } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from './i18n/config';
 
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
-  const url = request.nextUrl;
+// i18n 미들웨어 생성
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'as-needed', // 기본 로케일은 URL에서 숨김
+});
 
-  // 1. 쿼리 파라미터에서 테넌트 확인 (?tenant=cmntech)
-  const tenantParam = url.searchParams.get('tenant');
-  if (tenantParam && TENANTS[tenantParam.toLowerCase()]) {
-    // 쿠키에 테넌트 저장 (7일)
-    response.cookies.set(TENANT_COOKIE, tenantParam.toLowerCase(), {
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
-    });
-    return response;
+export default function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // API 라우트는 i18n 미들웨어 스킵
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
   }
 
-  // 2. 서브도메인에서 테넌트 확인 (cmntech.bidflow.com)
-  const hostname = request.headers.get('host') || '';
-  const parts = hostname.split('.');
-  if (parts.length >= 3 && parts[0] !== 'www') {
-    const subdomain = parts[0];
-    if (TENANTS[subdomain]) {
-      response.cookies.set(TENANT_COOKIE, subdomain, {
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-      return response;
-    }
+  // 정적 파일 스킵
+  if (
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/static/') ||
+    pathname.includes('.') // 파일 확장자가 있는 경우
+  ) {
+    return NextResponse.next();
   }
 
-  return response;
+  // i18n 미들웨어 적용
+  return intlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    // 마케팅 페이지만
-    '/',
-    '/features/:path*',
-    '/use-cases/:path*',
-    '/pricing',
-    '/about',
+    // API 라우트 제외
+    '/((?!api|_next|_vercel|.*\\..*).*)',
   ],
 };
