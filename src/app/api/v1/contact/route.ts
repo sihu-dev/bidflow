@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { sendSlackMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
+import { logger } from '@/lib/utils/logger';
 
 // Supabase 클라이언트 (서비스 역할)
 const supabase = createClient(
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       console.error('[Contact API] Email Error:', emailError);
     }
 
-    console.log('[Contact API] New inquiry saved:', {
+    logger.info('[Contact API] New inquiry saved:', {
       id: inquiryId,
       name: data.name,
       type: data.inquiryType,

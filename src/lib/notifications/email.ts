@@ -3,6 +3,8 @@
  * @description 이메일 알림 서비스 (Resend 사용)
  */
 
+import { logger } from '@/lib/utils/logger';
+
 // ============================================================================
 // 타입 정의
 // ============================================================================
@@ -52,11 +54,12 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailResult> {
   if (!RESEND_API_KEY) {
     if (isDevelopment) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Email DEV] 이메일 발송 (시뮬레이션):');
-        console.log(`  To: ${recipients.join(', ')}`);
-        console.log(`  Subject: ${subject}`);
-        console.log(`  From: ${from}`);
-        if (html) console.log(`  HTML: ${html.substring(0, 200)}...`);
+        logger.info('[Email DEV] 이메일 발송 (시뮬레이션):', {
+          to: recipients.join(', '),
+          subject,
+          from,
+          htmlPreview: html?.substring(0, 200),
+        });
       }
       return { success: true, id: 'dev-mock-id' };
     }
