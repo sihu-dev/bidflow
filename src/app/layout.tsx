@@ -1,21 +1,22 @@
 import type { Metadata } from 'next';
-import { Inter, IBM_Plex_Mono } from 'next/font/google';
+// import { Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  preload: true,
-  adjustFontFallback: true,
-  fallback: ['system-ui', 'arial'],
-  variable: '--font-inter',
-});
+// Google Fonts 네트워크 이슈로 인해 시스템 폰트 사용
+// const inter = Inter({
+//   subsets: ['latin'],
+//   display: 'swap',
+//   preload: true,
+//   adjustFontFallback: true,
+//   fallback: ['system-ui', 'arial'],
+//   variable: '--font-inter',
+// });
 
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-ibm-plex-mono',
-});
+// const ibmPlexMono = IBM_Plex_Mono({
+//   weight: ['400', '500', '600', '700'],
+//   subsets: ['latin'],
+//   variable: '--font-ibm-plex-mono',
+// });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'),
@@ -86,7 +87,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${ibmPlexMono.variable} antialiased`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         {/* Aurora Background */}
         <div className="aurora-bg" aria-hidden="true" />
 
