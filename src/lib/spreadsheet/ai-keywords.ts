@@ -1,7 +1,11 @@
 /**
  * AI_KEYWORDS() 함수 구현
  * 핵심 키워드 3개 자동 추출
+ * Redis 캐싱 적용 (7일 TTL)
  */
+
+import { getCache, setCache, createCacheKey, CacheTTL } from '@/lib/cache/redis-cache';
+import { createHash } from 'crypto';
 
 /**
  * 제품 관련 키워드 사전
@@ -59,16 +63,33 @@ const STOP_WORDS = [
  * // → ["초음파유량계", "상수도", "DN300~1000"]
  * ```
  */
-export function AI_KEYWORDS(bidText: string): string[] {
+export async function AI_KEYWORDS(bidText: string): Promise<string[]> {
   if (!bidText || typeof bidText !== 'string') {
     return [];
+  }
+
+  // 캐시 키 생성 (bidText 해시 기반)
+  const textHash = createHash('sha256').update(bidText).digest('hex').slice(0, 16);
+  const cacheKey = createCacheKey('ai', 'keywords', textHash);
+
+  // 캐시 조회
+  const cached = await getCache<string[]>(cacheKey);
+  if (cached) {
+    return cached;
   }
 
   // 1. 제품 키워드 우선 추출
   const productMatches = extractProductKeywords(bidText);
 
   if (productMatches.length >= 3) {
-    return productMatches.slice(0, 3);
+    const result = productMatches.slice(0, 3);
+
+    // 캐시 저장 (비동기, 에러 무시)
+    setCache(cacheKey, result, CacheTTL.AI_KEYWORDS).catch(() => {
+      // 캐싱 실패해도 결과는 반환
+    });
+
+    return result;
   }
 
   // 2. 일반 키워드 추출
@@ -80,7 +101,14 @@ export function AI_KEYWORDS(bidText: string): string[] {
   // 4. 중복 제거 및 상위 3개
   const uniqueKeywords = Array.from(new Set(allKeywords));
 
-  return uniqueKeywords.slice(0, 3);
+  const result = uniqueKeywords.slice(0, 3);
+
+  // 캐시 저장 (비동기, 에러 무시)
+  setCache(cacheKey, result, CacheTTL.AI_KEYWORDS).catch(() => {
+    // 캐싱 실패해도 결과는 반환
+  });
+
+  return result;
 }
 
 /**
@@ -173,12 +201,12 @@ export interface CategorizedKeywords {
  * @param bidText 입찰 공고 전문
  * @returns 카테고리별 키워드
  */
-export function getCategorizedKeywords(bidText: string): CategorizedKeywords {
+export async function getCategorizedKeywords(bidText: string): Promise<CategorizedKeywords> {
   const productTypes = ['초음파', '전자', '비만관', '개수로', '열량계'];
   const purposes = ['상수도', '하수', '공업용수', '농업용수', '난방', '열공급'];
   const specs = extractSpecKeywords(bidText);
 
-  const allKeywords = AI_KEYWORDS(bidText);
+  const allKeywords = await AI_KEYWORDS(bidText);
 
   return {
     products: allKeywords.filter(k =>

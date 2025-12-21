@@ -1,10 +1,13 @@
 /**
  * AI_SCORE() 함수 구현
  * 낙찰 가능성 점수 예측 (0-100%)
+ * Redis 캐싱 적용 (7일 TTL)
  */
 
 import { matchBidToProducts, type BidAnnouncement } from '../matching/enhanced-matcher';
 import type { Product } from '../matching/enhanced-matcher';
+import { getCache, setCache, createCacheKey, CacheTTL } from '@/lib/cache/redis-cache';
+import { createHash } from 'crypto';
 
 /**
  * 낙찰 가능성 점수 계산
@@ -28,10 +31,26 @@ import type { Product } from '../matching/enhanced-matcher';
  * // → 92
  * ```
  */
-export function AI_SCORE(
+export async function AI_SCORE(
   bid: BidAnnouncement,
   _product?: Product
-): number {
+): Promise<number> {
+  // 캐시 키 생성 (bid 핵심 정보 해시 기반)
+  const bidKey = JSON.stringify({
+    title: bid.title,
+    organization: bid.organization,
+    estimatedPrice: bid.estimatedPrice,
+    description: bid.description?.slice(0, 100), // 첫 100자만
+  });
+  const bidHash = createHash('sha256').update(bidKey).digest('hex').slice(0, 16);
+  const cacheKey = createCacheKey('ai', 'score', bidHash);
+
+  // 캐시 조회
+  const cached = await getCache<number>(cacheKey);
+  if (cached !== null) {
+    return cached;
+  }
+
   // 1. 매칭 점수 (60%)
   const matchResult = matchBidToProducts(bid);
   const bestMatch = matchResult.bestMatch;
@@ -56,7 +75,14 @@ export function AI_SCORE(
     historyScore * 0.2
   ) * 100;
 
-  return Math.round(finalScore);
+  const roundedScore = Math.round(finalScore);
+
+  // 캐시 저장 (비동기, 에러 무시)
+  setCache(cacheKey, roundedScore, CacheTTL.AI_SCORE).catch(() => {
+    // 캐싱 실패해도 결과는 반환
+  });
+
+  return roundedScore;
 }
 
 /**
@@ -147,7 +173,7 @@ export interface ScoreBreakdown {
  * @param bid 입찰 공고
  * @returns 점수 분해 정보
  */
-export function getScoreBreakdown(bid: BidAnnouncement): ScoreBreakdown {
+export async function getScoreBreakdown(bid: BidAnnouncement): Promise<ScoreBreakdown> {
   const matchResult = matchBidToProducts(bid);
   const bestMatch = matchResult.bestMatch;
 

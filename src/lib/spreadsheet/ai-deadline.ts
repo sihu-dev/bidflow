@@ -1,7 +1,10 @@
 /**
  * AI_DEADLINE() 함수 구현
  * 마감일 분석 및 권장 액션 제안
+ * Redis 캐싱 적용 (30일 TTL)
  */
+
+import { getCache, setCache, createCacheKey, CacheTTL } from '@/lib/cache/redis-cache';
 
 /**
  * 마감일 분석 결과
@@ -45,7 +48,7 @@ export interface DeadlineAnalysis {
  * // }
  * ```
  */
-export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
+export async function AI_DEADLINE(deadline: Date | string): Promise<DeadlineAnalysis> {
   // Date 객체로 변환
   const deadlineDate = typeof deadline === 'string'
     ? new Date(deadline)
@@ -56,6 +59,17 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
 
   const deadlineNorm = new Date(deadlineDate);
   deadlineNorm.setHours(0, 0, 0, 0);
+
+  // 캐시 키 생성 (deadline + 오늘 날짜 기반)
+  const todayStr = today.toISOString().split('T')[0];
+  const deadlineStr = deadlineNorm.toISOString().split('T')[0];
+  const cacheKey = createCacheKey('ai', 'deadline', deadlineStr, todayStr);
+
+  // 캐시 조회
+  const cached = await getCache<DeadlineAnalysis>(cacheKey);
+  if (cached) {
+    return cached;
+  }
 
   // D-Day 계산
   const diffMs = deadlineNorm.getTime() - today.getTime();
@@ -69,9 +83,11 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
     : `D+${Math.abs(dday)}`;
 
   // 긴급도 및 액션 결정
+  let result: DeadlineAnalysis;
+
   if (dday <= 0) {
     // 마감일 지남
-    return {
+    result = {
       dday,
       ddayLabel,
       urgency: 'urgent',
@@ -82,7 +98,7 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
     };
   } else if (dday <= 3) {
     // D-3 이하: 긴급
-    return {
+    result = {
       dday,
       ddayLabel,
       urgency: 'urgent',
@@ -99,7 +115,7 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
     };
   } else if (dday <= 7) {
     // D-7 이하: 보통
-    return {
+    result = {
       dday,
       ddayLabel,
       urgency: 'normal',
@@ -116,7 +132,7 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
     };
   } else if (dday <= 14) {
     // D-14 이하: 여유
-    return {
+    result = {
       dday,
       ddayLabel,
       urgency: 'relaxed',
@@ -134,7 +150,7 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
     };
   } else {
     // D-14 초과: 장기
-    return {
+    result = {
       dday,
       ddayLabel,
       urgency: 'relaxed',
@@ -150,6 +166,13 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
       statusColor: 'green',
     };
   }
+
+  // 캐시 저장 (비동기, 에러 무시)
+  setCache(cacheKey, result, CacheTTL.AI_DEADLINE).catch(() => {
+    // 캐싱 실패해도 결과는 반환
+  });
+
+  return result;
 }
 
 /**
@@ -158,8 +181,8 @@ export function AI_DEADLINE(deadline: Date | string): DeadlineAnalysis {
  * @param deadline 마감일
  * @returns "D-7" 형식 문자열
  */
-export function getSimpleDday(deadline: Date | string): string {
-  const analysis = AI_DEADLINE(deadline);
+export async function getSimpleDday(deadline: Date | string): Promise<string> {
+  const analysis = await AI_DEADLINE(deadline);
   return analysis.ddayLabel;
 }
 
@@ -169,8 +192,8 @@ export function getSimpleDday(deadline: Date | string): string {
  * @param deadline 마감일
  * @returns 긴급 여부
  */
-export function isUrgent(deadline: Date | string): boolean {
-  const analysis = AI_DEADLINE(deadline);
+export async function isUrgent(deadline: Date | string): Promise<boolean> {
+  const analysis = await AI_DEADLINE(deadline);
   return analysis.urgency === 'urgent';
 }
 
@@ -180,8 +203,8 @@ export function isUrgent(deadline: Date | string): boolean {
  * @param deadline 마감일
  * @returns 알림 발송 필요 여부
  */
-export function shouldSendReminder(deadline: Date | string): boolean {
-  const analysis = AI_DEADLINE(deadline);
+export async function shouldSendReminder(deadline: Date | string): Promise<boolean> {
+  const analysis = await AI_DEADLINE(deadline);
   return analysis.shouldNotify;
 }
 
@@ -201,9 +224,9 @@ export interface DeadlineGroup {
  * @param deadlines 마감일 배열
  * @returns 긴급도별 그룹
  */
-export function groupByDeadline(
+export async function groupByDeadline(
   deadlines: Array<{ id: string; deadline: Date | string }>
-): DeadlineGroup {
+): Promise<DeadlineGroup> {
   const groups: DeadlineGroup = {
     urgent: [],
     thisWeek: [],
@@ -212,7 +235,7 @@ export function groupByDeadline(
   };
 
   for (const item of deadlines) {
-    const analysis = AI_DEADLINE(item.deadline);
+    const analysis = await AI_DEADLINE(item.deadline);
     const { dday } = analysis;
 
     const deadlineDate = typeof item.deadline === 'string'
@@ -248,12 +271,12 @@ export function groupByDeadline(
  * @param format 포맷 ('short' | 'long')
  * @returns 포맷팅된 문자열
  */
-export function formatDeadline(
+export async function formatDeadline(
   deadline: Date | string,
   format: 'short' | 'long' = 'short'
-): string {
+): Promise<string> {
   const date = typeof deadline === 'string' ? new Date(deadline) : deadline;
-  const analysis = AI_DEADLINE(deadline);
+  const analysis = await AI_DEADLINE(deadline);
 
   if (format === 'short') {
     return `${analysis.ddayLabel} (${date.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })})`;

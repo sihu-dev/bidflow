@@ -140,7 +140,7 @@ async function executeScoreAI(context: FormulaContext): Promise<string> {
       estimatedPrice: context.cellData.estimated_amount as number | undefined,
     };
 
-    const score = AI_SCORE(bid);
+    const score = await AI_SCORE(bid);
     return `${score}`;
   } catch (error) {
     console.error('[AI_SCORE] Error:', error);
@@ -187,7 +187,7 @@ async function executeKeywordsAI(context: FormulaContext): Promise<string> {
       context.cellData.organization,
     ].filter(Boolean).join(' ');
 
-    const keywords = AI_KEYWORDS(bidText as string);
+    const keywords = await AI_KEYWORDS(bidText as string);
     return keywords.join(', ');
   } catch (error) {
     console.error('[AI_KEYWORDS] Error:', error);
@@ -203,7 +203,7 @@ async function executeDeadlineAI(context: FormulaContext): Promise<string> {
   // 신규 AI_DEADLINE 함수 사용
   try {
     const deadline = context.cellData.deadline as string | Date;
-    const analysis = AI_DEADLINE(deadline);
+    const analysis = await AI_DEADLINE(deadline);
 
     // 이모지 추가
     const emoji = analysis.statusColor === 'red' ? '🔴' :

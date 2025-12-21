@@ -1,9 +1,12 @@
 /**
  * AI_SUMMARY() 함수 구현
  * 입찰 공고를 2-3문장으로 자동 요약
+ * Redis 캐싱 적용 (7일 TTL)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { getCache, setCache, createCacheKey, CacheTTL } from '@/lib/cache/redis-cache';
+import { createHash } from 'crypto';
 
 /**
  * 입찰 공고 요약 생성
@@ -20,6 +23,16 @@ import Anthropic from '@anthropic-ai/sdk';
  * ```
  */
 export async function AI_SUMMARY(bidText: string): Promise<string> {
+  // 캐시 키 생성 (bidText 해시 기반)
+  const textHash = createHash('sha256').update(bidText).digest('hex').slice(0, 16);
+  const cacheKey = createCacheKey('ai', 'summary', textHash);
+
+  // 캐시 조회
+  const cached = await getCache<string>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   // 환경 변수 확인
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -47,7 +60,14 @@ ${bidText}
 
     const content = message.content[0];
     if (content.type === 'text') {
-      return content.text.trim();
+      const summary = content.text.trim();
+
+      // 캐시 저장 (비동기, 에러 무시)
+      setCache(cacheKey, summary, CacheTTL.AI_SUMMARY).catch(() => {
+        // 캐싱 실패해도 결과는 반환
+      });
+
+      return summary;
     }
 
     return generateFallbackSummary(bidText);
