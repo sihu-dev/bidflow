@@ -147,7 +147,7 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
             {Array.isArray(modalPoints) && modalPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
                 <span className="text-amber-500 mt-1">•</span>
-                <span dangerouslySetInnerHTML={{ __html: point }} />
+                <span>{point}</span>
               </li>
             ))}
           </ul>

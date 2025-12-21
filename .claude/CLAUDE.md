@@ -1,8 +1,8 @@
 # BIDFLOW 마스터 프롬프트
 
 > **자동 로드**: 모든 세션 시작 시 자동 적용
-> **버전**: 1.0.0
-> **업데이트**: 2025-12-20
+> **버전**: 1.1.0
+> **업데이트**: 2025-12-21
 
 ---
 
@@ -23,7 +23,7 @@
 ```yaml
 프로젝트: BIDFLOW 입찰 자동화 시스템
 타겟: 제조업 SME (씨엠엔텍 - 유량계)
-스택: Next.js 15 + Supabase + Handsontable
+스택: Next.js 15 + Supabase + TailwindCSS + MapLibre + ECharts
 포트: 3010
 ```
 

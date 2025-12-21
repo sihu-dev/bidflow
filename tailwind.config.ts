@@ -1,13 +1,12 @@
 import type { Config } from 'tailwindcss'
 
 /**
- * HEPHAITOS Tailwind Configuration
- * Inherited from CATALYST AI + Linear Design
+ * BIDFLOW Tailwind Configuration
+ * Google DeepMind-inspired Light Theme
  *
- * Primary: #5E6AD2 (Linear Purple)
- * Background: #0D0D0F
- * Glass: backdrop-blur-xl
- * Accent: #7C8AEA
+ * Primary: #4F46E5 (Indigo)
+ * Background: #FFFFFF / #FAFAFA
+ * Clean, minimal, professional
  */
 
 const config: Config = {
@@ -19,83 +18,73 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
-      // Color Palette
+      // Color Palette (Light Theme)
       colors: {
-        // Primary Brand (Linear Purple)
+        // Primary Brand (DeepMind Indigo)
         primary: {
-          DEFAULT: '#5E6AD2',
-          50: '#F0F1FA',
-          100: '#E0E2F4',
-          200: '#C1C5E9',
-          300: '#A2A8DE',
-          400: '#838BD3',
-          500: '#5E6AD2',
-          600: '#4B56C8',
-          700: '#3A44A8',
-          800: '#2D3585',
-          900: '#1F2562',
+          DEFAULT: '#4F46E5',
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#4F46E5',
+          600: '#4338CA',
+          700: '#3730A3',
+          800: '#312E81',
+          900: '#1E1B4B',
         },
-        
-        // Accent
+
+        // Accent (Lighter indigo for highlights)
         accent: {
-          DEFAULT: '#7C8AEA',
-          light: '#9BA5F0',
-          dark: '#5D6BD8',
-          hover: '#8B98EE',
-          muted: 'rgba(124, 138, 234, 0.4)',
+          DEFAULT: '#818CF8',
+          light: '#A5B4FC',
+          dark: '#6366F1',
+          hover: '#7C3AED',
+          muted: 'rgba(79, 70, 229, 0.1)',
         },
-        
-        // Background (Deep Space)
+
+        // Background (Light)
         background: {
-          primary: '#0D0D0F',
-          secondary: '#111113',
-          tertiary: '#161618',
-          elevated: '#1A1A1D',
-          hover: '#1E1E21',
+          primary: '#FFFFFF',
+          secondary: '#FAFAFA',
+          tertiary: '#F5F5F5',
+          elevated: '#FFFFFF',
+          hover: '#F5F5F5',
         },
-        
+
         // Surface
         surface: {
-          DEFAULT: 'rgba(255, 255, 255, 0.02)',
-          raised: 'rgba(255, 255, 255, 0.04)',
-          overlay: 'rgba(255, 255, 255, 0.06)',
-          glass: 'rgba(255, 255, 255, 0.03)',
+          DEFAULT: '#FFFFFF',
+          raised: '#FFFFFF',
+          overlay: 'rgba(0, 0, 0, 0.02)',
+          glass: 'rgba(255, 255, 255, 0.8)',
         },
-        
-        // Border
+
+        // Border (Light theme)
         border: {
-          DEFAULT: 'rgba(255, 255, 255, 0.06)',
-          light: 'rgba(255, 255, 255, 0.08)',
-          medium: 'rgba(255, 255, 255, 0.12)',
-          focus: '#5E6AD2',
+          DEFAULT: '#E5E5E5',
+          light: '#F5F5F5',
+          medium: '#D4D4D4',
+          focus: '#4F46E5',
         },
-        
+
         // Status
         success: {
-          DEFAULT: '#22C55E',
-          bg: 'rgba(34, 197, 94, 0.1)',
+          DEFAULT: '#10B981',
+          bg: 'rgba(16, 185, 129, 0.08)',
         },
         warning: {
           DEFAULT: '#F59E0B',
-          bg: 'rgba(245, 158, 11, 0.1)',
+          bg: 'rgba(245, 158, 11, 0.08)',
         },
         error: {
           DEFAULT: '#EF4444',
-          bg: 'rgba(239, 68, 68, 0.1)',
+          bg: 'rgba(239, 68, 68, 0.08)',
         },
         info: {
           DEFAULT: '#3B82F6',
-          bg: 'rgba(59, 130, 246, 0.1)',
-        },
-        
-        // Trading
-        profit: {
-          DEFAULT: '#22C55E',
-          bg: 'rgba(34, 197, 94, 0.1)',
-        },
-        loss: {
-          DEFAULT: '#EF4444',
-          bg: 'rgba(239, 68, 68, 0.1)',
+          bg: 'rgba(59, 130, 246, 0.08)',
         },
       },
       
@@ -115,14 +104,17 @@ const config: Config = {
         '4xl': '2rem',
       },
       
-      // Box Shadow
+      // Box Shadow (Light Theme - Subtle)
       boxShadow: {
-        'glow-primary': '0 0 20px rgba(94, 106, 210, 0.3)',
-        'glow-accent': '0 0 20px rgba(124, 138, 234, 0.3)',
-        'glow-success': '0 0 20px rgba(34, 197, 94, 0.3)',
-        'glow-error': '0 0 20px rgba(239, 68, 68, 0.3)',
-        'elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5)',
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5)',
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        'sm': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
+        'md': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
+        'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03)',
+        'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
+        'glow-primary': '0 0 20px rgba(79, 70, 229, 0.15)',
+        'glow-success': '0 0 20px rgba(16, 185, 129, 0.15)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
+        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
       },
       
       // Backdrop Blur

@@ -1,11 +1,30 @@
+'use client';
+
 /**
- * 히어로 섹션 - CMNTech 제품 매칭 버전
+ * 히어로 섹션 - 동적 화이트라벨 버전
  */
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Play, ArrowRight } from 'lucide-react';
+import { useTenantHero, useTenantProducts } from '@/contexts/TenantContext';
 
 export function Hero() {
+  const hero = useTenantHero();
+  const products = useTenantProducts();
+
+  // 범용 vs 테넌트별 Trust Indicators
+  const trustIndicators = products.length > 0
+    ? [
+        { text: `${products.length}개 제품 기본 등록` },
+        { text: 'AI 자동 매칭' },
+        { text: '14일 무료 체험' },
+      ]
+    : [
+        { text: '45+ 데이터 소스' },
+        { text: 'AI 자동 매칭' },
+        { text: '14일 무료 체험' },
+      ];
+
   return (
     <section className="relative py-24 lg:py-36 overflow-hidden bg-white">
       {/* Background pattern */}
@@ -17,20 +36,23 @@ export function Hero() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900 text-white text-sm font-medium mb-8">
             <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-            CMNTech 유량계 전문 입찰 자동화
+            {hero.badge}
           </div>
 
           {/* Headline */}
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900">
-            UR-1000PLUS부터
-            <br />
-            <span className="text-neutral-400">EnerRay까지</span>
+            {hero.headline}
+            {hero.headlineSub && (
+              <>
+                <br />
+                <span className="text-neutral-400">{hero.headlineSub}</span>
+              </>
+            )}
           </h1>
 
           {/* Subheadline */}
           <p className="mt-8 text-lg md:text-xl text-neutral-500 max-w-2xl mx-auto leading-relaxed">
-            나라장터, TED, 한전 공고에서 유량계 입찰을 AI가 자동 수집하고,
-            5개 CMNTech 제품과 매칭하여 입찰 성공률을 높여드립니다.
+            {hero.description}
           </p>
 
           {/* CTA Buttons */}
@@ -51,31 +73,41 @@ export function Hero() {
 
           {/* Trust Indicators */}
           <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-neutral-500">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-neutral-900" />
-              <span>5개 제품 기본 등록</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-neutral-900" />
-              <span>AI 자동 매칭</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-neutral-900" />
-              <span>14일 무료 체험</span>
-            </div>
-          </div>
-
-          {/* Product Pills */}
-          <div className="mt-10 flex flex-wrap justify-center gap-2">
-            {['UR-1000PLUS', 'MF-1000C', 'UR-1010PLUS', 'SL-3000PLUS', 'EnerRay'].map((product) => (
-              <span
-                key={product}
-                className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs text-neutral-700 font-mono font-medium"
-              >
-                {product}
-              </span>
+            {trustIndicators.map((indicator, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-neutral-900" />
+                <span>{indicator.text}</span>
+              </div>
             ))}
           </div>
+
+          {/* Product Pills - 테넌트에 제품이 있을 때만 표시 */}
+          {products.length > 0 && (
+            <div className="mt-10 flex flex-wrap justify-center gap-2">
+              {products.map((product) => (
+                <span
+                  key={product.model}
+                  className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs text-neutral-700 font-mono font-medium"
+                >
+                  {product.model}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* 범용 테넌트: 데이터 소스 표시 */}
+          {products.length === 0 && (
+            <div className="mt-10 flex flex-wrap justify-center gap-2">
+              {['나라장터', 'TED (EU)', 'SAM.gov', 'KEPCO', 'LH공사'].map((source) => (
+                <span
+                  key={source}
+                  className="px-3 py-1.5 bg-neutral-100 rounded-full text-xs text-neutral-700 font-medium"
+                >
+                  {source}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>

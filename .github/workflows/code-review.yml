@@ -1,0 +1,76 @@
+# BIDFLOW 자동 코드 리뷰
+# PR 생성 시 Claude Opus 4.5로 코드 품질/보안/성능 검수
+
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    paths:
+      - 'src/**'
+      - 'bidflow/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus-4-5-20251101
+          max_turns: 5
+          prompt: |
+            PR #${{ github.event.pull_request.number }} 코드 리뷰
+
+            제목: ${{ github.event.pull_request.title }}
+
+            다음 5가지 관점에서 검수해주세요 (각 20점, 총 100점):
+
+            1. **코드 품질 (20점)**
+               - TypeScript strict mode 준수
+               - any 타입 사용 여부
+               - 코드 가독성
+
+            2. **보안 (20점)**
+               - XSS, SQL Injection 취약점
+               - API 키 하드코딩 여부
+               - 입력 검증 (Zod)
+
+            3. **성능 (20점)**
+               - 불필요한 리렌더링
+               - 메모리 누수 가능성
+               - 번들 사이즈 영향
+
+            4. **디자인 시스템 (20점)**
+               - 모노크롬 팔레트 준수 (neutral 계열만)
+               - 금지 색상 사용 여부
+               - 반응형 레이아웃
+
+            5. **아키텍처 (20점)**
+               - Repository 패턴 준수
+               - Server/Client 컴포넌트 분리
+               - API v1 버저닝
+
+      - name: Post Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              event: 'COMMENT',
+              body: '🤖 **Claude Code Review 완료**\n\n자동 검수가 완료되었습니다. 위 결과를 참고하여 코드를 개선해주세요.'
+            });

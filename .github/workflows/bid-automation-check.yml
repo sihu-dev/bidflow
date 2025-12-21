@@ -1,0 +1,57 @@
+# BIDFLOW 입찰 자동화 로직 검수
+# 입찰 관련 코드 변경 시 특화된 검수 실행
+
+name: Bid Automation Quality Check
+
+on:
+  pull_request:
+    paths:
+      - 'src/lib/domain/bid/**'
+      - 'src/lib/clients/**'
+      - 'src/app/api/v1/bids/**'
+      - 'src/lib/validation/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  bid-quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus-4-5-20251101
+          prompt: |
+            BIDFLOW 입찰 자동화 로직 전문 검수
+
+            검토 항목:
+
+            1. **API 보안**
+               - Rate Limiting 적용 여부
+               - 인증 미들웨어 사용
+               - CSRF 보호
+
+            2. **데이터 검증**
+               - Zod 스키마 정의
+               - 입력값 sanitization
+               - 에러 메시지 보안
+
+            3. **외부 API 연동**
+               - TED API 에러 처리
+               - 나라장터 API 타임아웃
+               - SAM.gov API 재시도 로직
+
+            4. **비즈니스 로직**
+               - 입찰 매칭 알고리즘 정확성
+               - 점수 계산 로직
+               - 상태 관리 일관성
+
+            5. **Repository 패턴**
+               - DDD Lite 아키텍처 준수
+               - Use Case 분리
+               - 트랜잭션 처리

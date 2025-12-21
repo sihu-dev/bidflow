@@ -5,7 +5,7 @@
  * 11컬럼 + 사이드패널 + AI 함수 데모
  */
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import {
   LayoutGrid,
   Zap,
@@ -445,9 +445,9 @@ export function SpreadsheetDemo() {
   );
 }
 
-// Sub-components
+// Sub-components (memoized for performance)
 
-function SourceBadge({ source, label }: { source: string; label: string }) {
+const SourceBadge = memo(function SourceBadge({ source, label }: { source: string; label: string }) {
   const colors: Record<string, string> = {
     narajangto: 'bg-neutral-100 text-neutral-700',
     ted: 'bg-neutral-200 text-neutral-800',
@@ -460,9 +460,9 @@ function SourceBadge({ source, label }: { source: string; label: string }) {
       {label}
     </span>
   );
-}
+});
 
-function StatusBadge({ status, label }: { status: string; label: string }) {
+const StatusBadge = memo(function StatusBadge({ status, label }: { status: string; label: string }) {
   const styles: Record<string, string> = {
     new: 'bg-neutral-100 text-neutral-900 border border-neutral-300',
     reviewing: 'bg-neutral-100 text-neutral-600 border border-neutral-200',
@@ -475,9 +475,9 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
       {label}
     </span>
   );
-}
+});
 
-function DdayBadge({ dday, isUrgent }: { dday: string; isUrgent: boolean }) {
+const DdayBadge = memo(function DdayBadge({ dday, isUrgent }: { dday: string; isUrgent: boolean }) {
   return (
     <span className={cn(
       'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold',
@@ -488,9 +488,9 @@ function DdayBadge({ dday, isUrgent }: { dday: string; isUrgent: boolean }) {
       {dday}
     </span>
   );
-}
+});
 
-function PriorityIndicator({ priority }: { priority: 'high' | 'medium' | 'low' }) {
+const PriorityIndicator = memo(function PriorityIndicator({ priority }: { priority: 'high' | 'medium' | 'low' }) {
   const indicators: Record<string, string> = {
     high: '●●●',
     medium: '●●○',
@@ -500,9 +500,9 @@ function PriorityIndicator({ priority }: { priority: 'high' | 'medium' | 'low' }
   return (
     <span className="text-xs text-neutral-500 font-mono">{indicators[priority]}</span>
   );
-}
+});
 
-function ScoreBar({ score }: { score: number }) {
+const ScoreBar = memo(function ScoreBar({ score }: { score: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="w-12 h-1.5 bg-neutral-200 rounded-full overflow-hidden">
@@ -517,9 +517,9 @@ function ScoreBar({ score }: { score: number }) {
       <span className="text-xs font-mono font-medium text-neutral-700">{score}%</span>
     </div>
   );
-}
+});
 
-function FunctionIcon({ name }: { name: string }) {
+const FunctionIcon = memo(function FunctionIcon({ name }: { name: string }) {
   const icons: Record<string, React.ReactNode> = {
     FileText: <FileText className="w-3.5 h-3.5" />,
     TrendingUp: <TrendingUp className="w-3.5 h-3.5" />,
@@ -529,4 +529,4 @@ function FunctionIcon({ name }: { name: string }) {
   };
 
   return <span className="text-neutral-400">{icons[name] || <Zap className="w-3.5 h-3.5" />}</span>;
-}
+});

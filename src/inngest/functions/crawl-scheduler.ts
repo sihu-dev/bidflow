@@ -4,10 +4,44 @@
  */
 
 import { inngest } from '../client';
-import { NaraJangtoClient } from '@/lib/clients/narajangto-api';
+import { NaraJangtoClient, type MappedBid } from '@/lib/clients/narajangto-api';
 import { getBidRepository } from '@/lib/domain/repositories/bid-repository';
 import { createISODateString, createKRW, type CreateInput, type BidData } from '@/types';
 import { sendNotification, type BidNotificationData } from '@/lib/notifications';
+
+// ============================================================================
+// 키워드 필터링 유틸리티
+// ============================================================================
+
+/**
+ * 공고가 키워드와 매칭되는지 확인
+ */
+function matchesKeywords(notice: MappedBid, keywords: string[]): boolean {
+  if (!keywords || keywords.length === 0) {
+    return true; // 키워드가 없으면 모든 공고 포함
+  }
+
+  const searchText = [
+    notice.title,
+    notice.organization,
+    ...(notice.keywords || []),
+  ].join(' ').toLowerCase();
+
+  return keywords.some(keyword =>
+    searchText.includes(keyword.toLowerCase())
+  );
+}
+
+/**
+ * 키워드로 공고 필터링
+ */
+function filterByKeywords(notices: MappedBid[], keywords: string[]): MappedBid[] {
+  if (!keywords || keywords.length === 0) {
+    return notices;
+  }
+
+  return notices.filter(notice => matchesKeywords(notice, keywords));
+}
 
 // ============================================================================
 // 스케줄된 크롤링 작업
@@ -149,27 +183,114 @@ export const manualCrawl = inngest.createFunction(
   },
   { event: 'bid/crawl.requested' },
   async ({ event, step, logger }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { source = 'all', keywords: _keywords } = event.data || {}; // TODO: 키워드 필터링 구현
+    const { source = 'all', keywords = [] } = event.data || {};
 
-    logger.info(`수동 크롤링 시작: source=${source}`);
+    logger.info(`수동 크롤링 시작: source=${source}, keywords=${keywords.length}개`);
 
     if (source === 'narajangto' || source === 'all') {
-      const results = await step.run('crawl-narajangto-manual', async () => {
+      // Step 1: 나라장터 크롤링 + 키워드 필터링 + DB 저장
+      const result = await step.run('crawl-filter-save', async () => {
         const apiKey = process.env.NARA_JANGTO_API_KEY;
         if (!apiKey) {
-          return { error: 'API 키 없음' };
+          return { success: false, error: 'API 키 없음', total: 0, filtered: 0, saved: 0, notices: [] as MappedBid[] };
         }
 
         const client = new NaraJangtoClient(apiKey);
         const fromDate = new Date();
         fromDate.setDate(fromDate.getDate() - 30); // 최근 30일
 
+        // 크롤링
         const notices = await client.searchFlowMeterBids({ fromDate });
-        return { count: notices.length };
+        const total = notices.length;
+
+        // 키워드 필터링
+        const filtered = filterByKeywords(notices, keywords);
+        logger.info(`키워드 필터링: ${total}건 → ${filtered.length}건`);
+
+        // DB 저장
+        const repository = getBidRepository();
+        let saved = 0;
+        const savedNotices: MappedBid[] = [];
+
+        for (const bid of filtered) {
+          try {
+            // 중복 확인
+            const existing = await repository.findByExternalId('narajangto', bid.external_id);
+            if (existing.success && existing.data) {
+              continue;
+            }
+
+            // 새 공고 저장
+            const deadlineStr = typeof bid.deadline === 'string'
+              ? bid.deadline
+              : new Date(bid.deadline).toISOString();
+
+            const createInput: CreateInput<BidData> = {
+              source: 'narajangto',
+              externalId: bid.external_id,
+              title: bid.title,
+              organization: bid.organization,
+              deadline: createISODateString(deadlineStr),
+              estimatedAmount: bid.estimated_amount ? createKRW(BigInt(bid.estimated_amount)) : null,
+              status: 'new',
+              priority: 'medium',
+              type: 'product',
+              keywords: bid.keywords,
+              url: bid.url,
+              rawData: bid.raw_data,
+            };
+
+            const createResult = await repository.create(createInput);
+            if (createResult.success) {
+              saved++;
+              savedNotices.push(bid);
+            }
+          } catch (error) {
+            logger.error(`저장 실패: ${bid.external_id}`, error);
+          }
+        }
+
+        return {
+          success: true,
+          total,
+          filtered: filtered.length,
+          saved,
+          notices: savedNotices,
+        };
       });
 
-      return results;
+      if (!result.success) {
+        return { success: false, error: 'error' in result ? result.error : '알 수 없는 오류' };
+      }
+
+      // Step 2: 알림 발송 (새 공고가 있는 경우)
+      if (result.saved > 0) {
+        await step.run('send-manual-crawl-notification', async () => {
+          // Inngest JSON 직렬화로 Date가 string이 됨
+          type SerializedBid = Omit<MappedBid, 'deadline'> & { deadline: string };
+          const notificationBids: BidNotificationData[] = (result.notices as SerializedBid[]).map((bid) => ({
+            id: bid.external_id,
+            title: bid.title,
+            organization: bid.organization,
+            deadline: bid.deadline,
+            estimatedAmount: bid.estimated_amount,
+            url: bid.url,
+          }));
+
+          await sendNotification(['slack'], {
+            type: 'new_bids',
+            bids: notificationBids,
+          });
+        });
+      }
+
+      return {
+        success: true,
+        total: result.total,
+        filtered: result.filtered,
+        saved: result.saved,
+        keywords: keywords.length > 0 ? keywords : '(전체)',
+      };
     }
 
     return { success: true, message: '크롤링 완료' };

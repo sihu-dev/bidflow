@@ -1,0 +1,102 @@
+# Claude Code AI Assistant for BIDFLOW
+# 모바일 Claude 앱에서 @claude 멘션으로 코드 리뷰 및 작업 자동화
+#
+# 사용법:
+# - Issue/PR 코멘트에 @claude 멘션
+# - 예: "@claude 이 코드 리뷰해줘"
+# - 예: "@claude TypeScript 타입 오류 수정해줘"
+
+name: Claude Code AI Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude-assistant:
+    # @claude 멘션이 있거나 특정 라벨이 있는 경우에만 실행
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'claude-assist')) ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'claude-review'))
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Opus 4.5 모델 사용 (최고 품질)
+          model: claude-opus-4-5-20251101
+          # 최대 10턴 대화
+          max_turns: 10
+          # bidflow 프로젝트 컨텍스트 포함
+          allowed_tools: |
+            Bash
+            Read
+            Write
+            Edit
+            Glob
+            Grep
+          # 프로젝트 규칙 자동 로드
+          custom_instructions: |
+            BIDFLOW 입찰 자동화 프로젝트입니다.
+
+            기술 스택:
+            - Next.js 15 + TypeScript strict mode
+            - Supabase (PostgreSQL)
+            - TailwindCSS (모노크롬 디자인)
+
+            코딩 규칙:
+            - any 타입 금지, unknown 사용
+            - Repository 패턴 (DDD Lite)
+            - Zod 입력 검증 필수
+            - API v1 버저닝
+
+            디자인 규칙:
+            - neutral 계열 색상만 사용
+            - 컬러풀한 색상 금지 (blue, green, red 등)
+
+      - name: Comment result
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ job.status }}';
+            const emoji = result === 'success' ? '✅' : '❌';
+
+            if (context.eventName === 'issue_comment' || context.eventName === 'pull_request_review_comment') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `${emoji} Claude Code 작업 ${result === 'success' ? '완료' : '실패'}되었습니다.\n\n자세한 내용은 [Actions 로그](${context.payload.repository.html_url}/actions/runs/${context.runId})를 확인하세요.`
+              });
+            }
