@@ -41,8 +41,46 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false,
   },
 
-  // Webpack 설정
-  webpack: (config) => {
+  // Webpack 설정 - 번들 최적화
+  webpack: (config, { isServer }) => {
+    // Radix UI 선택적 임포트 최적화
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@radix-ui/react-icons': '@radix-ui/react-icons/dist/react-icons.esm.js',
+    };
+
+    // 클라이언트 번들 최적화
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        usedExports: true,
+        sideEffects: false,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            // Radix UI 분리
+            radix: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              name: 'radix-ui',
+              priority: 10,
+            },
+            // ECharts 분리
+            echarts: {
+              test: /[\\/]node_modules[\\/]echarts/,
+              name: 'echarts',
+              priority: 10,
+            },
+            // Supabase 분리
+            supabase: {
+              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
+              name: 'supabase',
+              priority: 10,
+            },
+          },
+        },
+      };
+    }
+
     return config;
   },
 
