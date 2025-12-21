@@ -129,20 +129,23 @@
 - [x] **Enhanced Matcher 실시간 연동 (2025-12-21)**
 - [x] **CMNTech 5개 제품 카탈로그 (2025-12-21)**
 - [x] **AI 스마트 함수 5개 정의 (2025-12-21)**
+- [x] **반응형 레이아웃 수정 (2025-12-21)**
+- [x] **번들 분석기 설치 (2025-12-21)**
+- [x] **HyperFormula lazy load 적용 (2025-12-21)** - 912KB 초기 번들에서 분리
+- [x] **개발 로드맵 V2 작성 (2025-12-21)** - 7개 에이전트 병렬 분석
 
-### 진행중 🚧
-- [ ] 프로덕션 빌드 테스트 및 최적화
-- [ ] 반응형 레이아웃 검증 (모바일/태블릿)
-- [ ] Upstash Redis Rate Limiting
+### 진행중 🚧 (Phase 4)
+- [ ] Dashboard API 연결 (CRUD)
+- [ ] 스프레드시트 필터/정렬 완성
+- [ ] 알림 발송 구현
 
 ### 다음 우선순위 📋
-1. **[높음]** 프로덕션 빌드 실행 및 에러 수정
-2. **[높음]** 반응형 디자인 검증 (모바일/태블릿/데스크톱)
-3. **[중간]** SpreadsheetDemo E2E 테스트 작성
-4. **[중간]** Lighthouse 성능 측정 및 개선
-5. **[낮음]** AI 셀 함수 실제 구현
-6. **[낮음]** 크롤링 자동화 (Inngest)
-7. **[낮음]** 알림 시스템
+1. **[P0]** Dashboard Bid 수정 API 연결 (`dashboard/page.tsx:387`)
+2. **[P0]** Dashboard 새로고침 API 연결 (`dashboard/page.tsx:390`)
+3. **[P0]** 알림 발송 구현 (`crawl-scheduler.ts:103, 202`)
+4. **[P1]** 키워드 필터링 구현 (`crawl-scheduler.ts:131`)
+5. **[P1]** 카카오 알림톡 연동 (`notifications/index.ts:62`)
+6. **[P1]** Contact API 구현 (`contact/route.ts:36`)
 
 ---
 
