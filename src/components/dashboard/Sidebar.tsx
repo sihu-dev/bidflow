@@ -108,22 +108,22 @@ const bottomNavItemsConfig = [
   { icon: QuestionMarkCircleIcon, labelKey: 'help', href: '/docs' },
 ]
 
-// 스테이지 색상
+// 스테이지 색상 - 모노크롬 디자인
 const stageColors = {
   emerald: {
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-400',
-    border: 'border-emerald-500/20',
+    bg: 'bg-neutral-500/10',
+    text: 'text-neutral-400',
+    border: 'border-neutral-500/20',
   },
   blue: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/20',
+    bg: 'bg-neutral-500/10',
+    text: 'text-neutral-400',
+    border: 'border-neutral-500/20',
   },
   amber: {
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
-    border: 'border-amber-500/20',
+    bg: 'bg-neutral-500/10',
+    text: 'text-neutral-400',
+    border: 'border-neutral-500/20',
   },
 }
 
@@ -214,7 +214,7 @@ export const Sidebar = memo(function Sidebar() {
         <div className="px-2 py-2">
           <Link
             href="/dashboard/strategy-builder"
-            className={`flex items-center gap-2 px-2 py-2 rounded text-sm bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-colors ${
+            className={`flex items-center gap-2 px-2 py-2 rounded text-sm bg-neutral-500/10 border border-neutral-500/20 text-neutral-400 hover:bg-neutral-500/20 transition-colors ${
               isCollapsed ? 'justify-center' : ''
             }`}
           >
@@ -266,9 +266,9 @@ export const Sidebar = memo(function Sidebar() {
           <div className="px-3 py-3 border-t border-white/[0.06]">
             <div className="text-[10px] text-zinc-400 mb-2">{t('dashboard.myJourney')}</div>
             <div className="flex gap-1">
-              <div className="flex-1 h-1 rounded-full bg-emerald-500/30" title="COPY" />
-              <div className="flex-1 h-1 rounded-full bg-blue-500/30" title="LEARN" />
-              <div className="flex-1 h-1 rounded-full bg-amber-500/30" title="BUILD" />
+              <div className="flex-1 h-1 rounded-full bg-neutral-500/30" title="COPY" />
+              <div className="flex-1 h-1 rounded-full bg-neutral-400/30" title="LEARN" />
+              <div className="flex-1 h-1 rounded-full bg-neutral-300/30" title="BUILD" />
             </div>
             <div className="flex justify-between mt-1 text-[9px] text-zinc-400">
               <span>COPY</span>
@@ -317,7 +317,7 @@ export const Sidebar = memo(function Sidebar() {
             href="/dashboard/mirroring"
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('mirroring') || pathname?.includes('compare')
-                ? 'text-emerald-400'
+                ? 'text-white'
                 : 'text-zinc-400'
             }`}
           >
@@ -330,7 +330,7 @@ export const Sidebar = memo(function Sidebar() {
             href="/dashboard/coaching"
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('coaching') || pathname?.includes('ai-strategy')
-                ? 'text-blue-400'
+                ? 'text-white'
                 : 'text-zinc-400'
             }`}
           >
@@ -343,7 +343,7 @@ export const Sidebar = memo(function Sidebar() {
             href="/dashboard/strategy-builder"
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('strategy-builder') || pathname?.includes('backtest')
-                ? 'text-amber-400'
+                ? 'text-white'
                 : 'text-zinc-400'
             }`}
           >

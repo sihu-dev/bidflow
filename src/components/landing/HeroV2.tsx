@@ -22,31 +22,31 @@ export function HeroV2() {
       {/* Subtle gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-white via-white to-neutral-50" />
 
-      {/* Decorative elements - DeepMind style */}
-      <div className="absolute top-20 right-20 w-96 h-96 bg-primary-100/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 left-20 w-80 h-80 bg-primary-50/40 rounded-full blur-3xl" />
+      {/* Decorative elements - Monochrome style */}
+      <div className="absolute top-20 right-20 w-96 h-96 bg-neutral-200/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 left-20 w-80 h-80 bg-neutral-100/40 rounded-full blur-3xl" />
 
       <div className="relative z-10 container mx-auto px-6 py-24">
         <div className="max-w-4xl mx-auto text-center">
           {/* Announcement Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-primary-50 border border-primary-100 rounded-full">
-            <Sparkles className="w-4 h-4 text-primary-500" />
-            <span className="text-sm font-medium text-primary-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-neutral-100 border border-neutral-200 rounded-full">
+            <Sparkles className="w-4 h-4 text-neutral-600" />
+            <span className="text-sm font-medium text-neutral-700">
               {hero.badge}
             </span>
           </div>
 
-          {/* Main Headline - DeepMind Style */}
+          {/* Main Headline - Monochrome Style */}
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900 leading-[1.1]">
             {isWhiteLabel ? (
               <>
-                <span className="text-primary-500">{tenant.branding.name}</span>
+                <span className="text-neutral-900">{tenant.branding.name}</span>
                 <br />
                 Precision Matching
               </>
             ) : (
               <>
-                주간 <span className="text-primary-500">47건</span> 자동 포착
+                주간 <span className="text-neutral-600">47건</span> 자동 포착
                 <br />
                 <span className="text-neutral-400">Zero Missing</span>
               </>
@@ -66,11 +66,11 @@ export function HeroV2() {
             )}
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Monochrome */}
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-white bg-primary-500 rounded-xl hover:bg-primary-600 transition-all shadow-lg shadow-primary-500/20 hover:shadow-xl hover:shadow-primary-500/30"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium text-white bg-neutral-900 rounded-xl hover:bg-neutral-800 transition-all shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30"
             >
               14일 무료로 시작하기
               <ArrowRight className="w-4 h-4" />
@@ -94,7 +94,7 @@ export function HeroV2() {
               <div className="mt-1 text-sm text-neutral-500 uppercase tracking-wider">Win Rate</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-primary-500">45+</div>
+              <div className="text-3xl md:text-4xl font-bold text-neutral-600">45+</div>
               <div className="mt-1 text-sm text-neutral-500 uppercase tracking-wider">Data Sources</div>
             </div>
           </div>

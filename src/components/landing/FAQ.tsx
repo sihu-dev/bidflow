@@ -53,6 +53,8 @@ export function FAQ() {
               <button
                 className="w-full py-6 flex items-center justify-between text-left group"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                aria-expanded={openIndex === index}
+                aria-controls={`faq-answer-${index}`}
               >
                 <span className="font-medium text-neutral-900 pr-8 group-hover:text-neutral-600 transition-colors">
                   {faq.question}
@@ -62,13 +64,14 @@ export function FAQ() {
                   openIndex === index ? 'bg-neutral-900' : 'bg-neutral-100'
                 )}>
                   {openIndex === index ? (
-                    <Minus className="w-3.5 h-3.5 text-white" />
+                    <Minus className="w-3.5 h-3.5 text-white" aria-hidden="true" />
                   ) : (
-                    <Plus className="w-3.5 h-3.5 text-neutral-600" />
+                    <Plus className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </button>
               <div
+                id={`faq-answer-${index}`}
                 className={cn(
                   'overflow-hidden transition-all duration-300',
                   openIndex === index ? 'max-h-96 pb-6' : 'max-h-0'

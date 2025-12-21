@@ -48,7 +48,7 @@ export function PainPoints() {
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="inline-block px-3 py-1 mb-4 text-xs font-medium text-primary-600 bg-primary-50 rounded-full uppercase tracking-wider">
+          <span className="inline-block px-3 py-1 mb-4 text-xs font-medium text-neutral-700 bg-neutral-100 rounded-full uppercase tracking-wider">
             Problem Space
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 tracking-tight">
@@ -64,7 +64,7 @@ export function PainPoints() {
           {painPoints.map((point, idx) => (
             <div
               key={idx}
-              className="relative bg-white rounded-2xl border border-neutral-200 overflow-hidden group hover:border-primary-200 transition-all"
+              className="relative bg-white rounded-2xl border border-neutral-200 overflow-hidden group hover:border-neutral-300 transition-all"
             >
               {/* Before (Problem) */}
               <div className="p-6 border-b border-neutral-100 bg-neutral-50/50">
@@ -82,7 +82,7 @@ export function PainPoints() {
               {/* Arrow */}
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-neutral-200 rounded-full flex items-center justify-center z-10">
                 <svg
-                  className="w-4 h-4 text-primary-500"
+                  className="w-4 h-4 text-neutral-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -98,10 +98,10 @@ export function PainPoints() {
 
               {/* After (Solution) */}
               <div className="p-6 bg-white">
-                <div className="text-xs font-medium text-primary-500 uppercase tracking-wider mb-2">
+                <div className="text-xs font-medium text-neutral-600 uppercase tracking-wider mb-2">
                   With BIDFLOW
                 </div>
-                <div className="text-2xl font-bold text-primary-600">
+                <div className="text-2xl font-bold text-neutral-900">
                   {point.after.title}
                 </div>
                 <div className="mt-1 text-sm text-neutral-500">

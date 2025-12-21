@@ -2,9 +2,9 @@ import type { Config } from 'tailwindcss'
 
 /**
  * BIDFLOW Tailwind Configuration
- * Google DeepMind-inspired Light Theme
+ * Monochrome Design System
  *
- * Primary: #4F46E5 (Indigo)
+ * Primary: #171717 (neutral-900)
  * Background: #FFFFFF / #FAFAFA
  * Clean, minimal, professional
  */
@@ -20,28 +20,28 @@ const config: Config = {
     extend: {
       // Color Palette (Light Theme)
       colors: {
-        // Primary Brand (DeepMind Indigo)
+        // Primary Brand (Monochrome - Black/Gray)
         primary: {
-          DEFAULT: '#4F46E5',
-          50: '#EEF2FF',
-          100: '#E0E7FF',
-          200: '#C7D2FE',
-          300: '#A5B4FC',
-          400: '#818CF8',
-          500: '#4F46E5',
-          600: '#4338CA',
-          700: '#3730A3',
-          800: '#312E81',
-          900: '#1E1B4B',
+          DEFAULT: '#171717',  // neutral-900
+          50: '#fafafa',       // neutral-50
+          100: '#f5f5f5',      // neutral-100
+          200: '#e5e5e5',      // neutral-200
+          300: '#d4d4d4',      // neutral-300
+          400: '#a3a3a3',      // neutral-400
+          500: '#737373',      // neutral-500
+          600: '#525252',      // neutral-600
+          700: '#404040',      // neutral-700
+          800: '#262626',      // neutral-800
+          900: '#171717',      // neutral-900
         },
 
-        // Accent (Lighter indigo for highlights)
+        // Accent (Monochrome - Darker grays for highlights)
         accent: {
-          DEFAULT: '#818CF8',
-          light: '#A5B4FC',
-          dark: '#6366F1',
-          hover: '#7C3AED',
-          muted: 'rgba(79, 70, 229, 0.1)',
+          DEFAULT: '#525252',   // neutral-600
+          light: '#737373',     // neutral-500
+          dark: '#262626',      // neutral-800
+          hover: '#404040',     // neutral-700
+          muted: 'rgba(23, 23, 23, 0.08)',  // neutral-900 8% opacity
         },
 
         // Background (Light)
@@ -90,8 +90,8 @@ const config: Config = {
       
       // Typography
       fontFamily: {
-        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['var(--font-ibm-plex-mono)', 'JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
+        sans: ['var(--font-noto-sans-kr)', 'Noto Sans KR', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['var(--font-ibm-plex-mono)', 'IBM Plex Mono', 'JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
       },
       
       // Font Size
@@ -111,7 +111,7 @@ const config: Config = {
         'md': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03)',
         'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.03)',
         'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
-        'glow-primary': '0 0 20px rgba(79, 70, 229, 0.15)',
+        'glow-primary': '0 0 20px rgba(23, 23, 23, 0.12)',
         'glow-success': '0 0 20px rgba(16, 185, 129, 0.15)',
         'card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
         'card-hover': '0 4px 12px rgba(0, 0, 0, 0.08)',
@@ -176,8 +176,8 @@ const config: Config = {
           '100%': { backgroundPosition: '200% 0' },
         },
         glow: {
-          from: { boxShadow: '0 0 20px rgba(94, 106, 210, 0.2)' },
-          to: { boxShadow: '0 0 30px rgba(94, 106, 210, 0.4)' },
+          from: { boxShadow: '0 0 20px rgba(23, 23, 23, 0.08)' },
+          to: { boxShadow: '0 0 30px rgba(23, 23, 23, 0.15)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },

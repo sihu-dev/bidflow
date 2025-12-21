@@ -383,17 +383,26 @@ export function SpreadsheetDemo() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
-                    <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
-                      <ExternalLink className="w-3.5 h-3.5" />
+                  <div className="flex gap-2" role="group" aria-label="공고 액션">
+                    <button
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+                      aria-label="원본 공고 보기"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                       원문
                     </button>
-                    <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
-                      <Sparkles className="w-3.5 h-3.5" />
+                    <button
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+                      aria-label="AI 분석 실행"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                       분석
                     </button>
-                    <button className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-neutral-900 rounded-lg hover:bg-neutral-800 transition-colors">
-                      <FileText className="w-3.5 h-3.5" />
+                    <button
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-neutral-900 rounded-lg hover:bg-neutral-800 transition-colors"
+                      aria-label="제안서 작성 시작"
+                    >
+                      <FileText className="w-3.5 h-3.5" aria-hidden="true" />
                       제안서
                     </button>
                   </div>

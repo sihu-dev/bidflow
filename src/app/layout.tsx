@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, IBM_Plex_Mono } from 'next/font/google';
+import { Noto_Sans_KR, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
+const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
   preload: true,
-  adjustFontFallback: true,
-  fallback: ['system-ui', 'arial'],
-  variable: '--font-inter',
+  variable: '--font-noto-sans-kr',
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -86,7 +85,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} ${ibmPlexMono.variable} antialiased`} suppressHydrationWarning>
+      <body className={`${notoSansKR.variable} ${ibmPlexMono.variable} font-sans antialiased`} suppressHydrationWarning>
         {/* Aurora Background */}
         <div className="aurora-bg" aria-hidden="true" />
 

@@ -54,7 +54,7 @@ export function FeaturesV2() {
       <div className="container mx-auto px-6">
         {/* Section Header */}
         <div className="max-w-2xl mx-auto text-center mb-16">
-          <span className="inline-block px-3 py-1 mb-4 text-xs font-medium text-primary-600 bg-primary-50 rounded-full uppercase tracking-wider">
+          <span className="inline-block px-3 py-1 mb-4 text-xs font-medium text-neutral-700 bg-neutral-100 rounded-full uppercase tracking-wider">
             {sectionTitle}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 tracking-tight">
@@ -72,7 +72,7 @@ export function FeaturesV2() {
               key={feature.number}
               className={`relative p-8 rounded-2xl border transition-all group ${
                 feature.highlight
-                  ? 'bg-primary-50/50 border-primary-100 hover:border-primary-200'
+                  ? 'bg-neutral-50 border-neutral-200 hover:border-neutral-300'
                   : 'bg-white border-neutral-200 hover:border-neutral-300'
               }`}
             >
@@ -81,7 +81,7 @@ export function FeaturesV2() {
                 <div
                   className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center font-mono text-sm font-bold ${
                     feature.highlight
-                      ? 'bg-primary-500 text-white'
+                      ? 'bg-neutral-900 text-white'
                       : 'bg-neutral-100 text-neutral-600'
                   }`}
                 >
@@ -104,7 +104,7 @@ export function FeaturesV2() {
                     <div className="flex-shrink-0 text-right">
                       <div
                         className={`text-2xl font-bold ${
-                          feature.highlight ? 'text-primary-600' : 'text-neutral-900'
+                          feature.highlight ? 'text-neutral-900' : 'text-neutral-900'
                         }`}
                       >
                         {feature.metric}

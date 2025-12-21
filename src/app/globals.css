@@ -1,9 +1,9 @@
 /**
  * BIDFLOW Global Styles
- * Google DeepMind-inspired Light Theme
+ * Monochrome Design System
  *
- * Clean, transparent, minimal design
- * Subtle shadows, generous whitespace
+ * Clean, minimal, professional design
+ * Light theme default, dark mode support
  */
 
 @tailwind base;
@@ -49,11 +49,11 @@
   --border-light: #F5F5F5;
   --border-medium: #D4D4D4;
 
-  /* Primary Colors (DeepMind Blue) */
-  --primary: #4F46E5;
-  --primary-light: #818CF8;
-  --primary-dark: #4338CA;
-  --primary-muted: rgba(79, 70, 229, 0.1);
+  /* Primary Colors (Monochrome) */
+  --primary: #171717;
+  --primary-light: #525252;
+  --primary-dark: #0a0a0a;
+  --primary-muted: rgba(23, 23, 23, 0.08);
 
   /* Status */
   --color-success: #10B981;
@@ -62,13 +62,82 @@
   --color-info: #3B82F6;
 
   /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --font-sans: var(--font-noto-sans-kr), 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
 
   /* Transitions */
   --transition-fast: 150ms;
   --transition-normal: 200ms;
   --transition-slow: 300ms;
+}
+
+/* ============================================
+   CSS VARIABLES - DARK MODE
+   ============================================ */
+
+.dark {
+  /* Background */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --bg-tertiary: #262626;
+
+  /* Surface (for cards, panels) */
+  --surface-default: #171717;
+  --surface-raised: #262626;
+  --surface-overlay: rgba(255, 255, 255, 0.02);
+
+  /* Neutral Palette (Inverted) */
+  --neutral-0: #0a0a0a;
+  --neutral-50: #171717;
+  --neutral-100: #262626;
+  --neutral-200: #404040;
+  --neutral-300: #525252;
+  --neutral-400: #737373;
+  --neutral-500: #a3a3a3;
+  --neutral-600: #d4d4d4;
+  --neutral-700: #e5e5e5;
+  --neutral-800: #f5f5f5;
+  --neutral-900: #fafafa;
+
+  /* Text */
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+  --text-muted: #525252;
+
+  /* Border */
+  --border-default: #262626;
+  --border-light: #171717;
+  --border-medium: #404040;
+
+  /* Primary Colors (Monochrome - Light in dark mode) */
+  --primary: #fafafa;
+  --primary-light: #a3a3a3;
+  --primary-dark: #ffffff;
+  --primary-muted: rgba(250, 250, 250, 0.08);
+}
+
+/* Dark mode body */
+.dark body {
+  background: linear-gradient(180deg, #0a0a0a 0%, #171717 100%);
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Dark mode selection */
+.dark ::selection {
+  background-color: rgba(250, 250, 250, 0.15);
 }
 
 /* ============================================
@@ -138,7 +207,7 @@ body {
    ============================================ */
 
 ::selection {
-  background-color: rgba(79, 70, 229, 0.15);
+  background-color: rgba(23, 23, 23, 0.12);
   color: var(--text-primary);
 }
 
@@ -267,12 +336,12 @@ a:hover {
 .btn-primary {
   background: var(--primary);
   color: white;
-  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-dark);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-secondary {
@@ -331,7 +400,7 @@ a:hover {
 .input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-muted);
 }
 
 .input:disabled {
@@ -481,10 +550,10 @@ a:hover {
 }
 
 .glass-primary {
-  background: rgba(94, 106, 210, 0.08);
+  background: rgba(23, 23, 23, 0.05);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(94, 106, 210, 0.2);
+  border: 1px solid rgba(23, 23, 23, 0.1);
 }
 
 .glass-strong {
@@ -506,11 +575,11 @@ a:hover {
    ============================================ */
 
 .glow-primary {
-  box-shadow: 0 0 20px rgba(94, 106, 210, 0.3);
+  box-shadow: 0 0 20px rgba(23, 23, 23, 0.15);
 }
 
 .glow-primary:hover {
-  box-shadow: 0 0 30px rgba(94, 106, 210, 0.4);
+  box-shadow: 0 0 30px rgba(23, 23, 23, 0.2);
 }
 
 .glow-success {
@@ -524,10 +593,10 @@ a:hover {
 /* Pulse Glow Animation */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(94, 106, 210, 0.3);
+    box-shadow: 0 0 20px rgba(23, 23, 23, 0.15);
   }
   50% {
-    box-shadow: 0 0 30px rgba(94, 106, 210, 0.5);
+    box-shadow: 0 0 30px rgba(23, 23, 23, 0.25);
   }
 }
 
@@ -703,7 +772,7 @@ a:hover {
   background: linear-gradient(
     135deg,
     transparent 0%,
-    rgba(94, 106, 210, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 50%,
     transparent 100%
   );
   opacity: 0;
@@ -715,7 +784,7 @@ a:hover {
   transform: translateY(-2px);
   box-shadow:
     0 20px 40px -15px rgba(0, 0, 0, 0.5),
-    0 0 30px -10px rgba(94, 106, 210, 0.2);
+    0 0 30px -10px rgba(255, 255, 255, 0.05);
 }
 
 .card-cinematic:hover::before {
