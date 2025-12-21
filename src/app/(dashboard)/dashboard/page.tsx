@@ -8,7 +8,8 @@
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
 import { cn } from '@/lib/utils';
 import type { Bid } from '@/components/spreadsheet/SpreadsheetView';
 
@@ -287,15 +288,74 @@ export default function DashboardPage() {
   const [showBanner, setShowBanner] = useState(true);
   const [bids, setBids] = useState<Bid[]>(SAMPLE_BIDS as unknown as Bid[]);
   const [isLoading, setIsLoading] = useState(false);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+
+  // Supabase 클라이언트 초기화
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const stats = calculateStats(bids as unknown as typeof SAMPLE_BIDS);
 
+  // 인증 토큰 가져오기
+  useEffect(() => {
+    const getAuthToken = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        setAuthToken(session.access_token);
+      }
+    };
+
+    getAuthToken();
+
+    // 세션 변경 감지
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) {
+        setAuthToken(session.access_token);
+      } else {
+        setAuthToken(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  // API 요청 헤더 생성 (인증 + CSRF)
+  const getAuthHeaders = useCallback(() => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    // CSRF 토큰 (쿠키에서 자동 전송, 헤더에도 추가)
+    const csrfToken = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrf_token='))
+      ?.split('=')[1];
+
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+
+    return headers;
+  }, [authToken]);
+
   // Bid 수정 API 호출
   const handleBidUpdate = useCallback(async (id: string, updates: Partial<Bid>) => {
+    // 낙관적 업데이트 (즉시 UI 반영)
+    const previousBids = bids;
+    setBids(prev => prev.map(bid =>
+      bid.id === id ? { ...bid, ...updates } : bid
+    ));
+
     try {
       const response = await fetch(`/api/v1/bids/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
 
@@ -303,24 +363,35 @@ export default function DashboardPage() {
         throw new Error('Failed to update bid');
       }
 
-      // 로컬 상태 업데이트
-      setBids(prev => prev.map(bid =>
-        bid.id === id ? { ...bid, ...updates } : bid
-      ));
+      const data = await response.json();
+
+      // 서버 응답으로 최종 확정
+      if (data.data) {
+        setBids(prev => prev.map(bid =>
+          bid.id === id ? { ...bid, ...data.data } : bid
+        ));
+      }
     } catch (error) {
       console.error('Bid update failed:', error);
+      // 롤백
+      setBids(previousBids);
       throw error;
     }
-  }, []);
+  }, [bids, getAuthHeaders]);
 
   // 새로고침 API 호출
   const handleRefresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/v1/bids');
+      const response = await fetch('/api/v1/bids', {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch bids');
       }
+
       const data = await response.json();
       if (data.data) {
         setBids(data.data);
@@ -334,7 +405,7 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [isDemo]);
+  }, [isDemo, getAuthHeaders]);
 
   return (
     <main className="h-screen flex flex-col bg-slate-50">
