@@ -10,7 +10,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { uploadAndAnalyzeBidAttachments } from './files-manager';
-import { comprehensiveMarketAnalysis, analyzePriceCompetitiveness } from './web-search-tool';
+import { comprehensiveMarketAnalysis } from './web-search-tool';
 import { autoMatchWithEffort } from './effort-matcher';
 import { createClient } from '@supabase/supabase-js';
 

@@ -12,7 +12,7 @@
  */
 
 import { inngest } from '../client';
-import { selectEffortLevel, batchMatchWithEffort } from '@/lib/ai/effort-matcher';
+import { batchMatchWithEffort } from '@/lib/ai/effort-matcher';
 import { uploadAndAnalyzeBidAttachments } from '@/lib/ai/files-manager';
 import { autonomousBidAnalysis } from '@/lib/ai/autonomous-agent';
 import { generateProposal } from '@/lib/ai/proposal-generator';
