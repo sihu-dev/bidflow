@@ -1,10 +1,11 @@
 /**
  * @route /api/v1/ai/score
- * @description AI 입찰 적합도 점수 API
+ * @description AI 입찰 적합도 점수 API (Prompt Caching 적용)
  *
  * POST /api/v1/ai/score
  * - bidId로 DB 조회하거나
  * - title, organization, description 직접 입력
+ * - useCaching=true로 Prompt Caching 활성화 (기본값)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -14,6 +15,7 @@ import {
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+import { cachedBidMatch } from '@/lib/ai/cached-prompts';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
 
@@ -32,6 +34,8 @@ const ScoreRequestSchema = z.object({
 
   // 옵션
   companyId: z.string().uuid().optional(),
+  useCaching: z.boolean().default(true), // Prompt Caching 사용 여부
+  useAI: z.boolean().default(false), // Claude AI 사용 여부 (기본: Enhanced Matcher)
 }).refine(
   (data) => data.bidId || data.title,
   { message: 'bidId 또는 title이 필요합니다' }
@@ -135,7 +139,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { bidId, title, organization, description } = parseResult.data;
+    const { bidId, title, organization, description, useAI, useCaching } = parseResult.data;
 
     // 입찰 공고 데이터 준비
     let bid: BidAnnouncement;
@@ -188,7 +192,45 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // 매칭 실행
-    const matchResult = matchBidToProducts(bid);
+    let matchResult: MatchResult;
+    let aiResult;
+
+    if (useAI && useCaching) {
+      // Claude AI with Prompt Caching (90% 비용 절감)
+      aiResult = await cachedBidMatch(
+        bid.title,
+        bid.organization,
+        bid.description || ''
+      );
+
+      // AI 결과를 MatchResult 형식으로 변환
+      matchResult = {
+        bestMatch: {
+          productId: aiResult.matched_product,
+          productName: aiResult.matched_product,
+          score: aiResult.score,
+          confidence: aiResult.confidence,
+          reasons: aiResult.reasons,
+          requirementsMatch: [],
+          requirementsGap: aiResult.risks || [],
+        },
+        allMatches: [
+          {
+            productId: aiResult.matched_product,
+            productName: aiResult.matched_product,
+            score: aiResult.score,
+            confidence: aiResult.confidence,
+            reasons: aiResult.reasons,
+            requirementsMatch: [],
+            requirementsGap: aiResult.risks || [],
+          },
+        ],
+      };
+    } else {
+      // Enhanced Matcher (기본)
+      matchResult = matchBidToProducts(bid);
+    }
+
     const bestMatch = matchResult.allMatches[0]; // 항상 존재
 
     // 점수 정규화
@@ -198,6 +240,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 응답 생성
     const response: ScoreResponse = {
       score: normalizedScore,
+      method: useAI ? 'claude_ai_cached' : 'enhanced_matcher',
       confidence: Math.round(confidence * 100) / 100,
       confidenceLevel: bestMatch.confidence,
       factors: [
