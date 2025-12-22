@@ -29,9 +29,9 @@ const variantStyles = {
     accent: 'bg-white/[0.06]',
   },
   profit: {
-    bg: 'bg-emerald-500/[0.05]',
-    border: 'border-emerald-500/20',
-    accent: 'bg-emerald-500/20',
+    bg: 'bg-neutral-800/50',
+    border: 'border-neutral-700/50',
+    accent: 'bg-neutral-700/50',
   },
   loss: {
     bg: 'bg-red-500/[0.05]',
@@ -39,9 +39,9 @@ const variantStyles = {
     accent: 'bg-red-500/20',
   },
   primary: {
-    bg: 'bg-[#5E6AD2]/[0.05]',
-    border: 'border-[#5E6AD2]/20',
-    accent: 'bg-[#5E6AD2]/20',
+    bg: 'bg-neutral-800/50',
+    border: 'border-neutral-700/50',
+    accent: 'bg-neutral-700/50',
   },
 }
 
@@ -87,7 +87,7 @@ export function MetricCard({
   const determinedTrend = trend || (change !== undefined ? (change > 0 ? 'up' : change < 0 ? 'down' : 'neutral') : 'neutral')
 
   const TrendIcon = determinedTrend === 'up' ? ArrowUpIcon : determinedTrend === 'down' ? ArrowDownIcon : MinusIcon
-  const trendColor = determinedTrend === 'up' ? 'text-emerald-400' : determinedTrend === 'down' ? 'text-red-400' : 'text-zinc-500'
+  const trendColor = determinedTrend === 'up' ? 'text-neutral-300' : determinedTrend === 'down' ? 'text-red-400' : 'text-zinc-500'
 
   return (
     <div
@@ -152,7 +152,7 @@ export function MetricCard({
             <div
               className={clsx(
                 'h-full rounded-full transition-all duration-500',
-                determinedTrend === 'up' ? 'bg-emerald-500' : determinedTrend === 'down' ? 'bg-red-500' : 'bg-zinc-500'
+                determinedTrend === 'up' ? 'bg-neutral-400' : determinedTrend === 'down' ? 'bg-red-500' : 'bg-zinc-500'
               )}
               style={{ width: `${Math.min(Math.abs(change) * 5, 100)}%` }}
             />

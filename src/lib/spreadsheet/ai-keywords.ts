@@ -238,7 +238,7 @@ export function highlightKeywords(text: string, keywords: string[]): string {
     const regex = new RegExp(`(${keyword})`, 'gi');
     highlighted = highlighted.replace(
       regex,
-      '<mark class="bg-yellow-200 dark:bg-yellow-800">$1</mark>'
+      '<mark class="bg-neutral-700 dark:bg-neutral-800">$1</mark>'
     );
   }
 
