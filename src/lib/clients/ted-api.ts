@@ -11,7 +11,7 @@ import { checkCrawlingRateLimit } from '../security/rate-limiter';
 // TED API 타입 정의
 // ============================================================================
 
-interface TEDSearchParams {
+export interface TEDSearchParams {
   query?: string;
   publicationDate?: {
     from?: string;  // YYYYMMDD
@@ -24,7 +24,7 @@ interface TEDSearchParams {
   pageSize?: number;
 }
 
-interface TEDNotice {
+export interface TEDNotice {
   noticeId: string;
   title: string;
   buyerName: string;
@@ -42,7 +42,7 @@ interface TEDNotice {
   description?: string;
 }
 
-interface TEDSearchResponse {
+export interface TEDSearchResponse {
   total: number;
   pageNum: number;
   pageSize: number;
