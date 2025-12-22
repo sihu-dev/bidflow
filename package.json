@@ -17,6 +17,7 @@
     "db:reset": "supabase db reset"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@handsontable/react": "^16.2.0",
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-context-menu": "^2.2.16",
@@ -50,6 +51,7 @@
     "maplibre-gl": "^5.15.0",
     "next": "^15.1.4",
     "next-intl": "^4.6.1",
+    "openai": "^6.15.0",
     "pg": "^8.16.3",
     "playwright": "^1.49.1",
     "react": "^19.2.3",
