@@ -99,8 +99,10 @@ export async function matchWithEffort(
   const response = await client.messages.create({
     model: 'claude-opus-4-5-20251101', // Opus 4.5 required for effort parameter
     max_tokens: getMaxTokens(effort),
-    // @ts-expect-error - effort parameter is available but not in SDK types yet
-    effort, // NEW: Effort parameter
+    betas: ['effort-2025-11-24'], // Beta feature
+    output_config: {
+      effort: effort, // Correct position: inside output_config
+    },
     system: systemPrompt,
     messages: [
       {

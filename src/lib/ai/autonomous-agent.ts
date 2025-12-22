@@ -122,11 +122,14 @@ export async function autonomousBidAnalysis(bidId: string): Promise<AutonomousAn
     }
 
     // Step 2: Interleaved Thinking으로 자율 분석
+    // @ts-ignore - Beta features: betas and output_config not in SDK types yet
     const response = await client.messages.create({
       model: 'claude-opus-4-5-20251101',
       max_tokens: 32000,
-      // @ts-expect-error - Beta feature
-      effort: 'high' as const,
+      betas: ['effort-2025-11-24'],
+      output_config: {
+        effort: 'high' as const,
+      },
       tools: [
         {
           type: 'web_search_20250305' as const,

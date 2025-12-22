@@ -14,6 +14,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  defaultHeaders: {
+    'anthropic-beta': 'files-api-2025-04-14', // Beta header for Files API
+  },
 });
 
 const supabase = createClient(
