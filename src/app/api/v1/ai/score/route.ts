@@ -16,6 +16,7 @@ import {
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
 import { cachedBidMatch } from '@/lib/ai/cached-prompts';
+import { autoMatchWithEffort, type EffortLevel } from '@/lib/ai/effort-matcher';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
 
@@ -31,11 +32,13 @@ const ScoreRequestSchema = z.object({
   title: z.string().optional(),
   organization: z.string().optional(),
   description: z.string().optional(),
+  estimatedAmount: z.number().optional(), // 추정금액 (원)
 
   // 옵션
   companyId: z.string().uuid().optional(),
   useCaching: z.boolean().default(true), // Prompt Caching 사용 여부
   useAI: z.boolean().default(false), // Claude AI 사용 여부 (기본: Enhanced Matcher)
+  useEffort: z.boolean().default(false), // Effort Parameter 사용 (Claude Opus 4.5 전용)
 }).refine(
   (data) => data.bidId || data.title,
   { message: 'bidId 또는 title이 필요합니다' }
@@ -71,6 +74,11 @@ interface ScoreResponse {
     confidence: string;
   }>;
   reasons: string[];
+  effortUsed?: EffortLevel; // Effort Parameter 사용 시
+  tokensUsed?: {
+    input: number;
+    output: number;
+  };
 }
 
 // ============================================================================
@@ -140,10 +148,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { bidId, title, organization, description, useAI, useCaching } = parseResult.data;
+    const { bidId, title, organization, description, estimatedAmount, useAI, useCaching, useEffort } = parseResult.data;
 
     // 입찰 공고 데이터 준비
     let bid: BidAnnouncement;
+    let bidAmount: number | undefined = estimatedAmount;
 
     if (bidId) {
       // Supabase에서 bid 조회
@@ -154,7 +163,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       const { data, error } = await supabase
         .from('bids')
-        .select('id, title, organization, description, keywords')
+        .select('id, title, organization, description, keywords, estimated_amount')
         .eq('id', bidId)
         .single();
 
@@ -175,6 +184,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         organization: string;
         description: string | null;
         keywords: string[] | null;
+        estimated_amount: number | null;
       };
 
       bid = {
@@ -183,6 +193,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         organization: bidData.organization,
         description: bidData.description || bidData.keywords?.join(', '),
       };
+
+      // DB에서 가져온 금액이 있으면 사용
+      if (bidData.estimated_amount && !bidAmount) {
+        bidAmount = bidData.estimated_amount;
+      }
     } else {
       bid = {
         id: `temp-${Date.now()}`,
@@ -199,8 +214,39 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       recommendation: 'BID' | 'REVIEW' | 'SKIP';
     };
     let aiResult;
+    let effortResult;
 
-    if (useAI && useCaching) {
+    if (useAI && useEffort) {
+      // Claude Opus 4.5 with Effort Parameter (최신 기능)
+      effortResult = await autoMatchWithEffort({
+        title: bid.title,
+        organization: bid.organization,
+        description: bid.description || '',
+        estimatedAmount: bidAmount,
+      });
+
+      // Effort 결과를 MatchResult 형식으로 변환
+      const effortMatchResult: MatchResult = {
+        productId: effortResult.matched_product,
+        productName: effortResult.matched_product,
+        score: effortResult.score,
+        confidence: effortResult.confidence as 'high' | 'medium' | 'low' | 'none',
+        breakdown: {
+          keywordScore: effortResult.breakdown?.technical || effortResult.score * 0.5,
+          pipeSizeScore: effortResult.breakdown?.price || effortResult.score * 0.2,
+          organizationScore: effortResult.breakdown?.organization || effortResult.score * 0.3,
+          totalScore: effortResult.score,
+        },
+        reasons: effortResult.reasons || [],
+        isMatch: effortResult.score >= 30,
+      };
+
+      matchResult = {
+        bestMatch: effortMatchResult,
+        allMatches: [effortMatchResult],
+        recommendation: effortResult.score >= 150 ? 'BID' : effortResult.score >= 120 ? 'REVIEW' : 'SKIP',
+      };
+    } else if (useAI && useCaching) {
       // Claude AI with Prompt Caching (90% 비용 절감)
       aiResult = await cachedBidMatch(
         bid.title,
@@ -243,7 +289,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // 응답 생성
     const response: ScoreResponse = {
       score: normalizedScore,
-      method: useAI ? 'claude_ai_cached' : 'enhanced_matcher',
+      method: useAI && useEffort
+        ? 'claude_opus_4.5_effort'
+        : useAI && useCaching
+        ? 'claude_ai_cached'
+        : 'enhanced_matcher',
       confidence: Math.round(confidence * 100) / 100,
       confidenceLevel: bestMatch.confidence,
       factors: [
@@ -281,6 +331,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         confidence: m.confidence,
       })),
       reasons: bestMatch.reasons,
+      // Effort Parameter 사용 시 추가 정보
+      ...(effortResult && {
+        effortUsed: effortResult.effort_used,
+        tokensUsed: effortResult.tokens_used,
+      }),
     };
 
     return NextResponse.json({
