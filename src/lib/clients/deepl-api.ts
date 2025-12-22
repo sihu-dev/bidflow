@@ -231,7 +231,7 @@ export function postProcessBidTranslation(text: string): string {
     'electromagnetic': '전자기',
   };
 
-  let result = text;
+  const result = text;
   // 필요시 후처리 로직 추가
   return result;
 }

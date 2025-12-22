@@ -10,6 +10,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
+import {
+  matchBidToProducts,
+  type BidAnnouncement,
+  type MatchResult,
+  CMNTECH_PRODUCTS,
+} from './enhanced-matcher';
 
 // ============================================================================
 // 클라이언트 초기화
@@ -403,9 +409,27 @@ export async function hybridMatch(
   }
 
   // 4. 규칙 기반 매칭 (enhanced-matcher 연동)
-  // TODO: enhanced-matcher와 통합
+  const bidForRules: BidAnnouncement = {
+    id: bidId,
+    title: bid.title,
+    organization: bid.organization,
+    description: bid.description,
+  };
 
-  // 5. 점수 결합
+  const ruleMatchResult = matchBidToProducts(bidForRules);
+
+  // 규칙 매칭 결과를 productId로 인덱싱 (175점 기준 → 100점 정규화)
+  const ruleScoreMap = new Map<string, { score: number; reasons: string[] }>();
+  for (const match of ruleMatchResult.allMatches) {
+    // 175점 만점 → 100점 정규화
+    const normalizedScore = Math.min(100, Math.round((match.score / 175) * 100));
+    ruleScoreMap.set(match.productId, {
+      score: normalizedScore,
+      reasons: match.reasons,
+    });
+  }
+
+  // 5. 점수 결합 (시맨틱 + 규칙)
   const matches = (semanticMatches || []).map((match: {
     product_id: string;
     product_name: string;
@@ -413,16 +437,20 @@ export async function hybridMatch(
     similarity: number;
   }) => {
     const semanticScore = match.similarity;
-    const ruleScore = 50; // TODO: enhanced-matcher에서 가져오기
+
+    // enhanced-matcher에서 규칙 점수 가져오기 (없으면 시맨틱만 사용)
+    const ruleResult = ruleScoreMap.get(match.product_id);
+    const ruleScore = ruleResult?.score ?? 0;
+    const ruleReasons = ruleResult?.reasons ?? [];
 
     const combinedScore =
       ruleScore * ruleWeight + semanticScore * 100 * semanticWeight;
 
-    // 신뢰도 결정
+    // 신뢰도 결정 (강화된 기준)
     let confidence: 'high' | 'medium' | 'low' | 'none';
-    if (combinedScore >= 80) confidence = 'high';
-    else if (combinedScore >= 60) confidence = 'medium';
-    else if (combinedScore >= 40) confidence = 'low';
+    if (combinedScore >= 75 && ruleScore >= 50) confidence = 'high';
+    else if (combinedScore >= 55) confidence = 'medium';
+    else if (combinedScore >= 35) confidence = 'low';
     else confidence = 'none';
 
     return {
@@ -435,9 +463,48 @@ export async function hybridMatch(
       confidence,
       reasons: [
         `시맨틱 유사도: ${Math.round(semanticScore * 100)}%`,
+        `규칙 점수: ${ruleScore}/100`,
+        ...ruleReasons.slice(0, 2),
       ],
     };
   });
+
+  // 규칙 매칭은 있지만 시맨틱 매칭이 없는 제품 추가
+  for (const ruleMatch of ruleMatchResult.allMatches) {
+    if (!matches.find((m: { productId: string }) => m.productId === ruleMatch.productId)) {
+      // CMNTECH_PRODUCTS에서 model_number 조회
+      const product = CMNTECH_PRODUCTS.find((p) => p.id === ruleMatch.productId);
+      const normalizedScore = Math.min(100, Math.round((ruleMatch.score / 175) * 100));
+
+      // 규칙만으로 계산 (시맨틱 0)
+      const combinedScore = normalizedScore * ruleWeight;
+
+      let confidence: 'high' | 'medium' | 'low' | 'none';
+      if (combinedScore >= 50 && normalizedScore >= 60) confidence = 'medium';
+      else if (combinedScore >= 30) confidence = 'low';
+      else confidence = 'none';
+
+      matches.push({
+        productId: ruleMatch.productId,
+        productName: ruleMatch.productName,
+        modelNumber: product?.id || ruleMatch.productId,
+        ruleScore: normalizedScore,
+        semanticScore: 0,
+        combinedScore: Math.round(combinedScore),
+        confidence,
+        reasons: [
+          '규칙 매칭만 적용 (시맨틱 미매칭)',
+          `규칙 점수: ${normalizedScore}/100`,
+          ...ruleMatch.reasons.slice(0, 2),
+        ],
+      });
+    }
+  }
+
+  // 점수 기준 재정렬
+  matches.sort((a: { combinedScore: number }, b: { combinedScore: number }) =>
+    b.combinedScore - a.combinedScore
+  );
 
   // 6. 추천 결정
   let recommendation: 'BID' | 'REVIEW' | 'SKIP';
