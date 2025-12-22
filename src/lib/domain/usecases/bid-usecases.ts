@@ -269,65 +269,44 @@ interface DashboardStats {
 }
 
 /**
- * 대시보드 통계 조회
+ * 대시보드 통계 조회 (최적화: DB 집계 쿼리 사용)
  */
 export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
   const repository = getBidRepository();
 
-  // 전체 입찰 조회
-  const allBids = await repository.findAll(undefined, undefined, { page: 1, limit: 1000 });
+  // DB에서 집계 쿼리로 통계 조회 (N+1 해결)
+  const statsResult = await repository.getStats();
 
-  if (!allBids.success) {
-    return allBids as ApiResponse<never>;
+  if (!statsResult.success) {
+    return statsResult as ApiResponse<never>;
   }
 
-  const bids = allBids.data.items;
+  const stats = statsResult.data;
 
-  // 상태별 집계
-  const byStatus = bids.reduce(
-    (acc, bid) => {
-      acc[bid.status] = (acc[bid.status] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<BidStatus, number>
+  // 최근 활동은 별도 쿼리 (5개만 가져옴)
+  const recentBids = await repository.findAll(
+    undefined,
+    { field: 'createdAt', direction: 'desc' },
+    { page: 1, limit: 5 }
   );
 
-  // 마감 임박 (7일 이내)
-  const now = new Date();
-  const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const upcomingDeadlines = bids.filter((bid) => {
-    const deadline = new Date(bid.deadline);
-    return deadline >= now && deadline <= sevenDaysLater && !['won', 'lost', 'cancelled'].includes(bid.status);
-  }).length;
-
-  // 높은 우선순위
-  const highPriority = bids.filter((bid) => bid.priority === 'high').length;
-
-  // 낙찰률
-  const completed = bids.filter((bid) => ['won', 'lost'].includes(bid.status));
-  const wonRate = completed.length > 0
-    ? bids.filter((bid) => bid.status === 'won').length / completed.length
-    : 0;
-
-  // 최근 활동 (최신 5개)
-  const recentActivity = [...bids]
-    .sort((a: BidData, b: BidData) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 5)
-    .map((bid: BidData) => ({
-      id: bid.id,
-      title: bid.title,
-      action: `상태: ${bid.status}`,
-      timestamp: bid.updatedAt,
-    }));
+  const recentActivity = recentBids.success
+    ? recentBids.data.items.map((bid: BidData) => ({
+        id: bid.id,
+        title: bid.title,
+        action: `상태: ${bid.status}`,
+        timestamp: bid.updatedAt,
+      }))
+    : [];
 
   return {
     success: true,
     data: {
-      totalBids: allBids.data.total,
-      byStatus,
-      upcomingDeadlines,
-      highPriority,
-      wonRate,
+      totalBids: stats.totalBids,
+      byStatus: stats.byStatus,
+      upcomingDeadlines: stats.upcomingDeadlines,
+      highPriority: stats.highPriority,
+      wonRate: stats.wonRate,
       recentActivity,
     },
   };
@@ -338,7 +317,7 @@ export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> 
 // ============================================================================
 
 /**
- * 크롤링된 데이터 일괄 처리
+ * 크롤링된 데이터 일괄 처리 (최적화: 배치 조회로 N+1 해결)
  */
 export async function processCrawledBids(
   source: BidData['source'],
@@ -355,13 +334,26 @@ export async function processCrawledBids(
   let updated = 0;
   let skipped = 0;
 
-  for (const item of crawledData) {
-    // 중복 체크
-    const existing = await repository.findByExternalId(source, item.externalId);
+  // 1. 모든 externalId를 한 번에 조회 (N+1 해결!)
+  const externalIds = crawledData.map((item) => item.externalId);
+  const existingResult = await repository.findByExternalIds(source, externalIds);
 
-    if (existing.success && existing.data) {
+  if (!existingResult.success) {
+    return existingResult as ApiResponse<never>;
+  }
+
+  // 2. externalId → BidData 맵 생성 (O(1) 조회)
+  const existingMap = new Map<string, BidData>();
+  for (const bid of existingResult.data) {
+    existingMap.set(bid.externalId, bid);
+  }
+
+  // 3. 각 크롤링 데이터 처리 (메모리 맵 조회만)
+  for (const item of crawledData) {
+    const existingBid = existingMap.get(item.externalId);
+
+    if (existingBid) {
       // 기존 데이터 업데이트 (변경사항 있는 경우만)
-      const existingBid = existing.data;
       if (
         existingBid.title !== item.title ||
         existingBid.deadline !== item.deadline
