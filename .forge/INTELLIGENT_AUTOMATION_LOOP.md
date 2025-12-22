@@ -592,7 +592,7 @@ export const masterOrchestrator = inngest.createFunction(
 - [Introducing Claude Opus 4.5](https://www.anthropic.com/news/claude-opus-4-5)
 - [Introducing Claude Sonnet 4.5](https://www.anthropic.com/news/claude-sonnet-4-5)
 - [Building with Extended Thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
-- [Prompt Caching](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)
+- [Prompt Caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
 - [Claude Agent SDK](https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk)
 - [Claude-Flow v2.7](https://github.com/ruvnet/claude-flow)
 

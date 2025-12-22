@@ -95,9 +95,8 @@ export async function autonomousBidAnalysis(bidId: string): Promise<AutonomousAn
       effort: 'high' as const,
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'search_info',
-          description: '웹 검색으로 실시간 정보 수집',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [

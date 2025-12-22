@@ -66,6 +66,66 @@ export interface MultiplePDFAnalysisResult {
 }
 
 // ============================================================================
+// SECURITY CONFIGURATION
+// ============================================================================
+
+const ALLOWED_DOMAINS = [
+  'g2b.go.kr',           // 나라장터
+  'ted.europa.eu',       // TED
+  'sam.gov',             // SAM.gov
+  'storage.googleapis.com', // Google Cloud Storage
+  's3.amazonaws.com',    // AWS S3
+  'blob.core.windows.net' // Azure Blob
+];
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const ALLOWED_CONTENT_TYPES = ['application/pdf'];
+
+/**
+ * URL 보안 검증 (SSRF 방지)
+ */
+function validatePdfUrl(urlString: string): void {
+  // URL 파싱
+  let url: URL;
+  try {
+    url = new URL(urlString);
+  } catch (e) {
+    throw new Error('Invalid URL format');
+  }
+
+  // 프로토콜 검증 (HTTPS only)
+  if (url.protocol !== 'https:') {
+    throw new Error('Only HTTPS URLs are allowed');
+  }
+
+  // 도메인 화이트리스트 검증
+  const isAllowed = ALLOWED_DOMAINS.some(domain =>
+    url.hostname === domain || url.hostname.endsWith(`.${domain}`)
+  );
+
+  if (!isAllowed) {
+    throw new Error(`Domain ${url.hostname} is not in the allowed list`);
+  }
+
+  // Private IP 차단 (정규식)
+  const hostname = url.hostname;
+  const privateIPPatterns = [
+    /^127\./,           // localhost
+    /^10\./,            // 10.0.0.0/8
+    /^172\.(1[6-9]|2\d|3[01])\./,  // 172.16.0.0/12
+    /^192\.168\./,      // 192.168.0.0/16
+    /^169\.254\./,      // link-local
+    /^::1$/,            // IPv6 localhost
+    /^fe80:/,           // IPv6 link-local
+    /^fc00:/,           // IPv6 private
+  ];
+
+  if (privateIPPatterns.some(pattern => pattern.test(hostname))) {
+    throw new Error('Private IP addresses are not allowed');
+  }
+}
+
+// ============================================================================
 // PDF 업로드
 // ============================================================================
 
@@ -77,13 +137,41 @@ export async function uploadBidPDFFromURL(
   bidId: string
 ): Promise<PDFUploadResult> {
   try {
+    // SECURITY: URL 검증 (SSRF 방지)
+    validatePdfUrl(pdfUrl);
+
     // PDF 다운로드
-    const response = await fetch(pdfUrl);
+    const response = await fetch(pdfUrl, {
+      headers: {
+        'User-Agent': 'BIDFLOW/1.0',
+      },
+      redirect: 'follow',
+      // SECURITY: 10초 타임아웃
+      signal: AbortSignal.timeout(10000),
+    });
+
     if (!response.ok) {
       throw new Error(`Failed to download PDF: ${response.statusText}`);
     }
 
+    // SECURITY: Content-Type 검증
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !ALLOWED_CONTENT_TYPES.includes(contentType)) {
+      throw new Error(`Invalid content type: ${contentType}. Expected application/pdf`);
+    }
+
+    // SECURITY: Content-Length 검증 (100MB 제한)
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
+      throw new Error(`File size exceeds 100MB limit`);
+    }
+
     const buffer = await response.arrayBuffer();
+
+    // SECURITY: 실제 파일 크기 재검증
+    if (buffer.byteLength > MAX_FILE_SIZE) {
+      throw new Error(`File size exceeds 100MB limit`);
+    }
     const filename = pdfUrl.split('/').pop() || `bid_${bidId}.pdf`;
 
     // Files API 업로드
@@ -125,8 +213,34 @@ export async function uploadBidPDFFromBase64(
   bidId: string
 ): Promise<PDFUploadResult> {
   try {
+    // SECURITY: Base64 형식 검증
+    const base64Regex = /^[A-Za-z0-9+/]+=*$/;
+    if (!base64Regex.test(base64Data)) {
+      throw new Error('Invalid Base64 format');
+    }
+
+    // SECURITY: 파일명 검증 (Path Traversal 방지)
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      throw new Error('Invalid filename: Path traversal attempt detected');
+    }
+
+    if (!filename.endsWith('.pdf')) {
+      throw new Error('Only PDF files are allowed');
+    }
+
     // Base64 디코딩
     const buffer = Buffer.from(base64Data, 'base64');
+
+    // SECURITY: 파일 크기 검증
+    if (buffer.byteLength > MAX_FILE_SIZE) {
+      throw new Error(`File size exceeds 100MB limit`);
+    }
+
+    // SECURITY: PDF Magic Number 검증 (파일 헤더 확인)
+    const pdfHeader = buffer.slice(0, 4).toString('binary');
+    if (pdfHeader !== '%PDF') {
+      throw new Error('Invalid PDF file: Header verification failed');
+    }
 
     // Files API 업로드
     // @ts-expect-error - Files API is in beta
@@ -169,6 +283,7 @@ export async function analyzeMultiplePDFs(
   fileIds: string[]
 ): Promise<MultiplePDFAnalysisResult> {
   try {
+    // @ts-expect-error - Files API Beta: document content type not in SDK types
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 16000,

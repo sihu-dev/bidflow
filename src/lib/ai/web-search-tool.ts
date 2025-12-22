@@ -16,6 +16,77 @@ const client = new Anthropic({
 });
 
 // ============================================================================
+// SECURITY CONFIGURATION
+// ============================================================================
+
+const MAX_INPUT_LENGTH = 500;
+
+/**
+ * 입력 검증 및 살균 (Prompt Injection 방지)
+ */
+function sanitizeInput(input: string, fieldName: string): string {
+  // Null/undefined 체크
+  if (!input || typeof input !== 'string') {
+    throw new Error(`Invalid ${fieldName}: Must be a non-empty string`);
+  }
+
+  // 길이 제한
+  if (input.length > MAX_INPUT_LENGTH) {
+    throw new Error(`${fieldName} exceeds maximum length of ${MAX_INPUT_LENGTH} characters`);
+  }
+
+  // 위험한 문자 제거 (Prompt Injection 시도)
+  const dangerous = [
+    /ignore\s+previous\s+instructions/gi,
+    /disregard\s+all\s+previous/gi,
+    /system\s*:/gi,
+    /assistant\s*:/gi,
+    /user\s*:/gi,
+    /<\|im_start\|>/gi,
+    /<\|im_end\|>/gi,
+    /```/g,  // Code blocks
+  ];
+
+  let sanitized = input;
+  for (const pattern of dangerous) {
+    if (pattern.test(sanitized)) {
+      throw new Error(`${fieldName} contains potentially malicious content`);
+    }
+  }
+
+  // 특수문자 이스케이프
+  sanitized = sanitized
+    .replace(/\\/g, '\\\\')  // Backslash
+    .replace(/"/g, '\\"')    // Quote
+    .replace(/\n/g, ' ')     // Newline
+    .replace(/\r/g, '')      // Carriage return
+    .trim();
+
+  return sanitized;
+}
+
+/**
+ * JSON 파싱 검증 (Prototype Pollution 방지)
+ */
+function safeJsonParse<T>(jsonString: string): T | null {
+  try {
+    const parsed = JSON.parse(jsonString);
+
+    // Prototype pollution 방지
+    if (parsed && typeof parsed === 'object') {
+      if ('__proto__' in parsed || 'constructor' in parsed || 'prototype' in parsed) {
+        throw new Error('Potential prototype pollution detected');
+      }
+    }
+
+    return parsed as T;
+  } catch (e) {
+    console.warn('[Security] JSON parse failed:', e);
+    return null;
+  }
+}
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
@@ -69,21 +140,23 @@ export async function searchCompetitorInfo(
   bidTitle: string
 ): Promise<CompetitorInfo[]> {
   try {
+    // SECURITY: 입력 검증 및 살균
+    const safeBidTitle = sanitizeInput(bidTitle, 'bidTitle');
+    const safeCategory = sanitizeInput(productCategory, 'productCategory');
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
-      // @ts-expect-error - web_search tool is in beta
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'search_competitor',
-          description: '경쟁사 제품 및 가격 정보 검색',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [
         {
           role: 'user',
-          content: `"${bidTitle}" 입찰 관련 "${productCategory}" 분야 경쟁사 정보 검색:
+          content: `"${safeBidTitle}" 입찰 관련 "${safeCategory}" 분야 경쟁사 정보 검색:
 
 1. 주요 경쟁사 3-5개 업체
 2. 각 경쟁사의 주력 제품 사양
@@ -107,15 +180,14 @@ JSON 형식으로 응답:
       ],
     });
 
-    // Tool call 결과 파싱
+    // SECURITY: Tool call 결과 파싱 (Prototype Pollution 방지)
     let competitorData: CompetitorInfo[] = [];
 
     for (const block of response.content) {
       if (block.type === 'text') {
-        try {
-          competitorData = JSON.parse(block.text);
-        } catch (e) {
-          console.warn('[Web Search] Failed to parse competitor data:', e);
+        const parsed = safeJsonParse<CompetitorInfo[]>(block.text);
+        if (parsed) {
+          competitorData = parsed;
         }
       }
     }
@@ -135,21 +207,23 @@ export async function searchMarketIntelligence(
   organization: string
 ): Promise<MarketIntelligence> {
   try {
+    // SECURITY: 입력 검증 및 살균
+    const safeCategory = sanitizeInput(productCategory, 'productCategory');
+    const safeOrganization = sanitizeInput(organization, 'organization');
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
-      // @ts-expect-error - web_search tool is in beta
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'search_market_data',
-          description: '시장 데이터 및 낙찰 동향 검색',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [
         {
           role: 'user',
-          content: `"${productCategory}" 분야, "${organization}" 발주처의 시장 정보 검색:
+          content: `"${safeCategory}" 분야, "${safeOrganization}" 발주처의 시장 정보 검색:
 
 1. 최근 1년간 평균 낙찰가
 2. 가격 범위 (최저-최고)
@@ -176,7 +250,13 @@ JSON 형식으로 응답:
       throw new Error('Expected text response from Claude');
     }
 
-    return JSON.parse(firstBlock.text);
+    // SECURITY: Safe JSON parsing
+    const parsed = safeJsonParse<MarketIntelligence>(firstBlock.text);
+    if (!parsed) {
+      throw new Error('Failed to parse market intelligence data');
+    }
+
+    return parsed;
   } catch (error) {
     console.error('[Web Search] searchMarketIntelligence failed:', error);
     throw error;
@@ -188,21 +268,22 @@ JSON 형식으로 응답:
  */
 export async function searchBidHistory(organization: string): Promise<BidHistoryAnalysis> {
   try {
+    // SECURITY: 입력 검증 및 살균
+    const safeOrganization = sanitizeInput(organization, 'organization');
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
-      // @ts-expect-error - web_search tool is in beta
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'search_bid_history',
-          description: '발주처 과거 입찰 이력 검색',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [
         {
           role: 'user',
-          content: `"${organization}" 발주처의 과거 입찰 이력 검색:
+          content: `"${safeOrganization}" 발주처의 과거 입찰 이력 검색:
 
 1. 최근 1년 총 입찰 건수
 2. 평균 입찰 금액
@@ -228,7 +309,13 @@ JSON 형식으로 응답:
       throw new Error('Expected text response from Claude');
     }
 
-    return JSON.parse(firstBlock.text);
+    // SECURITY: Safe JSON parsing
+    const parsed = safeJsonParse<BidHistoryAnalysis>(firstBlock.text);
+    if (!parsed) {
+      throw new Error('Failed to parse bid history data');
+    }
+
+    return parsed;
   } catch (error) {
     console.error('[Web Search] searchBidHistory failed:', error);
     throw error;
@@ -330,21 +417,22 @@ export async function analyzePriceCompetitiveness(
  */
 export async function monitorCompetitorActivity(productCategory: string) {
   try {
+    // SECURITY: 입력 검증 및 살균
+    const safeCategory = sanitizeInput(productCategory, 'productCategory');
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4000,
-      // @ts-expect-error - web_search tool is in beta
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'monitor_competitors',
-          description: '경쟁사 최신 동향 모니터링',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [
         {
           role: 'user',
-          content: `"${productCategory}" 분야 경쟁사 최신 동향 (최근 7일):
+          content: `"${safeCategory}" 분야 경쟁사 최신 동향 (최근 7일):
 
 1. 신제품 출시
 2. 가격 변동
@@ -373,22 +461,27 @@ export async function monitorCompetitorActivity(productCategory: string) {
  */
 export async function discoverBidOpportunities(keywords: string[]) {
   try {
+    // SECURITY: 입력 검증 및 살균 (각 키워드)
+    if (!Array.isArray(keywords) || keywords.length === 0) {
+      throw new Error('Keywords must be a non-empty array');
+    }
+
+    const safeKeywords = keywords.map((k, i) => sanitizeInput(k, `keyword[${i}]`));
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
-      // @ts-expect-error - web_search tool is in beta
       tools: [
         {
-          type: 'web_search' as const,
-          name: 'find_opportunities',
-          description: '새로운 입찰 기회 검색',
+          type: 'web_search_20250305' as const,
+          name: 'web_search',
         },
       ],
       messages: [
         {
           role: 'user',
           content: `다음 키워드 관련 최신 입찰 공고 검색 (최근 7일):
-${keywords.map((k) => `- ${k}`).join('\n')}
+${safeKeywords.map((k) => `- ${k}`).join('\n')}
 
 각 입찰에 대해 JSON으로 응답:
 [
@@ -409,11 +502,9 @@ ${keywords.map((k) => `- ${k}`).join('\n')}
       return [];
     }
 
-    try {
-      return JSON.parse(firstBlock.text);
-    } catch (e) {
-      return [];
-    }
+    // SECURITY: Safe JSON parsing
+    const parsed = safeJsonParse<any[]>(firstBlock.text);
+    return parsed || [];
   } catch (error) {
     console.error('[Web Search] discoverBidOpportunities failed:', error);
     return [];
