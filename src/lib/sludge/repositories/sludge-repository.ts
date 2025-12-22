@@ -24,6 +24,25 @@ import type {
 // Repository Interface
 // ============================================
 
+export interface SensorThreshold {
+  min?: number;
+  max?: number;
+  warningMin?: number;
+  warningMax?: number;
+}
+
+export interface SensorAlert {
+  id: string;
+  siteId: SiteId;
+  sensorId: SensorId;
+  type: 'warning' | 'error';
+  message: string;
+  value: number;
+  threshold: number;
+  acknowledgedAt?: Date;
+  createdAt: Date;
+}
+
 export interface ISludgeRepository {
   // Sites
   getSites(): Promise<SludgeSite[]>;
@@ -31,6 +50,16 @@ export interface ISludgeRepository {
   createSite(dto: CreateSiteDto): Promise<SludgeSite>;
   updateSite(id: SiteId, dto: Partial<CreateSiteDto>): Promise<SludgeSite>;
   deleteSite(id: SiteId): Promise<void>;
+
+  // Alerts
+  getAlertsBySite(siteId: SiteId): Promise<SensorAlert[]>;
+  getAlertsSince(since: Date): Promise<SensorAlert[]>;
+  createAlert(alert: Omit<SensorAlert, 'id' | 'createdAt'>): Promise<SensorAlert>;
+  acknowledgeAlert(id: string): Promise<void>;
+
+  // Thresholds
+  getThresholdsBySensorIds(sensorIds: SensorId[]): Promise<Record<string, SensorThreshold>>;
+  setThreshold(sensorId: SensorId, threshold: SensorThreshold): Promise<void>;
 
   // Sensors
   getSensorsBySite(siteId: SiteId): Promise<SludgeSensor[]>;
@@ -364,8 +393,129 @@ export class SludgeRepository implements ISludgeRepository {
   }
 
   // ============================================
+  // Alerts
+  // ============================================
+
+  async getAlertsBySite(siteId: SiteId): Promise<SensorAlert[]> {
+    const { data, error } = await this.supabase
+      .from('sludge_alerts')
+      .select('*')
+      .eq('site_id', siteId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      // 테이블이 없으면 빈 배열 반환
+      if (error.code === '42P01') return [];
+      throw new Error(`Failed to get alerts: ${error.message}`);
+    }
+    return (data || []).map(this.mapAlert);
+  }
+
+  async getAlertsSince(since: Date): Promise<SensorAlert[]> {
+    const { data, error } = await this.supabase
+      .from('sludge_alerts')
+      .select('*')
+      .gte('created_at', since.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      if (error.code === '42P01') return [];
+      throw new Error(`Failed to get alerts: ${error.message}`);
+    }
+    return (data || []).map(this.mapAlert);
+  }
+
+  async createAlert(alert: Omit<SensorAlert, 'id' | 'createdAt'>): Promise<SensorAlert> {
+    const { data, error } = await this.supabase
+      .from('sludge_alerts')
+      .insert({
+        site_id: alert.siteId,
+        sensor_id: alert.sensorId,
+        type: alert.type,
+        message: alert.message,
+        value: alert.value,
+        threshold: alert.threshold,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to create alert: ${error.message}`);
+    return this.mapAlert(data);
+  }
+
+  async acknowledgeAlert(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('sludge_alerts')
+      .update({ acknowledged_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) throw new Error(`Failed to acknowledge alert: ${error.message}`);
+  }
+
+  // ============================================
+  // Thresholds
+  // ============================================
+
+  async getThresholdsBySensorIds(sensorIds: SensorId[]): Promise<Record<string, SensorThreshold>> {
+    if (sensorIds.length === 0) return {};
+
+    const { data, error } = await this.supabase
+      .from('sludge_thresholds')
+      .select('*')
+      .in('sensor_id', sensorIds);
+
+    if (error) {
+      // 테이블이 없으면 빈 객체 반환
+      if (error.code === '42P01') return {};
+      throw new Error(`Failed to get thresholds: ${error.message}`);
+    }
+
+    const result: Record<string, SensorThreshold> = {};
+    for (const row of data || []) {
+      result[row.sensor_id] = {
+        min: row.min_value,
+        max: row.max_value,
+        warningMin: row.warning_min,
+        warningMax: row.warning_max,
+      };
+    }
+    return result;
+  }
+
+  async setThreshold(sensorId: SensorId, threshold: SensorThreshold): Promise<void> {
+    const { error } = await this.supabase
+      .from('sludge_thresholds')
+      .upsert({
+        sensor_id: sensorId,
+        min_value: threshold.min,
+        max_value: threshold.max,
+        warning_min: threshold.warningMin,
+        warning_max: threshold.warningMax,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'sensor_id' });
+
+    if (error) throw new Error(`Failed to set threshold: ${error.message}`);
+  }
+
+  // ============================================
   // Mappers
   // ============================================
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  private mapAlert(row: any): SensorAlert {
+    return {
+      id: row.id,
+      siteId: row.site_id as SiteId,
+      sensorId: row.sensor_id as SensorId,
+      type: row.type,
+      message: row.message,
+      value: row.value,
+      threshold: row.threshold,
+      acknowledgedAt: row.acknowledged_at ? new Date(row.acknowledged_at) : undefined,
+      createdAt: new Date(row.created_at),
+    };
+  }
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private mapSite(row: any): SludgeSite {

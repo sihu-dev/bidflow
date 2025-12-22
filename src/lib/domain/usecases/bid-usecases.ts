@@ -88,14 +88,49 @@ export async function createBid(
 }
 
 /**
+ * 상태 변경 이력 기록
+ */
+async function recordStatusChange(
+  bidId: UUID,
+  fromStatus: BidStatus,
+  toStatus: BidStatus,
+  notes?: string
+): Promise<void> {
+  const repository = getBidRepository();
+  // 이력 저장 (rawData에 추가)
+  const bid = await repository.findById(bidId);
+  if (!bid.success || !bid.data) return;
+
+  const history = (bid.data.rawData?.statusHistory || []) as Array<{
+    from: BidStatus;
+    to: BidStatus;
+    notes?: string;
+    timestamp: string;
+  }>;
+
+  history.push({
+    from: fromStatus,
+    to: toStatus,
+    notes,
+    timestamp: new Date().toISOString(),
+  });
+
+  await repository.update(bidId, {
+    rawData: {
+      ...bid.data.rawData,
+      statusHistory: history,
+    },
+  });
+}
+
+/**
  * 입찰 상태 변경
  */
 export async function updateBidStatus(
   id: UUID,
   status: BidStatus,
-  _notes?: string
+  notes?: string
 ): Promise<ApiResponse<BidData>> {
-  // TODO: notes will be used for status change history
   const repository = getBidRepository();
 
   // 상태 전이 유효성 검사
@@ -124,6 +159,9 @@ export async function updateBidStatus(
       },
     };
   }
+
+  // 상태 변경 이력 기록
+  await recordStatusChange(id, currentStatus, status, notes);
 
   return repository.updateStatus(id, status);
 }

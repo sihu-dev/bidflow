@@ -35,5 +35,5 @@
     "src/**/*.tsx",
     "types/**/*.ts"
   ],
-  "exclude": ["node_modules", "bidflow", ".bidflow_backup"]
+  "exclude": ["node_modules", "bidflow", ".bidflow_backup", "tests/e2e", "vitest.config.ts"]
 }

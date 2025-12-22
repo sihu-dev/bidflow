@@ -54,12 +54,43 @@ async function fetchSites(): Promise<Site[]> {
   const res = await fetch('/api/v1/sludge/sites', { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch sites');
   const json = await res.json();
-  return json.data.map((site: any) => ({
-    ...site,
-    status: 'online' as const, // TODO: 실제 상태 계산
-    sensorsCount: 0, // TODO: 센서 카운트
-    alertsCount: 0, // TODO: 알림 카운트
-  }));
+
+  // 각 사이트에 대해 센서 및 알림 카운트 조회
+  const sitesWithCounts = await Promise.all(
+    json.data.map(async (site: Record<string, unknown>) => {
+      // 센서 카운트 조회
+      let sensorsCount = 0;
+      try {
+        const sensorsRes = await fetch(`/api/v1/sludge/sites/${site.id}/sensors`, { cache: 'no-store' });
+        if (sensorsRes.ok) {
+          const sensorsJson = await sensorsRes.json();
+          sensorsCount = sensorsJson.data?.length || 0;
+        }
+      } catch { /* ignore */ }
+
+      // 알림 카운트 조회
+      let alertsCount = 0;
+      try {
+        const alertsRes = await fetch(`/api/v1/sludge/sites/${site.id}/alerts`, { cache: 'no-store' });
+        if (alertsRes.ok) {
+          const alertsJson = await alertsRes.json();
+          alertsCount = alertsJson.data?.filter((a: { acknowledgedAt?: string }) => !a.acknowledgedAt).length || 0;
+        }
+      } catch { /* ignore */ }
+
+      // 상태 계산 (알림이 있으면 warning, 센서가 없으면 offline, 그 외 online)
+      const status = alertsCount > 0 ? 'warning' : sensorsCount === 0 ? 'offline' : 'online';
+
+      return {
+        ...site,
+        status: status as 'online' | 'offline' | 'warning',
+        sensorsCount,
+        alertsCount,
+      };
+    })
+  );
+
+  return sitesWithCounts;
 }
 
 // ============================================

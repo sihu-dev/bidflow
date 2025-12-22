@@ -291,11 +291,9 @@ function transformBidData(bids: Bid[]): Bid[] {
 export function SpreadsheetView({
   initialData = [],
   onBidUpdate,
-  onBidCreate: _onBidCreate,
+  onBidCreate,
   onRefresh,
 }: SpreadsheetViewProps) {
-  // TODO: onBidCreate will be used for new bid creation
-  void _onBidCreate;
   const hotRef = useRef<HotTableClass | null>(null);
   // 초기 데이터를 미리 변환하여 HyperFormula 파싱 오류 방지
   const [data, setData] = useState<Bid[]>(() => transformBidData(initialData));
@@ -367,6 +365,35 @@ export function SpreadsheetView({
     }
   }, [onRefresh]);
 
+  // 새 입찰 추가 핸들러
+  const handleAddBid = useCallback(async () => {
+    if (!onBidCreate) return;
+
+    const newBid: Partial<Bid> = {
+      source: 'manual',
+      external_id: `MANUAL-${Date.now()}`,
+      title: '새 입찰 공고',
+      organization: '',
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30일 후
+      estimated_amount: null,
+      status: 'new',
+      priority: 'medium',
+      type: 'product',
+      keywords: [],
+      url: null,
+    };
+
+    try {
+      await onBidCreate(newBid);
+      // 새로고침하여 새 데이터 로드
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (error) {
+      console.error('입찰 추가 실패:', error);
+    }
+  }, [onBidCreate, onRefresh]);
+
   // 내보내기 핸들러
   const handleExport = useCallback(
     async (format: 'csv' | 'excel' | 'json') => {
@@ -432,6 +459,7 @@ export function SpreadsheetView({
         <Toolbar
           onRefresh={handleRefresh}
           onExport={handleExport}
+          onAddBid={handleAddBid}
           isLoading={isLoading}
           totalCount={data.length}
         />

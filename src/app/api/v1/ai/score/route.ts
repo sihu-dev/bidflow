@@ -9,11 +9,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createClient } from '@supabase/supabase-js';
 import {
   matchBidToProducts,
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+
+// Supabase 클라이언트
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // ============================================================================
 // 요청 스키마
@@ -139,20 +146,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let bid: BidAnnouncement;
 
     if (bidId) {
-      // TODO: Supabase에서 bid 조회
-      // const { data, error } = await supabase
-      //   .from('bid_announcements')
-      //   .select('*')
-      //   .eq('id', bidId)
-      //   .single();
+      // Supabase에서 bid 조회
+      const { data: dbBid, error } = await supabase
+        .from('bid_announcements')
+        .select('*')
+        .eq('id', bidId)
+        .single();
 
-      // 현재는 Mock 데이터 반환
-      bid = {
-        id: bidId,
-        title: title || `입찰 공고 ${bidId}`,
-        organization: organization || '발주기관',
-        description: description,
-      };
+      if (error && error.code !== 'PGRST116') {
+        console.error('[AI Score API] DB 조회 오류:', error);
+      }
+
+      if (dbBid) {
+        bid = {
+          id: dbBid.id,
+          title: dbBid.title,
+          organization: dbBid.organization,
+          description: dbBid.raw_data?.description || dbBid.raw_data?.requirements || description,
+        };
+      } else {
+        // DB에 없으면 입력값 사용
+        bid = {
+          id: bidId,
+          title: title || `입찰 공고 ${bidId}`,
+          organization: organization || '발주기관',
+          description: description,
+        };
+      }
     } else {
       bid = {
         id: `temp-${Date.now()}`,

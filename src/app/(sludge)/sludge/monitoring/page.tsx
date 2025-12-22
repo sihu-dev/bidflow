@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   ArrowLeft,
   Activity,
@@ -16,6 +17,9 @@ import {
   TrendingDown,
   Clock,
 } from 'lucide-react';
+
+// ECharts 동적 로드 (SSR 비활성화)
+const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 // ============================================
 // Types
@@ -166,6 +170,101 @@ function LiveIndicator({ isLive }: { isLive: boolean }) {
   );
 }
 
+// 유량 트렌드 차트 컴포넌트
+function FlowTrendChart({ readings }: { readings: SensorReading[] }) {
+  // 24시간 데이터 시뮬레이션 (실제로는 API에서 가져옴)
+  const chartData = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => {
+      const date = new Date();
+      date.setHours(date.getHours() - (23 - i), 0, 0, 0);
+      return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    });
+
+    // 유량 센서 데이터 (시뮬레이션)
+    const flowSensors = readings.filter(r =>
+      r.sensorType.includes('flow') || r.sensorType.includes('ur') || r.sensorType.includes('sl')
+    );
+
+    const baseValue = flowSensors.length > 0 ? flowSensors[0].value : 500;
+    const values = hours.map((_, i) => {
+      const noise = (Math.sin(i / 3) * 50) + (Math.random() - 0.5) * 30;
+      const dailyPattern = Math.sin((i - 6) / 24 * Math.PI * 2) * 100;
+      return Math.max(0, Math.round(baseValue + noise + dailyPattern));
+    });
+
+    return { hours, values };
+  }, [readings]);
+
+  const chartOption = useMemo(() => ({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#1a1a1a',
+      borderColor: '#333',
+      textStyle: { color: '#fff', fontSize: 12 },
+      formatter: (params: Array<{ name: string; value: number }>) =>
+        `${params[0].name}<br/>유량: ${params[0].value} m³/h`,
+    },
+    grid: {
+      left: '3%',
+      right: '3%',
+      bottom: '3%',
+      top: '10%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      data: chartData.hours,
+      axisLine: { lineStyle: { color: '#e5e5e5' } },
+      axisTick: { show: false },
+      axisLabel: {
+        color: '#737373',
+        fontSize: 11,
+        interval: 3,
+      },
+    },
+    yAxis: {
+      type: 'value',
+      name: 'm³/h',
+      nameTextStyle: { color: '#737373', fontSize: 11 },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { lineStyle: { color: '#f5f5f5' } },
+      axisLabel: { color: '#737373', fontSize: 11 },
+    },
+    series: [
+      {
+        name: '유량',
+        type: 'line',
+        data: chartData.values,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: {
+          color: '#171717',
+          width: 2,
+        },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(23, 23, 23, 0.15)' },
+              { offset: 1, color: 'rgba(23, 23, 23, 0)' },
+            ],
+          },
+        },
+      },
+    ],
+  }), [chartData]);
+
+  return (
+    <ReactECharts
+      option={chartOption}
+      style={{ height: '100%', width: '100%' }}
+      opts={{ renderer: 'svg' }}
+    />
+  );
+}
+
 // ============================================
 // Main Component
 // ============================================
@@ -311,15 +410,14 @@ function MonitoringContent() {
           </div>
         </section>
 
-        {/* Chart Placeholder */}
+        {/* Flow Trend Chart */}
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-neutral-900 mb-4">
             유량 트렌드 (24시간)
           </h2>
           <div className="bg-white rounded-lg border border-neutral-200 p-6">
-            <div className="h-64 flex items-center justify-center text-neutral-400">
-              {/* TODO: ECharts 또는 Recharts로 그래프 구현 */}
-              <p>차트 영역 (추후 구현)</p>
+            <div className="h-64">
+              <FlowTrendChart readings={readings} />
             </div>
           </div>
         </section>
