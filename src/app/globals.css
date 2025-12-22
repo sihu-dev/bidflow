@@ -815,3 +815,92 @@ a:hover {
 .card-glass { @apply card; }
 .card-elevated { @apply card; }
 .btn-glow { @apply btn-primary; }
+
+/* ============================================
+   ACCESSIBILITY - FOCUS VISIBLE STYLES
+   ============================================ */
+
+/**
+ * 키보드 포커스 스타일 (WCAG 2.1 AA 준수)
+ * - 마우스 클릭 시에는 표시 안 됨 (:focus-visible)
+ * - Tab 키로 포커스 시에만 표시
+ * - 2px solid outline (충분한 대비)
+ */
+
+/* Reset default focus styles */
+*:focus {
+  outline: none;
+}
+
+/* Keyboard focus only */
+*:focus-visible {
+  outline: 2px solid var(--neutral-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Button focus */
+button:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--neutral-300);
+  outline-offset: 2px;
+}
+
+/* Input focus (already has box-shadow, add outline for a11y) */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--neutral-400);
+  outline-offset: 1px;
+}
+
+/* Link focus */
+a:focus-visible {
+  outline: 2px solid var(--neutral-400);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Card/Interactive focus */
+.card-interactive:focus-visible,
+.card-cinematic:focus-visible {
+  outline: 2px solid var(--neutral-300);
+  outline-offset: 2px;
+}
+
+/* Skip to content link (for keyboard navigation) */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  padding: 12px 16px;
+  background: var(--neutral-900);
+  color: white;
+  text-decoration: none;
+  z-index: 9999;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid var(--neutral-300);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  *:focus-visible {
+    outline-width: 3px;
+    outline-color: var(--neutral-900);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
