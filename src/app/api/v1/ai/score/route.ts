@@ -5,6 +5,8 @@
  * POST /api/v1/ai/score
  * - bidId로 DB 조회하거나
  * - title, organization, description 직접 입력
+ *
+ * Rate Limit: 10 requests/minute (ai type)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,6 +17,7 @@ import {
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+import { checkRateLimit } from '@/lib/security/rate-limiter';
 
 // Supabase 클라이언트
 const supabase = createClient(
@@ -126,6 +129,31 @@ function getRecommendationMessage(code: 'BID' | 'REVIEW' | 'SKIP'): string {
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Rate Limit 체크 (AI 호출은 분당 10회 제한)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown';
+    const rateLimitResult = await checkRateLimit(ip, 'ai');
+
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `요청 한도를 초과했습니다. ${retryAfter}초 후에 다시 시도해 주세요.`,
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(rateLimitResult.limit),
+            'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+            'X-RateLimit-Reset': String(rateLimitResult.reset),
+            'Retry-After': String(retryAfter),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // 입력 검증

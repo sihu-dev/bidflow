@@ -1,12 +1,15 @@
 /**
  * 문의 API 엔드포인트
  * POST /api/v1/contact
+ *
+ * Rate Limit: 5 requests/15 minutes (auth type - 스팸 방지)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { sendSlackMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
+import { checkRateLimit } from '@/lib/security/rate-limiter';
 
 // Supabase 클라이언트 (서비스 역할)
 const supabase = createClient(
@@ -26,6 +29,31 @@ const contactSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate Limit 체크 (스팸 방지: 15분당 5회)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown';
+    const rateLimitResult = await checkRateLimit(`contact:${ip}`, 'auth');
+
+    if (!rateLimitResult.success) {
+      const retryAfter = Math.ceil((rateLimitResult.reset - Date.now()) / 1000);
+      return NextResponse.json(
+        {
+          success: false,
+          error: '너무 많은 문의가 접수되었습니다. 잠시 후 다시 시도해 주세요.',
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': String(rateLimitResult.limit),
+            'X-RateLimit-Remaining': String(rateLimitResult.remaining),
+            'X-RateLimit-Reset': String(rateLimitResult.reset),
+            'Retry-After': String(retryAfter),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // 유효성 검사
