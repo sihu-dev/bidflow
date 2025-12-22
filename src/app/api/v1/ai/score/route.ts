@@ -54,6 +54,7 @@ interface Factor {
 
 interface ScoreResponse {
   score: number;
+  method: string;
   confidence: number;
   confidenceLevel: 'high' | 'medium' | 'low' | 'none';
   factors: Factor[];
@@ -192,7 +193,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // 매칭 실행
-    let matchResult: MatchResult;
+    let matchResult: {
+      bestMatch: MatchResult | null;
+      allMatches: MatchResult[];
+      recommendation: 'BID' | 'REVIEW' | 'SKIP';
+    };
     let aiResult;
 
     if (useAI && useCaching) {
@@ -204,27 +209,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
 
       // AI 결과를 MatchResult 형식으로 변환
-      matchResult = {
-        bestMatch: {
-          productId: aiResult.matched_product,
-          productName: aiResult.matched_product,
-          score: aiResult.score,
-          confidence: aiResult.confidence,
-          reasons: aiResult.reasons,
-          requirementsMatch: [],
-          requirementsGap: aiResult.risks || [],
+      const aiMatchResult: MatchResult = {
+        productId: aiResult.matched_product,
+        productName: aiResult.matched_product,
+        score: aiResult.score,
+        confidence: aiResult.confidence as 'high' | 'medium' | 'low' | 'none',
+        breakdown: {
+          keywordScore: aiResult.breakdown?.technical || aiResult.score * 0.5,
+          pipeSizeScore: aiResult.breakdown?.price || aiResult.score * 0.2,
+          organizationScore: aiResult.breakdown?.organization || aiResult.score * 0.3,
+          totalScore: aiResult.score,
         },
-        allMatches: [
-          {
-            productId: aiResult.matched_product,
-            productName: aiResult.matched_product,
-            score: aiResult.score,
-            confidence: aiResult.confidence,
-            reasons: aiResult.reasons,
-            requirementsMatch: [],
-            requirementsGap: aiResult.risks || [],
-          },
-        ],
+        reasons: aiResult.reasons || [],
+        isMatch: aiResult.score >= 30,
+      };
+
+      matchResult = {
+        bestMatch: aiMatchResult,
+        allMatches: [aiMatchResult],
+        recommendation: aiResult.score >= 60 ? 'BID' : aiResult.score >= 30 ? 'REVIEW' : 'SKIP',
       };
     } else {
       // Enhanced Matcher (기본)

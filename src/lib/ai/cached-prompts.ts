@@ -300,7 +300,11 @@ JSON 형식으로 응답:
     ],
   });
 
-  return JSON.parse(response.content[0].text);
+  const firstBlock = response.content[0];
+  if (firstBlock.type !== 'text') {
+    throw new Error('Expected text response from Claude');
+  }
+  return JSON.parse(firstBlock.text);
 }
 
 /**
