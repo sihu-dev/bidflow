@@ -3,6 +3,7 @@
 /**
  * BIDFLOW 스프레드시트 뷰
  * Handsontable 기반 입찰 관리 테이블
+ * 반응형: 모바일에서 Bottom Sheet 사용
  */
 
 import { useRef, useState, useCallback, useEffect } from 'react';
@@ -14,6 +15,7 @@ import 'handsontable/styles/ht-theme-main.min.css';
 
 import { Toolbar } from './Toolbar';
 import { SidePanel } from './SidePanel';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
   BID_COLUMNS,
   STATUS_LABELS,
@@ -288,6 +290,23 @@ function transformBidData(bids: Bid[]): Bid[] {
 // 메인 컴포넌트
 // ============================================================================
 
+// Inline useMediaQuery hook
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+    const listener = () => setMatches(media.matches);
+    media.addEventListener('change', listener);
+    return () => media.removeEventListener('change', listener);
+  }, [matches, query]);
+
+  return matches;
+}
+
 export function SpreadsheetView({
   initialData = [],
   onBidUpdate,
@@ -304,6 +323,9 @@ export function SpreadsheetView({
   const [isLoading, setIsLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formulaEngine, setFormulaEngine] = useState<any>(null);
+
+  // 모바일 감지 (768px 이하)
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // HyperFormula lazy load
   useEffect(() => {
@@ -468,17 +490,42 @@ export function SpreadsheetView({
         </div>
       </div>
 
-      {/* 사이드 패널 */}
-      {sidePanelOpen && selectedBid && (
-        <SidePanel
-          bid={selectedBid}
-          onClose={() => setSidePanelOpen(false)}
-          onUpdate={async (updates) => {
-            if (onBidUpdate) {
-              await onBidUpdate(selectedBid.id, updates);
-            }
-          }}
-        />
+      {/* 사이드 패널 - 반응형: 모바일은 Bottom Sheet, 데스크탑은 사이드 패널 */}
+      {isMobile ? (
+        // 모바일: Bottom Sheet
+        <Sheet open={sidePanelOpen} onOpenChange={setSidePanelOpen}>
+          <SheetContent
+            side="bottom"
+            className="h-[85vh] p-0 rounded-t-2xl"
+          >
+            {selectedBid && (
+              <SidePanel
+                bid={selectedBid}
+                onClose={() => setSidePanelOpen(false)}
+                onUpdate={async (updates) => {
+                  if (onBidUpdate) {
+                    await onBidUpdate(selectedBid.id, updates);
+                  }
+                }}
+                inSheet={true}
+              />
+            )}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        // 데스크탑: 기존 사이드 패널
+        sidePanelOpen && selectedBid && (
+          <SidePanel
+            bid={selectedBid}
+            onClose={() => setSidePanelOpen(false)}
+            onUpdate={async (updates) => {
+              if (onBidUpdate) {
+                await onBidUpdate(selectedBid.id, updates);
+              }
+            }}
+            inSheet={false}
+          />
+        )
       )}
     </div>
   );

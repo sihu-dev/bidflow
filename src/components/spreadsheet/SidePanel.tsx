@@ -67,6 +67,7 @@ interface SidePanelProps {
   bid: Bid;
   onClose: () => void;
   onUpdate?: (updates: Partial<Bid>) => Promise<void>;
+  inSheet?: boolean; // Sheet 내부에서 렌더링되는지 여부
 }
 
 // 제품 정보 (데모용)
@@ -108,7 +109,7 @@ const STATUS_STYLE: Record<string, string> = {
   lost: 'bg-neutral-100 text-neutral-500 border-neutral-200',
 };
 
-export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
+export function SidePanel({ bid, onClose, onUpdate, inSheet = false }: SidePanelProps) {
   const [isAIExpanded, setIsAIExpanded] = useState(true);
   const [isProductExpanded, setIsProductExpanded] = useState(true);
   const [notes, setNotes] = useState('');
@@ -158,7 +159,12 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
   const keywordArray = bid.keywords || [];
 
   return (
-    <div className="w-full md:w-[360px] lg:w-[400px] border-l border-slate-200 bg-white flex flex-col h-full animate-slide-in">
+    <div className={cn(
+      "flex flex-col h-full bg-white",
+      inSheet
+        ? "w-full" // Sheet 내부: 전체 너비, border/animation 제거
+        : "w-full md:w-[360px] lg:w-[400px] border-l border-slate-200 animate-slide-in" // 데스크탑: 고정 너비 + 사이드 패널 스타일
+    )}>
       {/* 헤더 */}
       <div className="flex items-start justify-between p-4 border-b border-slate-100">
         <div className="flex-1 min-w-0">
