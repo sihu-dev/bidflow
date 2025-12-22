@@ -13,8 +13,6 @@
  * - TEST_UPSTASH_REDIS_REST_URL (선택)
  */
 
-// @ts-nocheck - Integration test with dynamic Supabase types
-
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';

@@ -8,8 +8,6 @@
  * - 구조화된 제안서 생성
  */
 
-// @ts-nocheck - Beta features
-
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
@@ -153,6 +151,15 @@ export async function generateProposal(
     const template = DEFAULT_TEMPLATES[templateType];
 
     // Step 5: Claude로 제안서 작성
+    // Beta features: betas and output_config not in SDK types yet
+    // Type assertion for Supabase data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bidAny = bid as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productAny = product as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const matchAny = match as any;
+
     const response = await client.messages.create({
       model: 'claude-opus-4-5-20251101',
       max_tokens: 16000,
@@ -175,23 +182,23 @@ export async function generateProposal(
           content: `다음 입찰에 대한 ${template.name}를 작성하세요.
 
 ## 입찰 정보
-- 제목: ${bid.title}
-- 발주처: ${bid.organization}
-- 금액: ${bid.estimated_price?.toLocaleString() || '미정'}원
-- 마감일: ${bid.deadline}
-- 설명: ${bid.description || '없음'}
+- 제목: ${bidAny.title}
+- 발주처: ${bidAny.organization}
+- 금액: ${bidAny.estimated_price?.toLocaleString() || '미정'}원
+- 마감일: ${bidAny.deadline}
+- 설명: ${bidAny.description || '없음'}
 
 ## 제품 정보
-- 제품명: ${product.name}
-- 모델명: ${product.model}
-- 카테고리: ${product.category}
-- 설명: ${product.description || '없음'}
-- 사양: ${JSON.stringify(product.specs, null, 2)}
-- 가격대: ${product.price_range || '별도 협의'}
+- 제품명: ${productAny.name}
+- 모델명: ${productAny.model}
+- 카테고리: ${productAny.category}
+- 설명: ${productAny.description || '없음'}
+- 사양: ${JSON.stringify(productAny.specs, null, 2)}
+- 가격대: ${productAny.price_range || '별도 협의'}
 
 ## 매칭 정보
-- 매칭 점수: ${match?.score || 'N/A'}/175점
-- 신뢰도: ${match?.confidence || 'N/A'}
+- 매칭 점수: ${matchAny?.score || 'N/A'}/175점
+- 신뢰도: ${matchAny?.confidence || 'N/A'}
 
 ## 제안서 구성 (다음 섹션 모두 작성)
 ${template.sections.map((section, idx) => `${idx + 1}. ${section}`).join('\n')}
@@ -212,7 +219,8 @@ ${template.sections.map((section, idx) => `${idx + 1}. ${section}`).join('\n')}
 }`,
         },
       ],
-    });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     // Step 6: 응답 파싱
     const firstBlock = response.content[0];
@@ -314,7 +322,7 @@ export function proposalToHTML(proposal: GeneratedProposal): string {
   const markdown = proposalToMarkdown(proposal);
 
   // 간단한 마크다운 -> HTML 변환
-  let html = markdown
+  const html = markdown
     .replace(/^# (.*$)/gim, '<h1>$1</h1>')
     .replace(/^## (.*$)/gim, '<h2>$1</h2>')
     .replace(/^### (.*$)/gim, '<h3>$1</h3>')

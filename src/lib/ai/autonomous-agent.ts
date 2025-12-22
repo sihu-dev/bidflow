@@ -8,8 +8,6 @@
  * - 오류 시 자가 복구
  */
 
-// @ts-nocheck - Beta features: betas and output_config not in SDK types yet
-
 import Anthropic from '@anthropic-ai/sdk';
 import { uploadAndAnalyzeBidAttachments } from './files-manager';
 import { comprehensiveMarketAnalysis, analyzePriceCompetitiveness } from './web-search-tool';
@@ -124,13 +122,15 @@ export async function autonomousBidAnalysis(bidId: string): Promise<AutonomousAn
     }
 
     // Step 2: Interleaved Thinking으로 자율 분석
+    // Beta features: betas and output_config not in SDK types yet
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await client.messages.create({
       model: 'claude-opus-4-5-20251101',
       max_tokens: 32000,
-      betas: ['effort-2025-11-24'] as any, // Beta feature
+      betas: ['effort-2025-11-24'], // Beta feature
       output_config: {
         effort: 'high' as const,
-      } as any,
+      },
       tools: [
         {
           type: 'web_search_20250305' as const,
@@ -161,7 +161,7 @@ export async function autonomousBidAnalysis(bidId: string): Promise<AutonomousAn
 JSON으로 상세 분석 결과 제공.`,
         },
       ],
-    });
+    } as any);
 
     // 응답 파싱
     let thinkingContent = '';

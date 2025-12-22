@@ -8,8 +8,6 @@
  * - high: 최고 정확도 (고액 입찰 >1억원)
  */
 
-// @ts-nocheck - Beta features: betas and output_config not in SDK types yet
-
 import Anthropic from '@anthropic-ai/sdk';
 import { createCachedMatcherPrompt } from './cached-prompts';
 
@@ -98,6 +96,7 @@ export async function matchWithEffort(
 ): Promise<EffortMatchResult> {
   const systemPrompt = createCachedMatcherPrompt();
 
+  // Beta features: betas and output_config not in SDK types yet
   const response = await client.messages.create({
     model: 'claude-opus-4-5-20251101', // Opus 4.5 required for effort parameter
     max_tokens: getMaxTokens(effort),
@@ -139,7 +138,8 @@ JSON 형식으로 응답:
 }`,
       },
     ],
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
   const firstBlock = response.content[0];
   if (firstBlock.type !== 'text') {
