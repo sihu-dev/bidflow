@@ -15,6 +15,7 @@ import { inngest } from '../client';
 import { selectEffortLevel, batchMatchWithEffort } from '@/lib/ai/effort-matcher';
 import { uploadAndAnalyzeBidAttachments } from '@/lib/ai/files-manager';
 import { autonomousBidAnalysis } from '@/lib/ai/autonomous-agent';
+import { generateProposal } from '@/lib/ai/proposal-generator';
 import { sendSlackMessage, createSimpleMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
 import { createClient } from '@supabase/supabase-js';
@@ -131,12 +132,54 @@ export const masterOrchestrator = inngest.createFunction(
         ...autonomousResults.filter((r) => r.score >= 150),
       ];
 
-      // TODO: 제안서 자동 생성 로직
-      // - Files API로 템플릿 불러오기
-      // - Claude로 제안서 초안 작성
-      // - PDF 생성
+      if (highScoreBids.length === 0) {
+        console.log('[Orchestrator] No high-score bids for proposal generation');
+        return 0;
+      }
 
-      return highScoreBids.length;
+      // 각 bid에 대해 top matched product 조회 후 제안서 생성
+      const proposalResults = await Promise.all(
+        highScoreBids.map(async (bid) => {
+          try {
+            // bidId 추출 (effortGroups vs autonomousResults 구조 차이)
+            const bidId = (bid as any).bidId || (bid as any).bid_id;
+
+            if (!bidId) {
+              console.warn('[Proposal] No bidId found in:', bid);
+              return null;
+            }
+
+            // 해당 bid의 top matched product 조회
+            const { data: topMatch, error: matchError } = await supabase
+              .from('matches')
+              .select('product_id, score')
+              .eq('bid_id', bidId)
+              .order('score', { ascending: false })
+              .limit(1)
+              .single();
+
+            if (matchError || !topMatch) {
+              console.warn(`[Proposal] No matched product for bid ${bidId}`);
+              return null;
+            }
+
+            // 제안서 생성 (Claude Opus 4.5 + Files API)
+            const proposal = await generateProposal(bidId, topMatch.product_id, 'combined');
+
+            console.log(`[Proposal] Generated for bid ${bidId}, product ${topMatch.product_id}`);
+
+            return { bidId, success: true, proposal };
+          } catch (error) {
+            console.error(`[Proposal] Failed for bid:`, error);
+            return null;
+          }
+        })
+      );
+
+      const successCount = proposalResults.filter((r) => r !== null).length;
+      console.log(`[Orchestrator] Generated ${successCount}/${highScoreBids.length} proposals`);
+
+      return successCount;
     });
 
     // Step 6: 알림 발송
