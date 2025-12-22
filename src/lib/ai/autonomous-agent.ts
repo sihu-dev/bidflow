@@ -18,10 +18,39 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// SECURITY WARNING: Using SERVICE_ROLE_KEY bypasses Row Level Security (RLS)
+// This is acceptable for backend-only operations IF:
+// 1. This function is NEVER exposed to client-side code
+// 2. All callers are authenticated and authorized
+// 3. All queries include explicit tenant_id filtering (if multi-tenant)
+// 4. Input validation is performed on all parameters
+//
+// Current usage: Only called from Inngest (master-orchestrator.ts)
+// TODO: Add tenant_id filtering if multi-tenant support is added
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// ============================================================================
+// SECURITY CONFIGURATION
+// ============================================================================
+
+/**
+ * Bid ID 검증 (SQL Injection 및 Invalid ID 방지)
+ */
+function validateBidId(bidId: string): void {
+  // UUID v4 형식 검증
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!bidId || typeof bidId !== 'string') {
+    throw new Error('Invalid bidId: Must be a non-empty string');
+  }
+
+  if (!uuidRegex.test(bidId)) {
+    throw new Error(`Invalid bidId format: ${bidId}. Expected UUID v4`);
+  }
+}
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -76,15 +105,20 @@ export async function autonomousBidAnalysis(bidId: string): Promise<AutonomousAn
   const toolsUsed: string[] = [];
 
   try {
+    // SECURITY: Bid ID 검증
+    validateBidId(bidId);
+
     // Step 1: Bid 데이터 조회
     const { data: bid, error } = await supabase
       .from('bids')
       .select('*')
       .eq('id', bidId)
+      // TODO: Add tenant_id filter when multi-tenant support is added
+      // .eq('tenant_id', tenantId)
       .single();
 
     if (error || !bid) {
-      throw new Error(`Bid not found: ${bidId}`);
+      throw new Error(`Bid not found or access denied: ${bidId}`);
     }
 
     // Step 2: Interleaved Thinking으로 자율 분석
@@ -239,6 +273,24 @@ JSON으로 상세 분석 결과 제공.`,
  * 배치 자율 분석 (여러 입찰)
  */
 export async function batchAutonomousAnalysis(bidIds: string[]) {
+  // SECURITY: 입력 검증
+  if (!Array.isArray(bidIds) || bidIds.length === 0) {
+    throw new Error('bidIds must be a non-empty array');
+  }
+
+  if (bidIds.length > 100) {
+    throw new Error('Maximum 100 bids allowed per batch');
+  }
+
+  // 각 bidId 검증
+  bidIds.forEach((id, index) => {
+    try {
+      validateBidId(id);
+    } catch (e) {
+      throw new Error(`Invalid bidId at index ${index}: ${e}`);
+    }
+  });
+
   const results = await Promise.all(
     bidIds.map(async (bidId) => {
       try {
@@ -262,6 +314,13 @@ export async function batchAutonomousAnalysis(bidIds: string[]) {
  * 자가 복구 분석 (실패 시 재시도)
  */
 export async function selfHealingAnalysis(bidId: string, maxRetries: number = 3) {
+  // SECURITY: 입력 검증
+  validateBidId(bidId);
+
+  if (maxRetries < 1 || maxRetries > 5) {
+    throw new Error('maxRetries must be between 1 and 5');
+  }
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`[Autonomous] Attempt ${attempt}/${maxRetries} for ${bidId}`);

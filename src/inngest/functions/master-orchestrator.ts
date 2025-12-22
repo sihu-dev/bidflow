@@ -219,21 +219,78 @@ export const masterOrchestrator = inngest.createFunction(
 // MANUAL TRIGGER
 // ============================================================================
 
+// SECURITY: Rate Limiting Configuration
+const MANUAL_TRIGGER_RATE_LIMIT = {
+  MAX_BIDS_PER_TRIGGER: 10, // Maximum bids per manual trigger
+  MAX_PARALLEL_ANALYSIS: 5,  // Maximum parallel analysis jobs
+};
+
 export const manualOrchestrator = inngest.createFunction(
   {
     id: 'manual-orchestrator',
     name: 'Manual Orchestrator Trigger',
+    // SECURITY: Add rate limiting
+    rateLimit: {
+      limit: 5,
+      period: '1h', // Max 5 manual triggers per hour
+    },
   },
   { event: 'orchestrator/run.manual' },
   async ({ event, step }) => {
-    const { bidIds } = event.data as { bidIds?: string[] };
+    // SECURITY: Authentication Check
+    // TODO: Verify that event.user is authenticated and has 'admin' role
+    // For now, we check for a valid API key in event metadata
+    const apiKey = event.data.apiKey as string | undefined;
+
+    if (!apiKey || apiKey !== process.env.INNGEST_API_KEY) {
+      console.error('[Manual Orchestrator] Unauthorized access attempt');
+      throw new Error('Unauthorized: Valid API key required');
+    }
+
+    const { bidIds } = event.data as { bidIds?: string[]; apiKey?: string };
 
     if (bidIds && bidIds.length > 0) {
-      // 특정 입찰만 처리
-      const results = await step.run('analyze-specific-bids', async () => {
-        return await Promise.all(
-          bidIds.map((bidId) => autonomousBidAnalysis(bidId))
+      // SECURITY: Validate input
+      if (!Array.isArray(bidIds)) {
+        throw new Error('bidIds must be an array');
+      }
+
+      // SECURITY: Resource Exhaustion Prevention
+      if (bidIds.length > MANUAL_TRIGGER_RATE_LIMIT.MAX_BIDS_PER_TRIGGER) {
+        throw new Error(
+          `Too many bids requested. Maximum ${MANUAL_TRIGGER_RATE_LIMIT.MAX_BIDS_PER_TRIGGER} per trigger`
         );
+      }
+
+      // SECURITY: Validate each bidId (UUID format)
+      bidIds.forEach((id, index) => {
+        if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/i.test(id)) {
+          throw new Error(`Invalid bidId at index ${index}: ${id}`);
+        }
+      });
+
+      // 특정 입찰만 처리 (병렬 제한)
+      const results = await step.run('analyze-specific-bids', async () => {
+        // Process in batches to limit parallel load
+        const batchSize = MANUAL_TRIGGER_RATE_LIMIT.MAX_PARALLEL_ANALYSIS;
+        const batches: string[][] = [];
+
+        for (let i = 0; i < bidIds.length; i += batchSize) {
+          batches.push(bidIds.slice(i, i + batchSize));
+        }
+
+        const allResults = [];
+        for (const batch of batches) {
+          const batchResults = await Promise.all(
+            batch.map((bidId) => autonomousBidAnalysis(bidId).catch((e) => {
+              console.error(`[Manual] Failed for ${bidId}:`, e);
+              return null;
+            }))
+          );
+          allResults.push(...batchResults);
+        }
+
+        return allResults.filter((r) => r !== null);
       });
 
       return {
