@@ -44,6 +44,23 @@ interface SiteInfo {
   lastUpdate: Date;
 }
 
+// API 응답 타입
+interface APISensor {
+  id: string;
+  name: string;
+  type: string;
+  unit: string;
+}
+
+interface APIReading {
+  value: number;
+  timestamp: string;
+}
+
+interface APIAlert {
+  sensorId: string;
+}
+
 // ============================================
 // API Functions
 // ============================================
@@ -66,13 +83,13 @@ async function fetchSensorReadings(siteId: string): Promise<SensorReading[]> {
   if (!res.ok) throw new Error('Failed to fetch sensor readings');
   const json = await res.json();
 
-  const sensors = json.data.sensors || [];
-  const readings = json.data.readings || {};
-  const alerts = json.data.alerts || [];
+  const sensors: APISensor[] = json.data.sensors || [];
+  const readings: Record<string, APIReading> = json.data.readings || {};
+  const alerts: APIAlert[] = json.data.alerts || [];
 
-  return sensors.map((sensor: any) => {
+  return sensors.map((sensor) => {
     const reading = readings[sensor.id];
-    const hasAlert = alerts.some((a: any) => a.sensorId === sensor.id);
+    const hasAlert = alerts.some((a) => a.sensorId === sensor.id);
 
     return {
       sensorId: sensor.id,

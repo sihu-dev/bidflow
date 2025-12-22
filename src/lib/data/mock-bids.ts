@@ -2,6 +2,13 @@
  * 랜딩 페이지용 목업 입찰 데이터
  * CMNTech 5개 제품과 매칭된 6개 샘플 공고
  * Enhanced Matcher로 실시간 점수 계산
+ *
+ * @sync 이 데이터는 supabase/migrations/20251221000011_seed_sample_bids.sql과
+ *       동기화 상태를 유지해야 합니다. DB 시드가 source of truth입니다.
+ *
+ * @usage
+ * - 랜딩 페이지 데모: DB 연결 없이 MOCK_BIDS 사용 (빠른 로드)
+ * - Dashboard/실제 앱: DB에서 bids 테이블 조회
  */
 
 import { matchBidToProducts, type BidAnnouncement } from '../matching/enhanced-matcher';
@@ -62,7 +69,18 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 /**
+ * 동적 마감일 계산 (오늘 기준)
+ * DB 시드와 동일한 방식으로 계산
+ */
+function getDeadline(daysFromNow: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0];
+}
+
+/**
  * 원본 입찰 데이터 (매칭 전)
+ * deadline은 오늘 기준 동적 계산 (DB 시드와 동일)
  */
 const RAW_BIDS = [
   {
@@ -72,7 +90,7 @@ const RAW_BIDS = [
     title: '[긴급] 서울시 상수도본부 초음파유량계 설치 및 유지관리 (DN300-1000, 25대)',
     organization: '서울시 상수도사업본부',
     estimatedAmount: 450000000,
-    deadline: '2025-01-28',
+    deadline: getDeadline(14), // D-14
     status: 'reviewing' as const,
     statusLabel: STATUS_LABELS.reviewing,
     priority: 'high' as const,
@@ -85,7 +103,7 @@ const RAW_BIDS = [
     title: 'K-water 정수장 전자유량계 교체 공사 (DN50-150, 일체형)',
     organization: 'K-water 한국수자원공사',
     estimatedAmount: 280000000,
-    deadline: '2025-02-02',
+    deadline: getDeadline(21), // D-21
     status: 'new' as const,
     statusLabel: STATUS_LABELS.new,
     priority: 'medium' as const,
@@ -98,7 +116,7 @@ const RAW_BIDS = [
     title: 'Ultrasonic Water Flow Meters Supply - Berlin Water Authority (DN500-2000)',
     organization: 'Berliner Wasserbetriebe',
     estimatedAmount: 850000000,
-    deadline: '2025-02-15',
+    deadline: getDeadline(35), // D-35
     status: 'preparing' as const,
     statusLabel: STATUS_LABELS.preparing,
     priority: 'high' as const,
@@ -111,7 +129,7 @@ const RAW_BIDS = [
     title: '한국전력 발전소 초음파 열량계 납품 (지역난방 연계)',
     organization: '한국전력공사',
     estimatedAmount: 120000000,
-    deadline: '2025-02-08',
+    deadline: getDeadline(28), // D-28
     status: 'new' as const,
     statusLabel: STATUS_LABELS.new,
     priority: 'low' as const,
@@ -124,7 +142,7 @@ const RAW_BIDS = [
     title: '부산시 하수처리장 비만관형 유량계 설치 (DN1000, 비접촉식)',
     organization: '부산환경공단',
     estimatedAmount: 95000000,
-    deadline: '2025-01-24',
+    deadline: getDeadline(7), // D-7 (긴급)
     status: 'submitted' as const,
     statusLabel: STATUS_LABELS.submitted,
     priority: 'high' as const,
@@ -137,7 +155,7 @@ const RAW_BIDS = [
     title: '농어촌공사 농업용수로 개수로 유량측정 시스템 설치',
     organization: '한국농어촌공사',
     estimatedAmount: 180000000,
-    deadline: '2025-02-20',
+    deadline: getDeadline(40), // D-40
     status: 'new' as const,
     statusLabel: STATUS_LABELS.new,
     priority: 'medium' as const,

@@ -18,7 +18,21 @@ import type {
   CreateSiteDto,
   CreateSensorDto,
   SensorReadingDto,
+  SiteType,
+  SensorType,
+  SensorProtocol,
+  PredictionType,
+  ReportType,
+  ReportStatus,
+  ReportData,
 } from '../entities';
+
+// ============================================
+// Database Row Types (Supabase 응답)
+// ============================================
+
+/** Supabase에서 반환하는 DB row의 기본 타입 */
+type DatabaseRow = Record<string, unknown>;
 
 // ============================================
 // Repository Interface
@@ -498,101 +512,97 @@ export class SludgeRepository implements ISludgeRepository {
   }
 
   // ============================================
-  // Mappers
+  // Mappers (DatabaseRow → Entity)
   // ============================================
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  private mapAlert(row: any): SensorAlert {
+  private mapAlert(row: DatabaseRow): SensorAlert {
     return {
-      id: row.id,
+      id: row.id as string,
       siteId: row.site_id as SiteId,
       sensorId: row.sensor_id as SensorId,
-      type: row.type,
-      message: row.message,
-      value: row.value,
-      threshold: row.threshold,
-      acknowledgedAt: row.acknowledged_at ? new Date(row.acknowledged_at) : undefined,
-      createdAt: new Date(row.created_at),
+      type: row.type as 'warning' | 'error',
+      message: row.message as string,
+      value: row.value as number,
+      threshold: row.threshold as number,
+      acknowledgedAt: row.acknowledged_at ? new Date(row.acknowledged_at as string) : undefined,
+      createdAt: new Date(row.created_at as string),
     };
   }
-  /* eslint-enable @typescript-eslint/no-explicit-any */
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  private mapSite(row: any): SludgeSite {
+  private mapSite(row: DatabaseRow): SludgeSite {
     return {
       id: row.id as SiteId,
-      name: row.name,
-      type: row.type,
-      address: row.address,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      capacityM3Day: row.capacity_m3_day,
-      organizationId: row.organization_id,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at || row.created_at),
+      name: row.name as string,
+      type: row.type as SiteType,
+      address: row.address as string | undefined,
+      latitude: row.latitude as number | undefined,
+      longitude: row.longitude as number | undefined,
+      capacityM3Day: row.capacity_m3_day as number | undefined,
+      organizationId: row.organization_id as string | undefined,
+      createdAt: new Date(row.created_at as string),
+      updatedAt: new Date((row.updated_at || row.created_at) as string),
     };
   }
 
-  private mapSensor(row: any): SludgeSensor {
+  private mapSensor(row: DatabaseRow): SludgeSensor {
     return {
       id: row.id as SensorId,
       siteId: row.site_id as SiteId,
-      name: row.name,
-      type: row.type,
-      model: row.model,
-      protocol: row.protocol,
-      address: row.address,
-      register: row.register,
-      scale: row.scale,
-      unit: row.unit,
-      isActive: row.is_active,
-      lastReading: row.last_reading ? new Date(row.last_reading) : undefined,
-      createdAt: new Date(row.created_at),
+      name: row.name as string,
+      type: row.type as SensorType,
+      model: row.model as string | undefined,
+      protocol: (row.protocol || 'modbus_rtu') as SensorProtocol,
+      address: row.address as number | undefined,
+      register: row.register as number | undefined,
+      scale: row.scale as number | undefined,
+      unit: row.unit as string,
+      isActive: row.is_active as boolean,
+      lastReading: row.last_reading ? new Date(row.last_reading as string) : undefined,
+      createdAt: new Date(row.created_at as string),
     };
   }
 
-  private mapReading(row: any): SludgeReading {
+  private mapReading(row: DatabaseRow): SludgeReading {
     return {
       id: row.id as ReadingId,
-      time: new Date(row.time),
+      time: new Date(row.time as string),
       siteId: row.site_id as SiteId,
       sensorId: row.sensor_id as SensorId,
-      value: row.value,
-      unit: row.unit,
-      quality: row.quality,
+      value: row.value as number,
+      unit: row.unit as string,
+      quality: (row.quality as number) ?? 100,
     };
   }
 
-  private mapPrediction(row: any): SludgePrediction {
+  private mapPrediction(row: DatabaseRow): SludgePrediction {
     return {
       id: row.id as PredictionId,
       siteId: row.site_id as SiteId,
-      predictionType: row.prediction_type,
-      predictedAt: new Date(row.predicted_at),
-      targetDate: new Date(row.target_date),
-      predictedValue: row.predicted_value,
-      confidenceLow: row.confidence_low,
-      confidenceHigh: row.confidence_high,
-      actualValue: row.actual_value,
-      modelVersion: row.model_version,
+      predictionType: row.prediction_type as PredictionType,
+      predictedAt: new Date(row.predicted_at as string),
+      targetDate: new Date(row.target_date as string),
+      predictedValue: row.predicted_value as number,
+      confidenceLow: row.confidence_low as number | undefined,
+      confidenceHigh: row.confidence_high as number | undefined,
+      actualValue: row.actual_value as number | undefined,
+      modelVersion: (row.model_version as string) || 'v1.0',
     };
   }
 
-  private mapReport(row: any): SludgeReport {
+  private mapReport(row: DatabaseRow): SludgeReport {
     return {
       id: row.id as ReportId,
       siteId: row.site_id as SiteId,
-      reportType: row.report_type,
-      periodStart: new Date(row.period_start),
-      periodEnd: new Date(row.period_end),
-      status: row.status,
-      data: row.data,
-      fileUrl: row.file_url,
-      submittedAt: row.submitted_at ? new Date(row.submitted_at) : undefined,
-      createdAt: new Date(row.created_at),
+      reportType: row.report_type as ReportType,
+      periodStart: new Date(row.period_start as string),
+      periodEnd: new Date(row.period_end as string),
+      status: row.status as ReportStatus,
+      data: (row.data || {}) as ReportData,
+      fileUrl: row.file_url as string | undefined,
+      submittedAt: row.submitted_at ? new Date(row.submitted_at as string) : undefined,
+      createdAt: new Date(row.created_at as string),
     };
   }
-  /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 // Singleton instance

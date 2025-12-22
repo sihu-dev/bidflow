@@ -4,26 +4,31 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getSiteSensors, getLatestSensorReadings } from '@/lib/sludge';
+import { getSiteSensors, getLatestSensorReadings, getSludgeRepository } from '@/lib/sludge';
+import type { SiteId, SludgeReading } from '@/lib/sludge/entities';
+import type { SensorAlert } from '@/lib/sludge/repositories/sludge-repository';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: siteId } = await params;
+    const { id } = await params;
+    const siteId = id as SiteId;
 
     // 사이트의 센서 목록과 최신 readings 조회
-    const sensors = await getSiteSensors(siteId as any);
-    const latestReadings = await getLatestSensorReadings(siteId as any);
+    const sensors = await getSiteSensors(siteId);
+    const latestReadings = await getLatestSensorReadings(siteId);
 
     // readings를 센서 ID로 매핑
-    const readingsMap: Record<string, any> = {};
+    const readingsMap: Record<string, SludgeReading> = {};
     for (const reading of latestReadings) {
       readingsMap[reading.sensorId] = reading;
     }
 
-    const alerts: any[] = []; // TODO: 실제 알림 조회
+    // 실제 알림 조회
+    const repository = getSludgeRepository();
+    const alerts: SensorAlert[] = await repository.getAlertsBySite(siteId);
 
     return NextResponse.json({
       success: true,
