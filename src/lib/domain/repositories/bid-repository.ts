@@ -54,9 +54,17 @@ export interface IBidRepository {
   update(id: UUID, data: UpdateInput<BidData>): Promise<ApiResponse<BidData>>;
   delete(id: UUID): Promise<ApiResponse<{ deleted: boolean }>>;
   findByExternalId(source: BidSource, externalId: string): Promise<ApiResponse<BidData | null>>;
+  findByExternalIds(source: BidSource, externalIds: string[]): Promise<ApiResponse<BidData[]>>;
   findUpcoming(days: number): Promise<ApiResponse<BidData[]>>;
   updateStatus(id: UUID, status: BidStatus): Promise<ApiResponse<BidData>>;
   bulkCreate(data: CreateInput<BidData>[]): Promise<ApiResponse<{ created: number; failed: number }>>;
+  getStats(): Promise<ApiResponse<{
+    totalBids: number;
+    byStatus: Record<BidStatus, number>;
+    upcomingDeadlines: number;
+    highPriority: number;
+    wonRate: number;
+  }>>;
 }
 
 // ============================================================================
@@ -286,6 +294,34 @@ export class SupabaseBidRepository implements IBidRepository {
     }
   }
 
+  async findByExternalIds(source: BidSource, externalIds: string[]): Promise<ApiResponse<BidData[]>> {
+    try {
+      if (externalIds.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const { data, error } = await this.supabase
+        .from('bids')
+        .select('*')
+        .eq('source', source)
+        .in('external_id', externalIds);
+
+      if (error) {
+        return {
+          success: false,
+          error: { code: 'DB_ERROR', message: error.message },
+        };
+      }
+
+      return { success: true, data: (data ?? []).map(this.mapToBidData) };
+    } catch (error) {
+      return {
+        success: false,
+        error: { code: 'DB_ERROR', message: String(error) },
+      };
+    }
+  }
+
   async findUpcoming(days: number): Promise<ApiResponse<BidData[]>> {
     try {
       const today = new Date();
@@ -343,6 +379,103 @@ export class SupabaseBidRepository implements IBidRepository {
       return {
         success: true,
         data: { created: data?.length ?? 0, failed: inputs.length - (data?.length ?? 0) },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: { code: 'DB_ERROR', message: String(error) },
+      };
+    }
+  }
+
+  async getStats(): Promise<ApiResponse<{
+    totalBids: number;
+    byStatus: Record<BidStatus, number>;
+    upcomingDeadlines: number;
+    highPriority: number;
+    wonRate: number;
+  }>> {
+    try {
+      // 전체 입찰 수 (단일 쿼리)
+      const { count: totalBids, error: countError } = await this.supabase
+        .from('bids')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        return {
+          success: false,
+          error: { code: 'DB_ERROR', message: countError.message },
+        };
+      }
+
+      // 상태별 집계 (GROUP BY 쿼리)
+      const { data: statusData, error: statusError } = await this.supabase
+        .rpc('get_bids_by_status');
+
+      if (statusError) {
+        // RPC 함수가 없으면 fallback (JavaScript 집계)
+        const { data: allBids } = await this.supabase.from('bids').select('status');
+        const byStatus = (allBids ?? []).reduce(
+          (acc, bid) => {
+            const status = bid.status as BidStatus;
+            acc[status] = (acc[status] ?? 0) + 1;
+            return acc;
+          },
+          {} as Record<BidStatus, number>
+        );
+
+        // 마감 임박 (7일 이내)
+        const today = new Date();
+        const sevenDaysLater = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const { count: upcomingCount } = await this.supabase
+          .from('bids')
+          .select('*', { count: 'exact', head: true })
+          .gte('deadline', today.toISOString())
+          .lte('deadline', sevenDaysLater.toISOString())
+          .not('status', 'in', '(won,lost,cancelled)');
+
+        // 높은 우선순위
+        const { count: highPriorityCount } = await this.supabase
+          .from('bids')
+          .select('*', { count: 'exact', head: true })
+          .eq('priority', 'high');
+
+        // 낙찰률
+        const { count: wonCount } = await this.supabase
+          .from('bids')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'won');
+
+        const { count: lostCount } = await this.supabase
+          .from('bids')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'lost');
+
+        const completedCount = (wonCount ?? 0) + (lostCount ?? 0);
+        const wonRate = completedCount > 0 ? (wonCount ?? 0) / completedCount : 0;
+
+        return {
+          success: true,
+          data: {
+            totalBids: totalBids ?? 0,
+            byStatus,
+            upcomingDeadlines: upcomingCount ?? 0,
+            highPriority: highPriorityCount ?? 0,
+            wonRate,
+          },
+        };
+      }
+
+      // RPC 함수 사용 (추후 구현)
+      return {
+        success: true,
+        data: {
+          totalBids: totalBids ?? 0,
+          byStatus: statusData as Record<BidStatus, number>,
+          upcomingDeadlines: 0,
+          highPriority: 0,
+          wonRate: 0,
+        },
       };
     } catch (error) {
       return {
@@ -516,6 +649,11 @@ class MockBidRepository implements IBidRepository {
     return { success: true, data: bid ?? null };
   }
 
+  async findByExternalIds(source: BidSource, externalIds: string[]): Promise<ApiResponse<BidData[]>> {
+    const bids = this.bids.filter((b) => b.source === source && externalIds.includes(b.externalId));
+    return { success: true, data: bids };
+  }
+
   async findUpcoming(days: number): Promise<ApiResponse<BidData[]>> {
     const now = new Date();
     const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
@@ -537,6 +675,47 @@ class MockBidRepository implements IBidRepository {
       if (res.success) created++;
     }
     return { success: true, data: { created, failed: data.length - created } };
+  }
+
+  async getStats(): Promise<ApiResponse<{
+    totalBids: number;
+    byStatus: Record<BidStatus, number>;
+    upcomingDeadlines: number;
+    highPriority: number;
+    wonRate: number;
+  }>> {
+    const byStatus = this.bids.reduce(
+      (acc, bid) => {
+        acc[bid.status] = (acc[bid.status] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<BidStatus, number>
+    );
+
+    const now = new Date();
+    const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const upcomingDeadlines = this.bids.filter((bid) => {
+      const deadline = new Date(bid.deadline);
+      return deadline >= now && deadline <= sevenDaysLater && !['won', 'lost', 'cancelled'].includes(bid.status);
+    }).length;
+
+    const highPriority = this.bids.filter((bid) => bid.priority === 'high').length;
+
+    const completed = this.bids.filter((bid) => ['won', 'lost'].includes(bid.status));
+    const wonRate = completed.length > 0
+      ? this.bids.filter((bid) => bid.status === 'won').length / completed.length
+      : 0;
+
+    return {
+      success: true,
+      data: {
+        totalBids: this.bids.length,
+        byStatus,
+        upcomingDeadlines,
+        highPriority,
+        wonRate,
+      },
+    };
   }
 }
 

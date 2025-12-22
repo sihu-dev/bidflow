@@ -4,6 +4,8 @@
  * @see https://developers.kakao.com/docs/latest/ko/message/rest-api
  */
 
+import { logger } from '@/lib/utils/logger';
+
 // ============================================================================
 // 타입 정의
 // ============================================================================
@@ -82,10 +84,11 @@ export async function sendKakaoAlimtalk(payload: KakaoAlimtalkPayload): Promise<
   // 개발 환경 시뮬레이션
   if (!KAKAO_API_KEY || !KAKAO_SENDER_KEY) {
     if (isDevelopment) {
-      console.log('[Kakao DEV] 알림톡 발송 (시뮬레이션):');
-      console.log(`  수신자: ${recipientNo}`);
-      console.log(`  템플릿: ${templateCode}`);
-      console.log(`  파라미터:`, templateParameter);
+      logger.info('[Kakao DEV] 알림톡 발송 (시뮬레이션):', {
+        recipient: recipientNo,
+        template: templateCode,
+        parameters: templateParameter,
+      });
       return { success: true, requestId: 'dev-mock-' + Date.now() };
     }
     return { success: false, error: 'KAKAO_ALIMTALK_API_KEY 또는 KAKAO_SENDER_KEY가 설정되지 않았습니다' };

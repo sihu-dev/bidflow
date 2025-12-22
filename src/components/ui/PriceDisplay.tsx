@@ -14,7 +14,7 @@ export function PriceDisplay({ price, changePercent, showChange = true, classNam
     <div className={className}>
       <span>{price.toFixed(2)}</span>
       {showChange && changePercent !== undefined && (
-        <span className={changePercent >= 0 ? 'text-green-500' : 'text-red-500'}>
+        <span className={changePercent >= 0 ? 'text-neutral-300' : 'text-red-400'}>
           {changePercent >= 0 ? '+' : ''}{changePercent.toFixed(2)}%
         </span>
       )}

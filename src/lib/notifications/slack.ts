@@ -3,6 +3,8 @@
  * @description Slack 웹훅 알림 서비스
  */
 
+import { logger } from '@/lib/utils/logger';
+
 // ============================================================================
 // 타입 정의
 // ============================================================================
@@ -64,8 +66,7 @@ export async function sendSlackMessage(message: SlackMessage): Promise<void> {
   if (!SLACK_WEBHOOK_URL) {
     if (isDevelopment) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Slack DEV] 메시지 발송 (시뮬레이션):');
-        console.log(JSON.stringify(message, null, 2));
+        logger.info('[Slack DEV] 메시지 발송 (시뮬레이션):', message);
       }
       return;
     }

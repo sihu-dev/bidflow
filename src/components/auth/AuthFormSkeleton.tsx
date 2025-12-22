@@ -1,7 +1,7 @@
 /**
  * Auth 폼 로딩 Skeleton
  */
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export function AuthFormSkeleton() {
   return (

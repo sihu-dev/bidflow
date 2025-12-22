@@ -1,6 +1,6 @@
 /**
  * @route /api/v1/ai/formula
- * @description AI 수식 실행 API
+ * @description AI 수식 실행 API (V2 - 신규 AI 함수 통합)
  */
 
 import { NextResponse } from 'next/server';
@@ -8,6 +8,16 @@ import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middlew
 import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 import { parseFormula, type FormulaContext } from '@/lib/spreadsheet/formula-parser';
 import { z } from 'zod';
+
+// ============================================================================
+// 신규 AI 함수 Import
+// ============================================================================
+
+import { AI_SUMMARY } from '@/lib/spreadsheet/ai-summary';
+import { AI_SCORE } from '@/lib/spreadsheet/ai-score';
+import { AI_KEYWORDS } from '@/lib/spreadsheet/ai-keywords';
+import { AI_DEADLINE } from '@/lib/spreadsheet/ai-deadline';
+import { matchBidToProducts } from '@/lib/matching/enhanced-matcher';
 
 // ============================================================================
 // 요청 스키마
@@ -99,13 +109,20 @@ async function executeSummaryAI(context: FormulaContext): Promise<string> {
     return '데이터가 없습니다';
   }
 
-  const prompt = `다음 입찰 공고를 2-3문장으로 요약해주세요:\n
-제목: ${context.cellData.title}
-기관: ${context.cellData.organization}
-추정가: ${context.cellData.estimated_amount}
-마감일: ${context.cellData.deadline}`;
+  // 신규 AI_SUMMARY 함수 사용
+  const bidText = [
+    `제목: ${context.cellData.title}`,
+    `기관: ${context.cellData.organization}`,
+    context.cellData.description ? `내용: ${context.cellData.description}` : '',
+  ].filter(Boolean).join('\n');
 
-  return executeGeneralAI(prompt, context);
+  try {
+    const summary = await AI_SUMMARY(bidText);
+    return summary;
+  } catch (error) {
+    console.error('[AI_SUMMARY] Error:', error);
+    return '요약 생성 실패';
+  }
 }
 
 async function executeScoreAI(context: FormulaContext): Promise<string> {
@@ -113,20 +130,22 @@ async function executeScoreAI(context: FormulaContext): Promise<string> {
     return '-';
   }
 
-  if (!ANTHROPIC_API_KEY && isDevelopment) {
-    // 개발 모드에서는 랜덤 점수 반환
-    const score = Math.floor(Math.random() * 40) + 60;
-    return `${score}%`;
+  // 신규 AI_SCORE 함수 사용
+  try {
+    const bid = {
+      id: context.bidId || context.cellData.id as string || 'unknown',
+      title: context.cellData.title as string,
+      organization: context.cellData.organization as string,
+      description: context.cellData.description as string | undefined,
+      estimatedPrice: context.cellData.estimated_amount as number | undefined,
+    };
+
+    const score = await AI_SCORE(bid);
+    return `${score}`;
+  } catch (error) {
+    console.error('[AI_SCORE] Error:', error);
+    return '-';
   }
-
-  const prompt = `다음 입찰 공고에 대한 낙찰 확률을 0-100% 사이로 평가해주세요. 숫자와 %만 응답하세요.
-제목: ${context.cellData.title}
-기관: ${context.cellData.organization}
-추정가: ${context.cellData.estimated_amount}`;
-
-  const result = await executeGeneralAI(prompt, context);
-  const match = result.match(/(\d+)/);
-  return match ? `${match[1]}%` : result;
 }
 
 async function executeMatchAI(context: FormulaContext): Promise<string> {
@@ -134,17 +153,25 @@ async function executeMatchAI(context: FormulaContext): Promise<string> {
     return '-';
   }
 
-  if (!ANTHROPIC_API_KEY && isDevelopment) {
-    const products = ['UR-1000PLUS', 'UR-2000', 'EM-500', 'HM-300'];
-    return products[Math.floor(Math.random() * products.length)];
+  // 신규 Enhanced Matcher 사용
+  try {
+    const bid = {
+      id: context.bidId || context.cellData.id as string || 'unknown',
+      title: context.cellData.title as string,
+      organization: context.cellData.organization as string,
+      description: context.cellData.description as string | undefined,
+      estimatedPrice: context.cellData.estimated_amount as number | undefined,
+    };
+
+    const matchResult = matchBidToProducts(bid);
+    if (matchResult.bestMatch) {
+      return matchResult.bestMatch.productId;
+    }
+    return 'NONE';
+  } catch (error) {
+    console.error('[AI_MATCH] Error:', error);
+    return '-';
   }
-
-  const prompt = `다음 입찰 공고에 적합한 유량계 제품을 추천해주세요. 제품명만 간단히 응답하세요.
-제목: ${context.cellData.title}
-기관: ${context.cellData.organization}
-키워드: ${context.cellData.keywords}`;
-
-  return executeGeneralAI(prompt, context);
 }
 
 async function executeKeywordsAI(context: FormulaContext): Promise<string> {
@@ -152,14 +179,20 @@ async function executeKeywordsAI(context: FormulaContext): Promise<string> {
     return '-';
   }
 
-  if (!ANTHROPIC_API_KEY && isDevelopment) {
-    return '유량계, 초음파, 계측';
+  // 신규 AI_KEYWORDS 함수 사용
+  try {
+    const bidText = [
+      context.cellData.title,
+      context.cellData.description,
+      context.cellData.organization,
+    ].filter(Boolean).join(' ');
+
+    const keywords = await AI_KEYWORDS(bidText as string);
+    return keywords.join(', ');
+  } catch (error) {
+    console.error('[AI_KEYWORDS] Error:', error);
+    return '-';
   }
-
-  const prompt = `다음 입찰 공고에서 핵심 키워드 3개를 추출해주세요. 쉼표로 구분하여 응답하세요.
-제목: ${context.cellData.title}`;
-
-  return executeGeneralAI(prompt, context);
 }
 
 async function executeDeadlineAI(context: FormulaContext): Promise<string> {
@@ -167,15 +200,20 @@ async function executeDeadlineAI(context: FormulaContext): Promise<string> {
     return '-';
   }
 
-  const deadline = new Date(context.cellData.deadline as string);
-  const now = new Date();
-  const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  // 신규 AI_DEADLINE 함수 사용
+  try {
+    const deadline = context.cellData.deadline as string | Date;
+    const analysis = await AI_DEADLINE(deadline);
 
-  if (diffDays < 0) return '마감됨';
-  if (diffDays === 0) return 'D-Day 🔴';
-  if (diffDays <= 3) return `D-${diffDays} 🔴 긴급`;
-  if (diffDays <= 7) return `D-${diffDays} 🟡`;
-  return `D-${diffDays} 🟢`;
+    // 이모지 추가
+    const emoji = analysis.statusColor === 'red' ? '🔴' :
+                  analysis.statusColor === 'yellow' ? '🟡' : '🟢';
+
+    return `${analysis.ddayLabel} ${emoji} ${analysis.urgencyLabel}`;
+  } catch (error) {
+    console.error('[AI_DEADLINE] Error:', error);
+    return '-';
+  }
 }
 
 // ============================================================================
