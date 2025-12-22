@@ -163,11 +163,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
       }
 
+      // Type assertion for selected fields
+      const bidData = data as {
+        id: string;
+        title: string;
+        organization: string;
+        description: string | null;
+        keywords: string[] | null;
+      };
+
       bid = {
-        id: data.id,
-        title: data.title,
-        organization: data.organization,
-        description: data.description || data.keywords?.join(', '),
+        id: bidData.id,
+        title: bidData.title,
+        organization: bidData.organization,
+        description: bidData.description || bidData.keywords?.join(', '),
       };
     } else {
       bid = {
