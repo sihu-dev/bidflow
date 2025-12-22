@@ -14,6 +14,8 @@ import {
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database.types';
 
 // ============================================================================
 // 요청 스키마
@@ -139,19 +141,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     let bid: BidAnnouncement;
 
     if (bidId) {
-      // TODO: Supabase에서 bid 조회
-      // const { data, error } = await supabase
-      //   .from('bid_announcements')
-      //   .select('*')
-      //   .eq('id', bidId)
-      //   .single();
+      // Supabase에서 bid 조회
+      const supabase = createClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
 
-      // 현재는 Mock 데이터 반환
+      const { data, error } = await supabase
+        .from('bids')
+        .select('id, title, organization, description, keywords')
+        .eq('id', bidId)
+        .single();
+
+      if (error || !data) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `입찰 공고를 찾을 수 없습니다 (ID: ${bidId})`,
+          },
+          { status: 404 }
+        );
+      }
+
       bid = {
-        id: bidId,
-        title: title || `입찰 공고 ${bidId}`,
-        organization: organization || '발주기관',
-        description: description,
+        id: data.id,
+        title: data.title,
+        organization: data.organization,
+        description: data.description || data.keywords?.join(', '),
       };
     } else {
       bid = {
