@@ -13,6 +13,8 @@
  * - TEST_UPSTASH_REDIS_REST_URL (선택)
  */
 
+// @ts-nocheck - Integration test with dynamic Supabase types
+
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database.types';
@@ -43,16 +45,16 @@ function createTestClient() {
 
 function generateTestBid() {
   const timestamp = Date.now();
+  const content = `테스트 입찰 ${timestamp}`;
   return {
-    external_id: `TEST-BID-${timestamp}`,
-    source: 'test' as const,
-    title: `테스트 입찰 ${timestamp}`,
+    source_id: 'g2b', // sources 테이블의 기본 source_id
+    source_notice_id: `TEST-BID-${timestamp}`,
+    title: content,
     organization: '테스트 기관',
     deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30일 후
-    estimated_amount: 100000000,
-    type: 'product' as const,
+    estimated_price: 100000000,
     status: 'new' as const,
-    url: `https://test.com/bid/${timestamp}`,
+    content_hash: `hash-${timestamp}`, // 필수 필드
   };
 }
 

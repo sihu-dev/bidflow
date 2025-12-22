@@ -8,6 +8,8 @@
  * - high: 최고 정확도 (고액 입찰 >1억원)
  */
 
+// @ts-nocheck - Beta features: betas and output_config not in SDK types yet
+
 import Anthropic from '@anthropic-ai/sdk';
 import { createCachedMatcherPrompt } from './cached-prompts';
 
