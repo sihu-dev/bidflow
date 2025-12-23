@@ -2,6 +2,7 @@
  * Rate Limiter 유닛 테스트
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   checkRateLimit,
   getUserIdentifier,
@@ -9,9 +10,25 @@ import {
   checkAIRateLimit,
   checkCrawlingRateLimit,
   checkAuthRateLimit,
+  withRateLimit,
 } from '@/lib/security/rate-limiter';
 
+// Mock logger
+vi.mock('@/lib/utils/logger', () => ({
+  logger: {
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
 // Mock Upstash
+const mockLimit = vi.fn(() => Promise.resolve({
+  success: true,
+  remaining: 99,
+  reset: Date.now() + 60000,
+  limit: 100,
+}));
+
 vi.mock('@upstash/redis', () => ({
   Redis: vi.fn(() => ({
     // Mock Redis methods if needed
@@ -20,14 +37,25 @@ vi.mock('@upstash/redis', () => ({
 
 vi.mock('@upstash/ratelimit', () => ({
   Ratelimit: vi.fn(() => ({
-    limit: vi.fn(() => Promise.resolve({
-      success: true,
-      remaining: 99,
-      reset: Date.now() + 60000,
-      limit: 100,
-    })),
+    limit: mockLimit,
   })),
 }));
+
+// ============================================================================
+// 테스트 헬퍼
+// ============================================================================
+
+function createMockRequest(options: {
+  url?: string;
+  method?: string;
+  headers?: Record<string, string>;
+} = {}): NextRequest {
+  const headers = new Headers(options.headers || {});
+  const url = options.url || 'http://localhost:3010/api/test';
+  const method = options.method || 'POST';
+
+  return new NextRequest(url, { method, headers });
+}
 
 describe('rate-limiter', () => {
   beforeEach(() => {
@@ -164,6 +192,103 @@ describe('rate-limiter', () => {
       expect(typeof result.remaining).toBe('number');
       expect(typeof result.reset).toBe('number');
       expect(typeof result.limit).toBe('number');
+    });
+  });
+
+  // ============================================================================
+  // withRateLimit 미들웨어 테스트
+  // ============================================================================
+
+  describe('withRateLimit', () => {
+    beforeEach(() => {
+      // 각 테스트마다 mock 초기화
+      mockLimit.mockResolvedValue({
+        success: true,
+        remaining: 99,
+        reset: Date.now() + 60000,
+        limit: 100,
+      });
+    });
+
+    it('개발 모드 + Redis 미설정: 항상 통과', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler);
+      const request = createMockRequest();
+
+      const response = await middleware(request);
+
+      expect(handler).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+    });
+
+    it('Rate Limit 헤더 설정', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler);
+      const request = createMockRequest();
+
+      const response = await middleware(request);
+
+      expect(response.headers.get('X-RateLimit-Limit')).toBeDefined();
+      expect(response.headers.get('X-RateLimit-Remaining')).toBeDefined();
+      expect(response.headers.get('X-RateLimit-Reset')).toBeDefined();
+    });
+
+    it('커스텀 타입 설정 (ai)', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler, { type: 'ai' });
+      const request = createMockRequest();
+
+      const response = await middleware(request);
+
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it('커스텀 식별자 함수 사용', async () => {
+      const customIdentifier = vi.fn(() => 'custom-id');
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler, { getIdentifier: customIdentifier });
+      const request = createMockRequest();
+
+      const response = await middleware(request);
+
+      expect(customIdentifier).toHaveBeenCalledWith(request);
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it('x-forwarded-for 헤더에서 IP 추출', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler);
+      const request = createMockRequest({
+        headers: { 'x-forwarded-for': '192.168.1.1, 10.0.0.1' },
+      });
+
+      const response = await middleware(request);
+
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it('x-real-ip 헤더에서 IP 추출', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler);
+      const request = createMockRequest({
+        headers: { 'x-real-ip': '10.0.0.1' },
+      });
+
+      const response = await middleware(request);
+
+      expect(handler).toHaveBeenCalled();
+    });
+
+    it('cf-connecting-ip 헤더에서 IP 추출', async () => {
+      const handler = vi.fn(async () => NextResponse.json({ data: 'success' }));
+      const middleware = withRateLimit(handler);
+      const request = createMockRequest({
+        headers: { 'cf-connecting-ip': '172.16.0.1' },
+      });
+
+      const response = await middleware(request);
+
+      expect(handler).toHaveBeenCalled();
     });
   });
 });
