@@ -110,11 +110,15 @@ describe('column-definitions', () => {
   });
 
   describe('STATUS_COLORS', () => {
-    it('모든 상태에 색상 정의', () => {
-      expect(STATUS_COLORS.new).toContain('blue');
-      expect(STATUS_COLORS.reviewing).toContain('yellow');
-      expect(STATUS_COLORS.won).toContain('emerald');
-      expect(STATUS_COLORS.lost).toContain('red');
+    it('모든 상태에 색상 정의 (모노크롬 디자인)', () => {
+      // 모노크롬 디자인 시스템 사용
+      expect(STATUS_COLORS.new).toContain('neutral');
+      expect(STATUS_COLORS.reviewing).toContain('neutral');
+      expect(STATUS_COLORS.preparing).toContain('neutral');
+      expect(STATUS_COLORS.submitted).toContain('neutral');
+      expect(STATUS_COLORS.won).toContain('neutral');
+      expect(STATUS_COLORS.lost).toContain('neutral');
+      expect(STATUS_COLORS.cancelled).toContain('neutral');
     });
   });
 
