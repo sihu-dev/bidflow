@@ -2,6 +2,7 @@
  * Excel Export 유닛 테스트
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 import { exportToCSV, exportToJSON, BID_COLUMNS } from '@/lib/spreadsheet/excel-export';
 
 // file-saver 모킹
@@ -65,7 +66,7 @@ describe('Excel Export', () => {
       exportToJSON(testData, 'test-export');
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
       const filename = call[1];
 
@@ -79,7 +80,7 @@ describe('Excel Export', () => {
       exportToJSON(testData);
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const filename = call[1];
 
       expect(filename).toMatch(/^BIDFLOW_\d{4}-\d{2}-\d{2}\.json$/);
@@ -89,7 +90,7 @@ describe('Excel Export', () => {
       exportToJSON([]);
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       expect(blob.size).toBeGreaterThan(0); // "[]"
@@ -108,7 +109,7 @@ describe('Excel Export', () => {
 
       exportToJSON(testData, 'complex');
 
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
       const filename = call[1];
 
@@ -138,7 +139,7 @@ describe('Excel Export', () => {
       exportToCSV(testData, 'test-csv');
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
       const filename = call[1];
 
@@ -151,7 +152,7 @@ describe('Excel Export', () => {
 
       exportToCSV(testData);
 
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       // Blob 크기가 0보다 큼 (BOM + 데이터)
@@ -168,7 +169,7 @@ describe('Excel Export', () => {
 
       // saveAs 호출 확인 (실제 변환은 내부 로직으로 처리됨)
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       expect(blob.size).toBeGreaterThan(0);
@@ -192,7 +193,7 @@ describe('Excel Export', () => {
       exportToCSV(testData);
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       expect(blob.size).toBeGreaterThan(0);
@@ -226,7 +227,7 @@ describe('Excel Export', () => {
       exportToCSV(testData);
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       expect(blob.size).toBeGreaterThan(0);
@@ -242,7 +243,7 @@ describe('Excel Export', () => {
       exportToCSV(testData);
 
       expect(saveAs).toHaveBeenCalledTimes(1);
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       // 데이터가 많을수록 파일 크기가 커짐
@@ -254,7 +255,7 @@ describe('Excel Export', () => {
 
       exportToCSV(testData);
 
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const filename = call[1];
 
       expect(filename).toMatch(/^BIDFLOW_\d{4}-\d{2}-\d{2}\.csv$/);
@@ -281,7 +282,7 @@ describe('Excel Export', () => {
 
       exportToCSV(testData, 'complex');
 
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
       const filename = call[1];
 
@@ -300,8 +301,8 @@ describe('Excel Export', () => {
 
       expect(saveAs).toHaveBeenCalledTimes(2);
 
-      const jsonCall = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
-      const csvCall = (saveAs as ReturnType<typeof vi.fn>).mock.calls[1];
+      const jsonCall = (saveAs as unknown as Mock).mock.calls[0];
+      const csvCall = (saveAs as unknown as Mock).mock.calls[1];
 
       expect(jsonCall[1]).toBe('test.json');
       expect(csvCall[1]).toBe('test.csv');
@@ -310,7 +311,7 @@ describe('Excel Export', () => {
     it('빈 배열 CSV 내보내기 (헤더만)', () => {
       exportToCSV([]);
 
-      const call = (saveAs as ReturnType<typeof vi.fn>).mock.calls[0];
+      const call = (saveAs as unknown as Mock).mock.calls[0];
       const blob = call[0] as Blob;
 
       // 헤더만 있어도 파일 크기가 0보다 큼

@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getBidRepository } from '@/lib/domain/repositories/bid-repository';
-import type { BidData, UUID, BidSource, BidStatus, BidPriority, CreateInput, UpdateInput } from '@/types';
+import type { BidData, UUID, BidSource, BidStatus, BidPriority, CreateInput, UpdateInput, ISODateString, KRW } from '@/types';
 
 // 환경변수 모킹
 vi.stubEnv('NODE_ENV', 'test');
@@ -156,8 +156,8 @@ describe('BidRepository', () => {
         externalId: 'TEST-12345',
         title: '테스트 입찰 공고',
         organization: '테스트 기관',
-        deadline: '2025-12-31T18:00:00',
-        estimatedAmount: BigInt(100000000),
+        deadline: '2025-12-31T18:00:00' as ISODateString,
+        estimatedAmount: BigInt(100000000) as KRW,
         status: 'new' as BidStatus,
         priority: 'medium' as BidPriority,
         type: 'product',
@@ -184,8 +184,8 @@ describe('BidRepository', () => {
         externalId: uniqueExternalId,
         title: 'EU Tender Test for External ID',
         organization: 'European Union',
-        deadline: '2025-12-31T18:00:00',
-        estimatedAmount: BigInt(500000000),
+        deadline: '2025-12-31T18:00:00' as ISODateString,
+        estimatedAmount: BigInt(500000000) as KRW,
         status: 'new' as BidStatus,
         priority: 'high' as BidPriority,
         type: 'product',
@@ -259,7 +259,7 @@ describe('BidRepository', () => {
         externalId: 'DELETE-TEST',
         title: '삭제 테스트',
         organization: '테스트',
-        deadline: '2025-12-31T18:00:00',
+        deadline: '2025-12-31T18:00:00' as ISODateString,
         estimatedAmount: null,
         status: 'new' as BidStatus,
         priority: 'low' as BidPriority,
@@ -405,7 +405,7 @@ describe('BidRepository', () => {
           externalId: 'BULK-001',
           title: '일괄 생성 테스트 1',
           organization: '기관1',
-          deadline: '2025-12-31T18:00:00',
+          deadline: '2025-12-31T18:00:00' as ISODateString,
           estimatedAmount: null,
           status: 'new' as BidStatus,
           priority: 'low' as BidPriority,
@@ -419,7 +419,7 @@ describe('BidRepository', () => {
           externalId: 'BULK-002',
           title: '일괄 생성 테스트 2',
           organization: '기관2',
-          deadline: '2025-12-31T18:00:00',
+          deadline: '2025-12-31T18:00:00' as ISODateString,
           estimatedAmount: null,
           status: 'new' as BidStatus,
           priority: 'low' as BidPriority,
@@ -463,8 +463,8 @@ describe('BidRepository', () => {
         externalId: uniqueExternalId,
         title: '플로우 테스트',
         organization: '테스트기관',
-        deadline: '2025-12-31T18:00:00',
-        estimatedAmount: BigInt(100000000),
+        deadline: '2025-12-31T18:00:00' as ISODateString,
+        estimatedAmount: BigInt(100000000) as KRW,
         status: 'new' as BidStatus,
         priority: 'medium' as BidPriority,
         type: 'product',

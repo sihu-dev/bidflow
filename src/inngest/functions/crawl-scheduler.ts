@@ -5,9 +5,12 @@
 
 import { inngest } from '../client';
 import { NaraJangtoClient, type MappedBid } from '@/lib/clients/narajangto-api';
+import { getTEDClient, convertTEDToBidData } from '@/lib/clients/ted-api';
+import { getSAMGovClient, convertSAMToBidData } from '@/lib/clients/sam-gov-api';
 import { getBidRepository } from '@/lib/domain/repositories/bid-repository';
 import { createISODateString, createKRW, type CreateInput, type BidData } from '@/types';
 import { sendNotification, type BidNotificationData } from '@/lib/notifications';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 키워드 필터링 유틸리티
@@ -81,9 +84,42 @@ export const scheduledCrawl = inngest.createFunction(
       }
     });
 
-    // Step 2: DB 저장
+    // Step 2: TED (EU) 크롤링
+    const tedResults = await step.run('crawl-ted', async () => {
+      try {
+        const client = getTEDClient();
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - 7); // 최근 7일
+
+        const notices = await client.searchFlowMeterTenders({ fromDate });
+        logger.info(`TED에서 ${notices.length}건 수집`);
+        return notices;
+      } catch (error) {
+        logger.error('TED 크롤링 실패:', error);
+        return [];
+      }
+    });
+
+    // Step 3: SAM.gov (US) 크롤링
+    const samResults = await step.run('crawl-samgov', async () => {
+      try {
+        const client = getSAMGovClient();
+        const fromDate = new Date();
+        fromDate.setDate(fromDate.getDate() - 7); // 최근 7일
+
+        const opportunities = await client.searchFlowMeterOpportunities({ fromDate });
+        logger.info(`SAM.gov에서 ${opportunities.length}건 수집`);
+        return opportunities;
+      } catch (error) {
+        logger.error('SAM.gov 크롤링 실패:', error);
+        return [];
+      }
+    });
+
+    // Step 4: DB 저장 (모든 소스 통합)
     const savedCount = await step.run('save-to-db', async () => {
-      if (naraResults.length === 0) {
+      const allResults = naraResults.length + tedResults.length + samResults.length;
+      if (allResults === 0) {
         return 0;
       }
 
@@ -128,11 +164,47 @@ export const scheduledCrawl = inngest.createFunction(
         }
       }
 
-      logger.info(`${saved}건 저장 완료`);
+      // TED 공고 저장
+      for (const notice of tedResults) {
+        try {
+          const existing = await repository.findByExternalId('ted', notice.noticeId);
+          if (existing.success && existing.data) {
+            continue;
+          }
+
+          const createInput = convertTEDToBidData(notice);
+          const result = await repository.create(createInput);
+          if (result.success) {
+            saved++;
+          }
+        } catch (error) {
+          logger.error(`TED 저장 실패: ${notice.noticeId}`, error);
+        }
+      }
+
+      // SAM.gov 공고 저장
+      for (const opportunity of samResults) {
+        try {
+          const existing = await repository.findByExternalId('sam', opportunity.noticeId);
+          if (existing.success && existing.data) {
+            continue;
+          }
+
+          const createInput = convertSAMToBidData(opportunity);
+          const result = await repository.create(createInput);
+          if (result.success) {
+            saved++;
+          }
+        } catch (error) {
+          logger.error(`SAM.gov 저장 실패: ${opportunity.noticeId}`, error);
+        }
+      }
+
+      logger.info(`총 ${saved}건 저장 완료 (나라장터: ${naraResults.length}, TED: ${tedResults.length}, SAM.gov: ${samResults.length})`);
       return saved;
     });
 
-    // Step 3: 알림 발송 (새 공고가 있는 경우)
+    // Step 5: 알림 발송 (새 공고가 있는 경우)
     if (savedCount > 0) {
       await step.run('send-notification', async () => {
         // 저장된 공고 데이터를 알림용으로 변환
@@ -163,7 +235,12 @@ export const scheduledCrawl = inngest.createFunction(
 
     return {
       success: true,
-      crawled: naraResults.length,
+      crawled: {
+        narajangto: naraResults.length,
+        ted: tedResults.length,
+        sam: samResults.length,
+        total: naraResults.length + tedResults.length + samResults.length,
+      },
       saved: savedCount,
     };
   }

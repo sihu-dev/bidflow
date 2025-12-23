@@ -89,7 +89,11 @@ describe('auth-middleware', () => {
     });
 
     it('개발 모드 + Supabase 미설정: Mock 사용자 사용', async () => {
-      process.env.NODE_ENV = 'development';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true,
+        configurable: true,
+      });
       delete process.env.NEXT_PUBLIC_SUPABASE_URL;
       delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -110,7 +114,11 @@ describe('auth-middleware', () => {
     });
 
     it('유효한 세션 + 역할 권한 있음: 성공', async () => {
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true,
+      });
       process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
 
@@ -141,7 +149,11 @@ describe('auth-middleware', () => {
     });
 
     it('세션 없음: UNAUTHORIZED', async () => {
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true,
+      });
       process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
 
@@ -163,7 +175,11 @@ describe('auth-middleware', () => {
     });
 
     it('역할 권한 부족: FORBIDDEN', async () => {
-      process.env.NODE_ENV = 'production';
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true,
+      });
       process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
 
