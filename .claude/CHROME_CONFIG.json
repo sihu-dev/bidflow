@@ -1,0 +1,152 @@
+{
+    "extension": {
+          "name": "Claude for Chrome",
+          "version": "2.0",
+          "description": "최적화된 Claude Chrome 확장 설정"
+    },
+    "models": {
+          "default": "claude-haiku-4.5-20250305",
+          "heavyweight": "claude-opus-4.5-20251101",
+          "context_aware": true,
+          "fallback": "claude-sonnet-4-20250514"
+    },
+    "features": {
+          "prompt_caching": {
+                  "enabled": true,
+                  "ttl": {
+                            "system_prompt": 300,
+                            "product_catalog": 604800,
+                            "matching_rules": 2592000,
+                            "organization_data": 86400,
+                            "search_results": 3600
+                  },
+                  "expected_savings": "90%"
+          },
+          "effort_parameter": {
+                  "enabled": true,
+                  "auto_select": true,
+                  "thresholds": {
+                            "low": { "max_tokens": 1000, "max_price": 50000000 },
+                            "medium": { "max_tokens": 5000, "max_price": 100000000 },
+                            "high": { "min_price": 100000001 }
+                  },
+                  "expected_savings": "67-76%"
+          },
+          "vision_api": {
+                  "enabled": true,
+                  "supported_formats": ["pdf", "png", "jpg", "gif", "webp"],
+                  "max_file_size_mb": 100,
+                  "auto_analyze": true,
+                  "expected_automation": "90%"
+          },
+          "batch_processing": {
+                  "enabled": true,
+                  "schedule": "0 2 * * *",
+                  "timezone": "UTC",
+                  "max_batch_size": 100,
+                  "max_concurrent": 5,
+                  "expected_savings": "50%"
+          },
+          "files_api": {
+                  "enabled": true,
+                  "auto_cleanup": true,
+                  "ttl_days": 30,
+                  "max_file_size_mb": 100,
+                  "expected_reuse_factor": 10,
+                  "expected_savings": "50%"
+          },
+          "web_search": {
+                  "enabled": true,
+                  "cache_duration_seconds": 86400,
+                  "auto_analyze_results": true,
+                  "supported_searches": [
+                            "competitor_info",
+                            "market_intelligence",
+                            "bid_history",
+                            "pricing_trends"
+                  ]
+          },
+          "extended_thinking": {
+                  "enabled": true,
+                  "min_bid_amount": 100000000,
+                  "budget_tokens": 10000,
+                  "expected_improvement": "40%"
+          }
+    },
+    "performance": {
+          "cache_hit_target": 0.85,
+          "response_time_target_ms": 1200,
+          "error_rate_target": 0.01,
+          "code_stripping": true,
+          "tree_shaking": true,
+          "image_optimization": true,
+          "system_fonts": true,
+          "lazy_loading": true
+    },
+    "security": {
+          "ssrf_prevention": {
+                  "https_only": true,
+                  "domain_whitelist": [
+                            "anthropic.com",
+                            "github.com",
+                            "supabase.com",
+                            "inngest.com"
+                  ],
+                  "block_private_ips": true
+          },
+          "injection_prevention": {
+                  "input_sanitization": true,
+                  "max_input_length": 500,
+                  "dangerous_patterns": [
+                            "system prompt override",
+                            "ignore previous instructions",
+                            "switch mode"
+                  ]
+          },
+          "rate_limiting": {
+                  "enabled": true,
+                  "requests_per_minute": 60,
+                  "requests_per_hour": 1000,
+                  "batch_limit_per_hour": 5
+          }
+    },
+    "monitoring": {
+          "enabled": true,
+          "metrics": [
+                  "response_time",
+                  "token_usage",
+                  "cache_hit_rate",
+                  "error_rate",
+                  "cost_savings"
+          ],
+          "dashboards": [
+                  "chrome_popup",
+                  "background_page",
+                  "devtools"
+          ],
+          "alerts": {
+                  "cache_hit_below_target": true,
+                  "error_rate_above_target": true,
+                  "response_time_above_target": true
+          }
+    },
+    "cost_optimization": {
+          "monthly_budget_usd": 145,
+          "breakdown": {
+                  "prompt_caching": 20,
+                  "batch_processing": 75,
+                  "vision_api": 50,
+                  "base_api": 0
+          },
+          "savings_vs_baseline": "83%",
+          "annual_savings_usd": 8460,
+          "annual_savings_krw": 11000000
+    },
+    "deployment": {
+          "target": "production",
+          "channels": ["stable", "beta"],
+          "auto_update": true,
+          "rollback_enabled": true,
+          "health_check_interval_minutes": 15
+    }
+}
