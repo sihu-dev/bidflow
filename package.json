@@ -2,7 +2,7 @@
   "name": "bidflow-standalone",
   "version": "0.1.0",
   "private": true,
-  "description": "BIDFLOW 입찰 자동화 시스템 - 제조업 SME 맞춤",
+  "description": "BIDFLOW - Global Procurement Intelligence Platform for Korean SME Exporters (해외 수출 입찰 자동화 플랫폼)",
   "scripts": {
     "dev": "next dev -p 3010",
     "build": "NODE_ENV=production next build",
