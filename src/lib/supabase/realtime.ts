@@ -7,6 +7,7 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from './client';
 import type { Tables, RealtimePayload } from './types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 실시간 입찰 목록 훅
@@ -50,7 +51,7 @@ export function useRealtimeBids(options: UseRealtimeBidsOptions = {}) {
 
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
-      console.warn('[Realtime] Supabase 클라이언트 없음 - 실시간 기능 비활성화');
+      logger.warn('[Realtime] Supabase 클라이언트 없음 - 실시간 기능 비활성화');
       return;
     }
 
@@ -72,7 +73,7 @@ export function useRealtimeBids(options: UseRealtimeBidsOptions = {}) {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true);
           setError(null);
-          console.log('[Realtime] 입찰 테이블 구독 시작');
+          logger.info('[Realtime] 입찰 테이블 구독 시작');
         } else if (status === 'CHANNEL_ERROR') {
           setIsConnected(false);
           setError(new Error('채널 연결 오류'));

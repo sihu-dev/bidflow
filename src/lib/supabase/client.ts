@@ -5,6 +5,7 @@
 
 import { createBrowserClient, createServerClient } from '@supabase/ssr';
 import type { Database } from './types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 타입 정의
@@ -32,13 +33,13 @@ let browserClient: SupabaseClientType | null = null;
  */
 export function getSupabaseBrowserClient(): SupabaseClientType | null {
   if (typeof window === 'undefined') {
-    console.warn('getSupabaseBrowserClient는 브라우저에서만 사용 가능합니다');
+    logger.warn('getSupabaseBrowserClient는 브라우저에서만 사용 가능합니다');
     return null;
   }
 
   if (!supabaseUrl || !supabaseAnonKey) {
     if (isDevelopment) {
-      console.warn('[DEV] Supabase 미설정 - Realtime 비활성화');
+      logger.warn('[DEV] Supabase 미설정 - Realtime 비활성화');
       return null;
     }
     throw new Error('Supabase 환경 변수가 설정되지 않았습니다');
@@ -65,7 +66,7 @@ export function getSupabaseServerClient(
 ): SupabaseServerClientType | null {
   if (!supabaseUrl || !supabaseAnonKey) {
     if (isDevelopment) {
-      console.warn('[DEV] Supabase 미설정');
+      logger.warn('[DEV] Supabase 미설정');
       return null;
     }
     throw new Error('Supabase 환경 변수가 설정되지 않았습니다');
@@ -100,7 +101,7 @@ export function getSupabaseServiceClient(): SupabaseClientType | null {
 
   if (!supabaseUrl || !serviceRoleKey) {
     if (isDevelopment) {
-      console.warn('[DEV] Supabase Service Role 미설정');
+      logger.warn('[DEV] Supabase Service Role 미설정');
       return null;
     }
     throw new Error('Supabase Service Role 환경 변수가 설정되지 않았습니다');

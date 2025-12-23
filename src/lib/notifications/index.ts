@@ -11,6 +11,7 @@ import {
   sendDeadlineAlimtalk,
   ALIMTALK_TEMPLATES,
 } from './kakao';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 타입 정의
@@ -159,7 +160,7 @@ async function sendEmailNotification(payload: NotificationPayload): Promise<void
   const { type, recipients = [], bids } = payload;
 
   if (recipients.length === 0) {
-    console.warn('[Notification] 이메일 수신자가 없습니다');
+    logger.warn('[Notification] 이메일 수신자가 없습니다');
     return;
   }
 
@@ -264,7 +265,7 @@ async function sendKakaoNotification(payload: NotificationPayload): Promise<void
   const { type, recipients = [], bids } = payload;
 
   if (recipients.length === 0) {
-    console.warn('[Notification] 카카오 알림톡 수신자가 없습니다');
+    logger.warn('[Notification] 카카오 알림톡 수신자가 없습니다');
     return;
   }
 

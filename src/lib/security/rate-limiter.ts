@@ -7,6 +7,7 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { NextRequest, NextResponse } from 'next/server';
 import type { ApiErrorResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 개발 모드 감지
@@ -31,7 +32,7 @@ function getRedis(): Redis | null {
   if (!url || !token) {
     if (isDevelopment) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[DEV] Upstash Redis 미설정 - Rate Limiting 비활성화');
+        logger.warn('[DEV] Upstash Redis 미설정 - Rate Limiting 비활성화');
       }
       redisAvailable = false;
       return null;
@@ -127,7 +128,7 @@ export async function checkRateLimit(
       limit: result.limit,
     };
   } catch (error) {
-    console.error('Rate limit 체크 실패:', error);
+    logger.error('Rate limit 체크 실패:', error);
     // 오류 시 통과 (fail-open)
     return {
       success: true,

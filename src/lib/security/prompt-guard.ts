@@ -4,6 +4,7 @@
  */
 
 import DOMPurify from 'isomorphic-dompurify';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 위험한 패턴 정의
@@ -153,7 +154,7 @@ export function wrapUserInput(systemPrompt: string, userInput: string): string {
   const validation = validatePromptInput(userInput);
 
   if (!validation.isValid) {
-    console.warn('위험한 프롬프트 감지:', validation.threats);
+    logger.warn('위험한 프롬프트 감지:', { threats: validation.threats });
     // 정제된 버전 사용
     return `${systemPrompt}\n\n---\n\n[사용자 입력]\n${validation.sanitized}`;
   }

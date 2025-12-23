@@ -11,6 +11,7 @@ import { uuidSchema, updateBidSchema } from '@/lib/validation/schemas';
 import { getBidById, updateBidStatus } from '@/lib/domain/usecases/bid-usecases';
 import { getBidRepository } from '@/lib/domain/repositories/bid-repository';
 import type { ApiResponse, BidData, UUID, UpdateInput } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // BigInt를 JSON 직렬화 가능하게 변환
 function serializeForJson<T>(obj: T): T {
@@ -58,7 +59,7 @@ async function handleGet(
 
     return NextResponse.json(serializeForJson(result));
   } catch (error) {
-    console.error('GET /api/v1/bids/[id] 오류:', error);
+    logger.error('GET /api/v1/bids/[id] 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -137,7 +138,7 @@ async function handlePatch(
 
     return NextResponse.json(serializeForJson(result));
   } catch (error) {
-    console.error('PATCH /api/v1/bids/[id] 오류:', error);
+    logger.error('PATCH /api/v1/bids/[id] 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -201,7 +202,7 @@ async function handleDelete(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('DELETE /api/v1/bids/[id] 오류:', error);
+    logger.error('DELETE /api/v1/bids/[id] 오류:', error);
     return NextResponse.json(
       {
         success: false,

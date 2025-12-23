@@ -14,8 +14,14 @@ const eslintConfig = [
   {
     rules: {
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
+      'no-console': 'error',
+    },
+  },
+  {
+    files: ['src/lib/utils/logger.ts'],
+    rules: {
+      'no-console': 'off', // Logger is allowed to use console
     },
   },
 ];

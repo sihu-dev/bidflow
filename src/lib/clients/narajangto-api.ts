@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 타입 정의
@@ -86,7 +87,7 @@ export class NaraJangtoClient {
     this.apiKey = apiKey || process.env.NARA_JANGTO_API_KEY || '';
 
     if (!this.apiKey) {
-      console.warn('[NaraJangtoClient] API Key가 설정되지 않았습니다.');
+      logger.warn('[NaraJangtoClient] API Key가 설정되지 않았습니다.');
     }
   }
 
@@ -130,13 +131,13 @@ export class NaraJangtoClient {
       const parsed = ApiResponseSchema.safeParse(data);
 
       if (!parsed.success) {
-        console.error('[NaraJangtoClient] 응답 파싱 실패:', parsed.error);
+        logger.error('[NaraJangtoClient] 응답 파싱 실패:', parsed.error);
         return [];
       }
 
       return parsed.data.response.body.items || [];
     } catch (error) {
-      console.error('[NaraJangtoClient] API 호출 실패:', error);
+      logger.error('[NaraJangtoClient] API 호출 실패:', error);
       return [];
     }
   }
@@ -181,13 +182,13 @@ export class NaraJangtoClient {
       const parsed = ApiResponseSchema.safeParse(data);
 
       if (!parsed.success) {
-        console.error('[NaraJangtoClient] 응답 파싱 실패:', parsed.error);
+        logger.error('[NaraJangtoClient] 응답 파싱 실패:', parsed.error);
         return [];
       }
 
       return parsed.data.response.body.items || [];
     } catch (error) {
-      console.error('[NaraJangtoClient] API 호출 실패:', error);
+      logger.error('[NaraJangtoClient] API 호출 실패:', error);
       return [];
     }
   }

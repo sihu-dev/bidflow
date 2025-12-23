@@ -9,6 +9,7 @@ import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limite
 import { withCSRF } from '@/lib/security/csrf';
 import { z } from 'zod';
 import type { ApiResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 타입 정의
@@ -125,7 +126,7 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
       data: notifications,
     });
   } catch (error) {
-    console.error('GET /api/v1/notifications 오류:', error);
+    logger.error('GET /api/v1/notifications 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -181,7 +182,7 @@ async function handlePost(
       data: { updated },
     });
   } catch (error) {
-    console.error('POST /api/v1/notifications 오류:', error);
+    logger.error('POST /api/v1/notifications 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -263,7 +264,7 @@ async function handlePut(
       data: settings,
     });
   } catch (error) {
-    console.error('PUT /api/v1/notifications 오류:', error);
+    logger.error('PUT /api/v1/notifications 오류:', error);
     return NextResponse.json(
       {
         success: false,

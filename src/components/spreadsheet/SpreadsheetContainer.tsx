@@ -8,6 +8,7 @@
 import { useCallback, type ReactNode } from 'react';
 import { FormulaBar } from './FormulaBar';
 import { useSpreadsheet } from './hooks/useSpreadsheet';
+import { logger } from '@/lib/utils/logger';
 
 interface Bid {
   id: string;
@@ -77,7 +78,7 @@ export function SpreadsheetContainer({
         try {
           await onBidUpdate(bid.id, { [columnKey]: newValue });
         } catch (error) {
-          console.error('셀 업데이트 실패:', error);
+          logger.error('셀 업데이트 실패:', error);
         }
       },
       [onBidUpdate, initialData]
@@ -154,7 +155,7 @@ export function SpreadsheetContainer({
           setEditingValue(data.result);
         }
       } catch (error) {
-        console.error('AI 함수 실행 실패:', error);
+        logger.error('AI 함수 실행 실패:', error);
       }
     },
     [selectedCell, initialData, setEditingValue]

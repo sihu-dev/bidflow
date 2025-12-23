@@ -25,6 +25,7 @@ import {
   formatAmount,
 } from '@/lib/spreadsheet/column-definitions';
 import { exportToExcel, exportToCSV, exportToJSON } from '@/lib/spreadsheet/excel-export';
+import { logger } from '@/lib/utils/logger';
 
 // Handsontable 모듈 등록
 registerAllModules();
@@ -334,7 +335,7 @@ export function SpreadsheetView({
         try {
           await onBidUpdate(bid.id, { [prop as string]: newValue });
         } catch (error) {
-          console.error('업데이트 실패:', error);
+          logger.error('업데이트 실패:', error);
         }
       }
     },

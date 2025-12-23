@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/bids/[id]/analyze
  * @description AI 입찰 분석 API
@@ -211,7 +212,7 @@ async function handlePost(
       data: analysisResult,
     }));
   } catch (error) {
-    console.error('POST /api/v1/bids/[id]/analyze 오류:', error);
+    logger.error('POST /api/v1/bids/[id]/analyze 오류:', error);
     return NextResponse.json(
       {
         success: false,

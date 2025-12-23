@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 interface Bid {
   id: string;
@@ -63,7 +64,7 @@ export function ClientSpreadsheet(props: SpreadsheetViewProps) {
         }
         setIsLoading(false);
       } catch (err) {
-        console.error('Failed to load SpreadsheetView:', err);
+        logger.error('Failed to load SpreadsheetView:', err);
         setIsLoading(false);
       }
     };

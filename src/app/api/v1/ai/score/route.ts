@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/ai/score
  * @description AI 입찰 적합도 점수 API
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       data: response,
     });
   } catch (error) {
-    console.error('[AI Score API] 오류:', error);
+    logger.error('[AI Score API] 오류:', error);
     return NextResponse.json(
       {
         success: false,

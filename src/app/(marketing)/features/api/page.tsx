@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PageNavigation } from '@/components/marketing';
 import Link from 'next/link';
 import { Code, Zap, Lock, Book, Check } from 'lucide-react';
+import { logger } from '@/lib/utils/logger';
 
 export const metadata = generateMetadata(pageMetadata.features.api);
 
@@ -150,7 +151,7 @@ const response = await fetch('https://api.bidflow.io/v1/bids', {
 });
 
 const bids = await response.json();
-console.log(bids);
+logger.info(bids);
 
 // 결과 예시
 {

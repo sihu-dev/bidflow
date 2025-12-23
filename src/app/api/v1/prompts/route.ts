@@ -10,6 +10,7 @@ import { withCSRF } from '@/lib/security/csrf';
 import { validatePromptInput } from '@/lib/security/prompt-guard';
 import { z } from 'zod';
 import type { ApiResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 타입 정의
@@ -246,7 +247,7 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
       data: templates,
     });
   } catch (error) {
-    console.error('GET /api/v1/prompts 오류:', error);
+    logger.error('GET /api/v1/prompts 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -323,7 +324,7 @@ async function handlePost(
       data: newTemplate,
     }, { status: 201 });
   } catch (error) {
-    console.error('POST /api/v1/prompts 오류:', error);
+    logger.error('POST /api/v1/prompts 오류:', error);
     return NextResponse.json(
       {
         success: false,

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/bids/auto-match
  * @description 전체 신규 입찰 자동 매칭 API
@@ -26,7 +27,7 @@ async function handlePost(
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('POST /api/v1/bids/auto-match 오류:', error);
+    logger.error('POST /api/v1/bids/auto-match 오류:', error);
     return NextResponse.json(
       {
         success: false,

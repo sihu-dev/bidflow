@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import type { ApiErrorResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 개발 모드 감지
@@ -64,7 +65,7 @@ function createSupabaseClient(request: NextRequest) {
   if (!supabaseUrl || !supabaseAnonKey) {
     if (isDevelopment) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
+        logger.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
       }
       return null;
     }
@@ -144,7 +145,7 @@ export function withAuth<T>(
         .single();
 
       if (profileError) {
-        console.error('프로필 조회 실패:', profileError);
+        logger.error('프로필 조회 실패:', profileError);
         return createErrorResponse(
           'PROFILE_ERROR',
           '사용자 프로필을 조회할 수 없습니다.',
@@ -171,7 +172,7 @@ export function withAuth<T>(
 
       return handler(authenticatedRequest);
     } catch (error) {
-      console.error('인증 미들웨어 오류:', error);
+      logger.error('인증 미들웨어 오류:', error);
       return createErrorResponse(
         'INTERNAL_ERROR',
         '서버 오류가 발생했습니다.',
@@ -210,7 +211,7 @@ export function withApiKey<T>(
       const expectedKey = process.env[apiKeyEnvVar];
 
       if (!expectedKey) {
-        console.error(`환경 변수 ${apiKeyEnvVar}가 설정되지 않았습니다`);
+        logger.error(`환경 변수 ${apiKeyEnvVar}가 설정되지 않았습니다`);
         return createErrorResponse(
           'CONFIG_ERROR',
           '서버 설정 오류입니다.',
@@ -229,7 +230,7 @@ export function withApiKey<T>(
 
       return handler(request);
     } catch (error) {
-      console.error('API Key 인증 오류:', error);
+      logger.error('API Key 인증 오류:', error);
       return createErrorResponse(
         'INTERNAL_ERROR',
         '서버 오류가 발생했습니다.',

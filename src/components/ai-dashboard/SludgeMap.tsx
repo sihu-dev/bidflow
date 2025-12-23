@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { logger } from '@/lib/utils/logger';
 
 // WebGL 지원 여부 확인
 function detectWebGLSupport(): boolean {
@@ -297,7 +298,7 @@ export function SludgeMap() {
         .addTo(map.current);
     });
     } catch (error) {
-      console.error('[SludgeMap] 지도 초기화 실패:', error);
+      logger.error('[SludgeMap] 지도 초기화 실패:', error);
       setMapError('지도를 초기화할 수 없습니다');
       setHasWebGL(false);
     }

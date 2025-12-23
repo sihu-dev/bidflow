@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import type { Bid } from '@/components/spreadsheet/SpreadsheetView';
+import { logger } from '@/lib/utils/logger';
 
 // Handsontable 동적 로드
 const ClientSpreadsheet = dynamic(
@@ -308,7 +309,7 @@ export default function DashboardPage() {
         bid.id === id ? { ...bid, ...updates } : bid
       ));
     } catch (error) {
-      console.error('Bid update failed:', error);
+      logger.error('Bid update failed:', error);
       throw error;
     }
   }, []);
@@ -326,7 +327,7 @@ export default function DashboardPage() {
         setBids(data.data);
       }
     } catch (error) {
-      console.error('Refresh failed:', error);
+      logger.error('Refresh failed:', error);
       // 데모 모드에서는 샘플 데이터 유지
       if (isDemo) {
         setBids(SAMPLE_BIDS as unknown as Bid[]);

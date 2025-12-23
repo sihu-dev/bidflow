@@ -6,6 +6,7 @@
 
 import type { BidData, BidSource, CreateInput, ISODateString, KRW } from '@forge-labs/types/bidding';
 import { checkCrawlingRateLimit } from '../security/rate-limiter';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // SAM.gov API 타입 정의
@@ -89,7 +90,7 @@ export class SAMGovAPIClient {
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.SAM_GOV_API_KEY || '';
     if (!this.apiKey) {
-      console.warn('[SAM.gov] API 키가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.');
+      logger.warn('[SAM.gov] API 키가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.');
     }
   }
 
