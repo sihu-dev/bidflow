@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_KR, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
+// NOTE: Google Fonts disabled due to network restrictions
+// Using system fonts as fallback
+// To restore: uncomment below and import from 'next/font/google'
+/*
+import { Noto_Sans_KR, IBM_Plex_Mono } from 'next/font/google';
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -9,12 +13,14 @@ const notoSansKR = Noto_Sans_KR({
   preload: true,
   variable: '--font-noto-sans-kr',
 });
-
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-ibm-plex-mono',
 });
+*/
+
+// System font CSS variables defined in globals.css :root
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3010'),
@@ -85,7 +91,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark" suppressHydrationWarning>
-      <body className={`${notoSansKR.variable} ${ibmPlexMono.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         {/* Aurora Background */}
         <div className="aurora-bg" aria-hidden="true" />
 

@@ -37,11 +37,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // NOTE: eslint config moved to eslint.config.mjs in Next.js 16
 
-  // Webpack 설정
+  // Turbopack 설정 (Next.js 16 기본)
+  turbopack: {},
+
+  // Webpack 설정 (fallback)
   webpack: (config) => {
     return config;
   },

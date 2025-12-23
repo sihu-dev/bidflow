@@ -15,6 +15,10 @@
    ============================================ */
 
 :root {
+  /* Font Families (system font fallback) */
+  --font-noto-sans-kr: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-ibm-plex-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
   /* Background */
   --bg-primary: #FFFFFF;
   --bg-secondary: #FAFAFA;
