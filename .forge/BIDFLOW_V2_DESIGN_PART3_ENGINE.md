@@ -1,4 +1,5 @@
 # BIDFLOW V2 Beta Design Document
+
 ## Part 3: Connector Framework & Matching Engine
 
 > GPT 5.2 Pro 검수용 마스터 설계 문서
@@ -73,58 +74,58 @@
  */
 export interface NormalizedBid {
   // 소스 식별
-  sourceId: string;              // 'ted' | 'sam_gov' | 'g2b' | 'g2b_stub'
-  sourceNoticeId: string;        // 원천 시스템의 고유 ID
-  sourceUrl: string | null;      // 원천 URL (공고 상세 페이지)
+  sourceId: string; // 'ted' | 'sam_gov' | 'g2b' | 'g2b_stub'
+  sourceNoticeId: string; // 원천 시스템의 고유 ID
+  sourceUrl: string | null; // 원천 URL (공고 상세 페이지)
 
   // 공고 기본 정보
-  title: string;                 // 공고 제목
-  organization: string | null;   // 발주 기관
-  country: string;               // 국가 코드 (ISO 3166-1 alpha-2)
-  region: string | null;         // 지역/도시
+  title: string; // 공고 제목
+  organization: string | null; // 발주 기관
+  country: string; // 국가 코드 (ISO 3166-1 alpha-2)
+  region: string | null; // 지역/도시
 
   // 일정
-  publishedAt: Date | null;      // 공고일
-  deadline: Date | null;         // 마감일
+  publishedAt: Date | null; // 공고일
+  deadline: Date | null; // 마감일
 
   // 금액
   estimatedPrice: number | null; // 예정가격 (통화 변환 후)
-  currency: string;              // 원래 통화 코드
+  currency: string; // 원래 통화 코드
 
   // 상세 정보
-  description: string | null;    // 요약/설명
-  category: string | null;       // 카테고리 (CPV, NAICS 등)
-  keywords: string[];            // 추출된 키워드
+  description: string | null; // 요약/설명
+  category: string | null; // 카테고리 (CPV, NAICS 등)
+  keywords: string[]; // 추출된 키워드
 
   // 원본 데이터
-  rawData: Record<string, unknown>;  // 원본 JSON (감사/재파싱용)
+  rawData: Record<string, unknown>; // 원본 JSON (감사/재파싱용)
 
   // 해시 (중복 방지)
-  contentHash: string;           // SHA-256(title + org + deadline)
+  contentHash: string; // SHA-256(title + org + deadline)
 }
 
 /**
  * 커넥터 설정
  */
 export interface ConnectorConfig {
-  apiKey?: string;               // API 키 (환경변수에서)
-  baseUrl: string;               // API 기본 URL
-  rateLimit: number;             // 요청/분 제한
-  timeout: number;               // 요청 타임아웃 (ms)
-  retryCount: number;            // 재시도 횟수
-  retryDelay: number;            // 재시도 간격 (ms)
+  apiKey?: string; // API 키 (환경변수에서)
+  baseUrl: string; // API 기본 URL
+  rateLimit: number; // 요청/분 제한
+  timeout: number; // 요청 타임아웃 (ms)
+  retryCount: number; // 재시도 횟수
+  retryDelay: number; // 재시도 간격 (ms)
 }
 
 /**
  * 수집 옵션
  */
 export interface FetchOptions {
-  fromDate?: Date;               // 시작일
-  toDate?: Date;                 // 종료일
-  category?: string;             // 카테고리 필터
-  keywords?: string[];           // 키워드 필터
-  maxResults?: number;           // 최대 결과 수
-  pageSize?: number;             // 페이지 크기
+  fromDate?: Date; // 시작일
+  toDate?: Date; // 종료일
+  category?: string; // 카테고리 필터
+  keywords?: string[]; // 키워드 필터
+  maxResults?: number; // 최대 결과 수
+  pageSize?: number; // 페이지 크기
 }
 
 /**
@@ -136,7 +137,7 @@ export interface ConnectorStatus {
   lastSyncAt: Date | null;
   lastError: string | null;
   syncCount: number;
-  status: 'idle' | 'running' | 'error';
+  status: "idle" | "running" | "error";
 }
 
 /**
@@ -147,7 +148,7 @@ export interface FetchResult {
   totalCount: number;
   pagesFetched: number;
   errors: string[];
-  duration: number;              // ms
+  duration: number; // ms
 }
 ```
 
@@ -156,8 +157,14 @@ export interface FetchResult {
 ```typescript
 // src/lib/connectors/base-connector.ts
 
-import { createHash } from 'crypto';
-import { NormalizedBid, ConnectorConfig, FetchOptions, FetchResult, ConnectorStatus } from './types';
+import { createHash } from "crypto";
+import {
+  NormalizedBid,
+  ConnectorConfig,
+  FetchOptions,
+  FetchResult,
+  ConnectorStatus,
+} from "./types";
 
 export abstract class BaseConnector {
   protected config: ConnectorConfig;
@@ -168,9 +175,9 @@ export abstract class BaseConnector {
 
   constructor(config: Partial<ConnectorConfig>) {
     this.config = {
-      baseUrl: '',
-      rateLimit: 60,       // 60 req/min default
-      timeout: 30000,      // 30s default
+      baseUrl: "",
+      rateLimit: 60, // 60 req/min default
+      timeout: 30000, // 30s default
       retryCount: 3,
       retryDelay: 1000,
       ...config,
@@ -182,7 +189,7 @@ export abstract class BaseConnector {
       lastSyncAt: null,
       lastError: null,
       syncCount: 0,
-      status: 'idle',
+      status: "idle",
     };
   }
 
@@ -201,13 +208,13 @@ export abstract class BaseConnector {
    */
   protected generateHash(bid: Partial<NormalizedBid>): string {
     const content = [
-      bid.title || '',
-      bid.organization || '',
-      bid.deadline?.toISOString() || '',
-      bid.sourceNoticeId || '',
-    ].join('|');
+      bid.title || "",
+      bid.organization || "",
+      bid.deadline?.toISOString() || "",
+      bid.sourceNoticeId || "",
+    ].join("|");
 
-    return createHash('sha256').update(content).digest('hex').slice(0, 32);
+    return createHash("sha256").update(content).digest("hex").slice(0, 32);
   }
 
   /**
@@ -215,7 +222,7 @@ export abstract class BaseConnector {
    */
   protected async rateLimitedFetch<T>(
     url: string,
-    options?: RequestInit
+    options?: RequestInit,
   ): Promise<T> {
     // Rate limit 구현
     await this.waitForRateLimit();
@@ -237,7 +244,7 @@ export abstract class BaseConnector {
    */
   protected async withRetry<T>(
     operation: () => Promise<T>,
-    retries = this.config.retryCount
+    retries = this.config.retryCount,
   ): Promise<T> {
     let lastError: Error | null = null;
 
@@ -271,7 +278,7 @@ export abstract class BaseConnector {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -311,31 +318,31 @@ Rate Limit: 100 requests/minute (추정)
 ```typescript
 // src/lib/connectors/ted-connector.ts
 
-import { BaseConnector } from './base-connector';
+import { BaseConnector } from "./base-connector";
 import {
   NormalizedBid,
   ConnectorConfig,
   FetchOptions,
   FetchResult,
-} from './types';
+} from "./types";
 
 // TED API 응답 타입
 interface TedNotice {
-  ND: string;                    // Notice ID
-  TI: string;                    // Title
-  CY: string;                    // Country
-  TW: string;                    // Town
-  AA: string;                    // Authority Name (발주기관)
-  DD: string;                    // Deadline Date
-  DT: string;                    // Document Type
-  NC: string;                    // Nature of Contract
-  PR: string;                    // Procedure Type
-  TD: string;                    // Total Deadline
-  TV?: string;                   // Total Value
-  RC?: string;                   // Region Code
-  PC?: string;                   // CPV Code (카테고리)
-  OL: string;                    // Original Language
-  AU?: string;                   // Authority URL
+  ND: string; // Notice ID
+  TI: string; // Title
+  CY: string; // Country
+  TW: string; // Town
+  AA: string; // Authority Name (발주기관)
+  DD: string; // Deadline Date
+  DT: string; // Document Type
+  NC: string; // Nature of Contract
+  PR: string; // Procedure Type
+  TD: string; // Total Deadline
+  TV?: string; // Total Value
+  RC?: string; // Region Code
+  PC?: string; // CPV Code (카테고리)
+  OL: string; // Original Language
+  AU?: string; // Authority URL
 }
 
 interface TedSearchResponse {
@@ -347,12 +354,12 @@ interface TedSearchResponse {
 }
 
 export class TEDConnector extends BaseConnector {
-  readonly sourceId = 'ted';
-  readonly sourceName = 'EU TED';
+  readonly sourceId = "ted";
+  readonly sourceName = "EU TED";
 
   constructor() {
     super({
-      baseUrl: 'https://ted.europa.eu/api/v3.0',
+      baseUrl: "https://ted.europa.eu/api/v3.0",
       rateLimit: 60,
       timeout: 30000,
       retryCount: 3,
@@ -367,15 +374,15 @@ export class TEDConnector extends BaseConnector {
     const errors: string[] = [];
     let pagesFetched = 0;
 
-    this.updateStatus({ status: 'running' });
+    this.updateStatus({ status: "running" });
 
     try {
       // 유량계 관련 CPV 코드
       const cpvCodes = [
-        '38421100',  // Water meters
-        '38423000',  // Flow meters
-        '38424000',  // Measuring equipment
-        '42131000',  // Taps, cocks, valves
+        "38421100", // Water meters
+        "38423000", // Flow meters
+        "38424000", // Measuring equipment
+        "42131000", // Taps, cocks, valves
       ];
 
       // 검색 쿼리 구성
@@ -388,8 +395,8 @@ export class TEDConnector extends BaseConnector {
         try {
           const response = await this.withRetry(() =>
             this.rateLimitedFetch<TedSearchResponse>(
-              `${this.config.baseUrl}/notices/search?${query}&page=${page}&limit=50`
-            )
+              `${this.config.baseUrl}/notices/search?${query}&page=${page}&limit=50`,
+            ),
           );
 
           for (const notice of response.results) {
@@ -411,7 +418,7 @@ export class TEDConnector extends BaseConnector {
       }
 
       this.updateStatus({
-        status: 'idle',
+        status: "idle",
         lastSyncAt: new Date(),
         syncCount: this.status.syncCount + allBids.length,
         lastError: errors.length > 0 ? errors[0] : null,
@@ -419,7 +426,7 @@ export class TEDConnector extends BaseConnector {
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : String(e);
       this.updateStatus({
-        status: 'error',
+        status: "error",
         lastError: errorMsg,
       });
       errors.push(errorMsg);
@@ -466,7 +473,7 @@ export class TEDConnector extends BaseConnector {
       deadline,
 
       estimatedPrice,
-      currency: 'EUR',
+      currency: "EUR",
 
       description: null, // 상세 조회 필요
       category: notice.PC || null,
@@ -487,29 +494,35 @@ export class TEDConnector extends BaseConnector {
 
     // CPV 코드 필터
     if (cpvCodes.length > 0) {
-      params.append('cpv', cpvCodes.join(','));
+      params.append("cpv", cpvCodes.join(","));
     }
 
     // 날짜 필터
     if (options.fromDate) {
-      params.append('publication-date-from', options.fromDate.toISOString().split('T')[0]);
+      params.append(
+        "publication-date-from",
+        options.fromDate.toISOString().split("T")[0],
+      );
     }
     if (options.toDate) {
-      params.append('publication-date-to', options.toDate.toISOString().split('T')[0]);
+      params.append(
+        "publication-date-to",
+        options.toDate.toISOString().split("T")[0],
+      );
     }
 
     // 키워드 필터 (유량계 관련)
     const defaultKeywords = [
-      'flow meter',
-      'ultrasonic',
-      'water meter',
-      'flowmeter',
+      "flow meter",
+      "ultrasonic",
+      "water meter",
+      "flowmeter",
     ];
     const keywords = options.keywords || defaultKeywords;
-    params.append('q', keywords.join(' OR '));
+    params.append("q", keywords.join(" OR "));
 
     // 활성 공고만
-    params.append('status', 'active');
+    params.append("status", "active");
 
     return params.toString();
   }
@@ -517,7 +530,7 @@ export class TEDConnector extends BaseConnector {
   private parseTedDate(dateStr: string): Date | null {
     try {
       // TED 날짜 형식: YYYYMMDD 또는 YYYY-MM-DD
-      const cleaned = dateStr.replace(/-/g, '');
+      const cleaned = dateStr.replace(/-/g, "");
       const year = parseInt(cleaned.slice(0, 4));
       const month = parseInt(cleaned.slice(4, 6)) - 1;
       const day = parseInt(cleaned.slice(6, 8));
@@ -530,7 +543,7 @@ export class TEDConnector extends BaseConnector {
   private parseTedValue(valueStr: string): number | null {
     try {
       // "EUR 1,000,000" 형식 파싱
-      const cleaned = valueStr.replace(/[^0-9.]/g, '');
+      const cleaned = valueStr.replace(/[^0-9.]/g, "");
       return parseFloat(cleaned) || null;
     } catch {
       return null;
@@ -543,10 +556,17 @@ export class TEDConnector extends BaseConnector {
 
     // 유량계 관련 키워드 추출
     const patterns = [
-      'flow meter', 'flowmeter', 'water meter',
-      'ultrasonic', 'electromagnetic', 'magnetic',
-      'measurement', 'instrumentation',
-      'water supply', 'wastewater', 'sewage',
+      "flow meter",
+      "flowmeter",
+      "water meter",
+      "ultrasonic",
+      "electromagnetic",
+      "magnetic",
+      "measurement",
+      "instrumentation",
+      "water supply",
+      "wastewater",
+      "sewage",
     ];
 
     for (const pattern of patterns) {
@@ -581,13 +601,13 @@ Rate Limit: 10 requests/second
 ```typescript
 // src/lib/connectors/sam-connector.ts
 
-import { BaseConnector } from './base-connector';
+import { BaseConnector } from "./base-connector";
 import {
   NormalizedBid,
   ConnectorConfig,
   FetchOptions,
   FetchResult,
-} from './types';
+} from "./types";
 
 // SAM.gov API 응답 타입
 interface SamOpportunity {
@@ -634,12 +654,12 @@ interface SamSearchResponse {
 }
 
 export class SAMConnector extends BaseConnector {
-  readonly sourceId = 'sam_gov';
-  readonly sourceName = 'US SAM.gov';
+  readonly sourceId = "sam_gov";
+  readonly sourceName = "US SAM.gov";
 
   constructor() {
     super({
-      baseUrl: 'https://api.sam.gov/opportunities/v2',
+      baseUrl: "https://api.sam.gov/opportunities/v2",
       rateLimit: 10 * 60, // 10 req/sec = 600 req/min
       timeout: 30000,
       retryCount: 3,
@@ -654,14 +674,14 @@ export class SAMConnector extends BaseConnector {
     const errors: string[] = [];
     let pagesFetched = 0;
 
-    this.updateStatus({ status: 'running' });
+    this.updateStatus({ status: "running" });
 
     try {
       // 유량계 관련 NAICS 코드
       const naicsCodes = [
-        '334514',  // Totalizing Fluid Meter Manufacturing
-        '334519',  // Other Measuring Instruments
-        '333318',  // Other Commercial Equipment Manufacturing
+        "334514", // Totalizing Fluid Meter Manufacturing
+        "334519", // Other Measuring Instruments
+        "333318", // Other Commercial Equipment Manufacturing
       ];
 
       // 검색 쿼리 구성
@@ -677,14 +697,17 @@ export class SAMConnector extends BaseConnector {
             ...params,
             limit: String(limit),
             offset: String(offset),
-            api_key: this.config.apiKey || '',
+            api_key: this.config.apiKey || "",
           }).toString();
 
           const response = await this.withRetry(() =>
-            this.rateLimitedFetch<SamSearchResponse>(url.toString())
+            this.rateLimitedFetch<SamSearchResponse>(url.toString()),
           );
 
-          if (!response.opportunitiesData || response.opportunitiesData.length === 0) {
+          if (
+            !response.opportunitiesData ||
+            response.opportunitiesData.length === 0
+          ) {
             break;
           }
 
@@ -693,7 +716,9 @@ export class SAMConnector extends BaseConnector {
               const normalizedBid = this.normalize(opp);
               allBids.push(normalizedBid);
             } catch (e) {
-              errors.push(`Failed to normalize opportunity ${opp.noticeId}: ${e}`);
+              errors.push(
+                `Failed to normalize opportunity ${opp.noticeId}: ${e}`,
+              );
             }
           }
 
@@ -710,7 +735,7 @@ export class SAMConnector extends BaseConnector {
       }
 
       this.updateStatus({
-        status: 'idle',
+        status: "idle",
         lastSyncAt: new Date(),
         syncCount: this.status.syncCount + allBids.length,
         lastError: errors.length > 0 ? errors[0] : null,
@@ -718,7 +743,7 @@ export class SAMConnector extends BaseConnector {
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : String(e);
       this.updateStatus({
-        status: 'error',
+        status: "error",
         lastError: errorMsg,
       });
       errors.push(errorMsg);
@@ -749,13 +774,15 @@ export class SAMConnector extends BaseConnector {
     }
 
     // 발주 기관 조합
-    const organization = [opp.department, opp.subTier, opp.office]
-      .filter(Boolean)
-      .join(' - ') || null;
+    const organization =
+      [opp.department, opp.subTier, opp.office].filter(Boolean).join(" - ") ||
+      null;
 
     // 지역 정보
-    const region = opp.placeOfPerformance?.state?.name ||
-                   opp.placeOfPerformance?.city?.name || null;
+    const region =
+      opp.placeOfPerformance?.state?.name ||
+      opp.placeOfPerformance?.city?.name ||
+      null;
 
     // 금액 (award 정보가 있는 경우)
     const estimatedPrice = opp.award?.amount || null;
@@ -770,14 +797,14 @@ export class SAMConnector extends BaseConnector {
 
       title: opp.title,
       organization,
-      country: 'US',
+      country: "US",
       region,
 
       publishedAt,
       deadline,
 
       estimatedPrice,
-      currency: 'USD',
+      currency: "USD",
 
       description: opp.description || null,
       category: opp.naicsCode || opp.classificationCode || null,
@@ -795,11 +822,11 @@ export class SAMConnector extends BaseConnector {
 
   private buildSearchParams(
     options: FetchOptions,
-    naicsCodes: string[]
+    naicsCodes: string[],
   ): Record<string, string> {
     const params: Record<string, string> = {
-      ptype: 'o,p,k', // Combined Synopsis/Solicitation, Presolicitation, Sources Sought
-      status: 'active',
+      ptype: "o,p,k", // Combined Synopsis/Solicitation, Presolicitation, Sources Sought
+      status: "active",
     };
 
     // 날짜 필터
@@ -812,35 +839,43 @@ export class SAMConnector extends BaseConnector {
 
     // NAICS 코드 필터
     if (naicsCodes.length > 0) {
-      params.naics = naicsCodes.join(',');
+      params.naics = naicsCodes.join(",");
     }
 
     // 키워드 검색
     const defaultKeywords = [
-      'flow meter',
-      'ultrasonic meter',
-      'water measurement',
-      'flowmeter',
+      "flow meter",
+      "ultrasonic meter",
+      "water measurement",
+      "flowmeter",
     ];
     const keywords = options.keywords || defaultKeywords;
-    params.q = keywords.join(' ');
+    params.q = keywords.join(" ");
 
     return params;
   }
 
   private formatDate(date: Date): string {
-    return date.toISOString().split('T')[0].replace(/-/g, '/');
+    return date.toISOString().split("T")[0].replace(/-/g, "/");
   }
 
   private extractKeywords(opp: SamOpportunity): string[] {
     const keywords: string[] = [];
-    const text = `${opp.title} ${opp.description || ''}`.toLowerCase();
+    const text = `${opp.title} ${opp.description || ""}`.toLowerCase();
 
     const patterns = [
-      'flow meter', 'flowmeter', 'water meter',
-      'ultrasonic', 'electromagnetic', 'magnetic',
-      'measurement', 'instrumentation', 'sensor',
-      'water', 'wastewater', 'utility',
+      "flow meter",
+      "flowmeter",
+      "water meter",
+      "ultrasonic",
+      "electromagnetic",
+      "magnetic",
+      "measurement",
+      "instrumentation",
+      "sensor",
+      "water",
+      "wastewater",
+      "utility",
     ];
 
     for (const pattern of patterns) {
@@ -861,8 +896,8 @@ export class SAMConnector extends BaseConnector {
 ```typescript
 // src/lib/connectors/g2b-stub-connector.ts
 
-import { BaseConnector } from './base-connector';
-import { NormalizedBid, FetchOptions, FetchResult } from './types';
+import { BaseConnector } from "./base-connector";
+import { NormalizedBid, FetchOptions, FetchResult } from "./types";
 
 /**
  * 나라장터 스텁 커넥터
@@ -870,12 +905,12 @@ import { NormalizedBid, FetchOptions, FetchResult } from './types';
  * - 실제 API 연동 시 이 클래스를 교체
  */
 export class G2BStubConnector extends BaseConnector {
-  readonly sourceId = 'g2b_stub';
-  readonly sourceName = 'Korea G2B (Stub)';
+  readonly sourceId = "g2b_stub";
+  readonly sourceName = "Korea G2B (Stub)";
 
   constructor() {
     super({
-      baseUrl: '',
+      baseUrl: "",
       rateLimit: 100,
       timeout: 5000,
       retryCount: 0,
@@ -890,7 +925,7 @@ export class G2BStubConnector extends BaseConnector {
     const stubBids = this.generateStubData(options.maxResults || 10);
 
     this.updateStatus({
-      status: 'idle',
+      status: "idle",
       lastSyncAt: new Date(),
       syncCount: this.status.syncCount + stubBids.length,
     });
@@ -912,27 +947,27 @@ export class G2BStubConnector extends BaseConnector {
     const stubData: NormalizedBid[] = [];
 
     const organizations = [
-      'K-water 대전지사',
-      '서울시 상수도사업본부',
-      '부산시 수도사업본부',
-      '한국환경공단',
-      '인천광역시 상수도사업본부',
+      "K-water 대전지사",
+      "서울시 상수도사업본부",
+      "부산시 수도사업본부",
+      "한국환경공단",
+      "인천광역시 상수도사업본부",
     ];
 
     const titles = [
-      '초음파 유량계 구매',
-      '전자식 유량계 설치 사업',
-      '하수관거 유량측정 장비 도입',
-      '상수도 스마트 미터링 사업',
-      '정수장 계측기 교체 공사',
+      "초음파 유량계 구매",
+      "전자식 유량계 설치 사업",
+      "하수관거 유량측정 장비 도입",
+      "상수도 스마트 미터링 사업",
+      "정수장 계측기 교체 공사",
     ];
 
     const products = [
-      { name: 'UR-1000PLUS', spec: 'DN200-500' },
-      { name: 'MF-1000C', spec: 'DN50-150' },
-      { name: 'UR-1010PLUS', spec: 'DN300-800' },
-      { name: 'SL-3000PLUS', spec: '개수로형' },
-      { name: 'EnerRay', spec: 'DN25-100' },
+      { name: "UR-1000PLUS", spec: "DN200-500" },
+      { name: "MF-1000C", spec: "DN50-150" },
+      { name: "UR-1010PLUS", spec: "DN300-800" },
+      { name: "SL-3000PLUS", spec: "개수로형" },
+      { name: "EnerRay", spec: "DN25-100" },
     ];
 
     for (let i = 0; i < count; i++) {
@@ -950,20 +985,24 @@ export class G2BStubConnector extends BaseConnector {
 
         title: `${titleBase} (${product.spec})`,
         organization: org,
-        country: 'KR',
-        region: org.includes('서울') ? '서울' :
-                org.includes('부산') ? '부산' :
-                org.includes('인천') ? '인천' : '대전',
+        country: "KR",
+        region: org.includes("서울")
+          ? "서울"
+          : org.includes("부산")
+            ? "부산"
+            : org.includes("인천")
+              ? "인천"
+              : "대전",
 
         publishedAt: new Date(),
         deadline,
 
         estimatedPrice: Math.floor(100000000 + Math.random() * 400000000),
-        currency: 'KRW',
+        currency: "KRW",
 
         description: `${org}에서 ${titleBase}을 위한 입찰 공고입니다. 대상 제품: ${product.name}`,
-        category: '유량계',
-        keywords: ['유량계', '초음파', product.name, product.spec],
+        category: "유량계",
+        keywords: ["유량계", "초음파", product.name, product.spec],
 
         rawData: {
           stub: true,
@@ -1039,7 +1078,7 @@ export class G2BStubConnector extends BaseConnector {
 ```typescript
 // src/lib/matching/enhanced-matcher.ts
 
-import { NormalizedBid } from '@/lib/connectors/types';
+import { NormalizedBid } from "@/lib/connectors/types";
 
 // 제품 인터페이스
 interface Product {
@@ -1076,12 +1115,12 @@ interface MatchResult {
     excludedKeywords: string[];
     orgHistory: {
       prevContracts: number;
-      preferenceLevel: 'high' | 'medium' | 'low' | 'none';
+      preferenceLevel: "high" | "medium" | "low" | "none";
     };
   };
 
   // 권장 액션
-  action: 'BID' | 'REVIEW' | 'SKIP';
+  action: "BID" | "REVIEW" | "SKIP";
   actionReason: string;
 }
 
@@ -1090,39 +1129,39 @@ interface OrgHistory {
   organization: string;
   contractCount: number;
   lastContract: Date | null;
-  preferenceLevel: 'high' | 'medium' | 'low' | 'none';
+  preferenceLevel: "high" | "medium" | "low" | "none";
 }
 
 export class EnhancedMatcher {
   // 점수 가중치
   private static readonly WEIGHTS = {
     keyword: {
-      primary: 60,      // 핵심 키워드 60점
-      secondary: 25,    // 보조 키워드 25점
-      specs: 15,        // 스펙 키워드 15점
+      primary: 60, // 핵심 키워드 60점
+      secondary: 25, // 보조 키워드 25점
+      specs: 15, // 스펙 키워드 15점
     },
     spec: {
-      diameter: 10,     // 구경 범위 10점
-      accuracy: 8,      // 정확도 8점
-      protocol: 7,      // 통신 프로토콜 7점
+      diameter: 10, // 구경 범위 10점
+      accuracy: 8, // 정확도 8점
+      protocol: 7, // 통신 프로토콜 7점
     },
     org: {
-      history: 25,      // 거래 이력 25점
-      preference: 15,   // 선호도 15점
-      size: 10,         // 기관 규모 10점
+      history: 25, // 거래 이력 25점
+      preference: 15, // 선호도 15점
+      size: 10, // 기관 규모 10점
     },
     excludePenalty: -50, // 제외 키워드 패널티
   };
 
   // 액션 임계값
   private static readonly THRESHOLDS = {
-    bid: 120,           // 120점 이상: 적극 참여 권장
-    review: 70,         // 70-119점: 검토 후 결정
-    skip: 0,            // 70점 미만: 건너뛰기 권장
+    bid: 120, // 120점 이상: 적극 참여 권장
+    review: 70, // 70-119점: 검토 후 결정
+    skip: 0, // 70점 미만: 건너뛰기 권장
   };
 
   constructor(
-    private readonly orgHistories: Map<string, OrgHistory> = new Map()
+    private readonly orgHistories: Map<string, OrgHistory> = new Map(),
   ) {}
 
   /**
@@ -1133,13 +1172,17 @@ export class EnhancedMatcher {
     const specResult = this.calculateSpecScore(bid, product);
     const orgResult = this.calculateOrgScore(bid, product);
 
-    const totalScore = Math.max(0,
-      keywordResult.score + specResult.score + orgResult.score
+    const totalScore = Math.max(
+      0,
+      keywordResult.score + specResult.score + orgResult.score,
     );
 
     const action = this.determineAction(totalScore);
     const actionReason = this.generateActionReason(
-      action, keywordResult, specResult, orgResult
+      action,
+      keywordResult,
+      specResult,
+      orgResult,
     );
 
     return {
@@ -1173,22 +1216,25 @@ export class EnhancedMatcher {
   matchBest(bid: NormalizedBid, products: Product[]): MatchResult | null {
     if (products.length === 0) return null;
 
-    const results = products.map(product => this.match(bid, product));
+    const results = products.map((product) => this.match(bid, product));
     return results.reduce((best, current) =>
-      current.totalScore > best.totalScore ? current : best
+      current.totalScore > best.totalScore ? current : best,
     );
   }
 
   /**
    * 키워드 점수 계산 (100점 만점)
    */
-  private calculateKeywordScore(bid: NormalizedBid, product: Product): {
+  private calculateKeywordScore(
+    bid: NormalizedBid,
+    product: Product,
+  ): {
     score: number;
     matched: string[];
     excluded: string[];
   } {
     const text = this.normalizeText(
-      `${bid.title} ${bid.description || ''} ${bid.category || ''}`
+      `${bid.title} ${bid.description || ""} ${bid.category || ""}`,
     );
 
     const matched: string[] = [];
@@ -1196,8 +1242,8 @@ export class EnhancedMatcher {
     let score = 0;
 
     // Primary 키워드 (60점)
-    const primaryMatched = product.keywords.primary.filter(kw =>
-      this.fuzzyMatch(text, kw)
+    const primaryMatched = product.keywords.primary.filter((kw) =>
+      this.fuzzyMatch(text, kw),
     );
     if (primaryMatched.length > 0) {
       const ratio = primaryMatched.length / product.keywords.primary.length;
@@ -1206,18 +1252,20 @@ export class EnhancedMatcher {
     }
 
     // Secondary 키워드 (25점)
-    const secondaryMatched = product.keywords.secondary.filter(kw =>
-      this.fuzzyMatch(text, kw)
+    const secondaryMatched = product.keywords.secondary.filter((kw) =>
+      this.fuzzyMatch(text, kw),
     );
     if (secondaryMatched.length > 0) {
       const ratio = secondaryMatched.length / product.keywords.secondary.length;
-      score += Math.round(EnhancedMatcher.WEIGHTS.keyword.secondary * Math.min(ratio * 2, 1));
+      score += Math.round(
+        EnhancedMatcher.WEIGHTS.keyword.secondary * Math.min(ratio * 2, 1),
+      );
       matched.push(...secondaryMatched);
     }
 
     // Specs 키워드 (15점)
-    const specsMatched = product.keywords.specs.filter(kw =>
-      this.fuzzyMatch(text, kw)
+    const specsMatched = product.keywords.specs.filter((kw) =>
+      this.fuzzyMatch(text, kw),
     );
     if (specsMatched.length > 0) {
       const ratio = specsMatched.length / product.keywords.specs.length;
@@ -1226,14 +1274,14 @@ export class EnhancedMatcher {
     }
 
     // Exclude 키워드 체크 (패널티)
-    const excludeMatched = product.keywords.exclude.filter(kw =>
-      this.fuzzyMatch(text, kw)
+    const excludeMatched = product.keywords.exclude.filter((kw) =>
+      this.fuzzyMatch(text, kw),
     );
     if (excludeMatched.length > 0) {
       // 강한 패널티 대신 완화된 패널티 (Recall 유지)
       const penalty = Math.min(
         EnhancedMatcher.WEIGHTS.excludePenalty,
-        -10 * excludeMatched.length
+        -10 * excludeMatched.length,
       );
       score += penalty;
       excluded.push(...excludeMatched);
@@ -1245,13 +1293,14 @@ export class EnhancedMatcher {
   /**
    * 스펙 점수 계산 (25점 만점)
    */
-  private calculateSpecScore(bid: NormalizedBid, product: Product): {
+  private calculateSpecScore(
+    bid: NormalizedBid,
+    product: Product,
+  ): {
     score: number;
     matched: string[];
   } {
-    const text = this.normalizeText(
-      `${bid.title} ${bid.description || ''}`
-    );
+    const text = this.normalizeText(`${bid.title} ${bid.description || ""}`);
     const matched: string[] = [];
     let score = 0;
 
@@ -1262,19 +1311,19 @@ export class EnhancedMatcher {
       const productRange = this.parseDiameterRange(diameterRange);
 
       if (bidDiameters.length > 0 && productRange) {
-        const inRange = bidDiameters.some(d =>
-          d >= productRange.min && d <= productRange.max
+        const inRange = bidDiameters.some(
+          (d) => d >= productRange.min && d <= productRange.max,
         );
         if (inRange) {
           score += EnhancedMatcher.WEIGHTS.spec.diameter;
-          matched.push(`Diameter: ${bidDiameters.join(', ')}`);
+          matched.push(`Diameter: ${bidDiameters.join(", ")}`);
         }
       }
     }
 
     // 정확도 매칭 (8점)
     const accuracy = product.specs.accuracy as string;
-    if (accuracy && text.includes(accuracy.replace('±', ''))) {
+    if (accuracy && text.includes(accuracy.replace("±", ""))) {
       score += EnhancedMatcher.WEIGHTS.spec.accuracy;
       matched.push(`Accuracy: ${accuracy}`);
     }
@@ -1282,12 +1331,12 @@ export class EnhancedMatcher {
     // 통신 프로토콜 매칭 (7점)
     const protocols = product.specs.communication as string[];
     if (protocols) {
-      const matchedProtocols = protocols.filter(p =>
-        this.fuzzyMatch(text, p)
+      const matchedProtocols = protocols.filter((p) =>
+        this.fuzzyMatch(text, p),
       );
       if (matchedProtocols.length > 0) {
         score += EnhancedMatcher.WEIGHTS.spec.protocol;
-        matched.push(`Protocol: ${matchedProtocols.join(', ')}`);
+        matched.push(`Protocol: ${matchedProtocols.join(", ")}`);
       }
     }
 
@@ -1297,15 +1346,18 @@ export class EnhancedMatcher {
   /**
    * 기관 점수 계산 (50점 만점)
    */
-  private calculateOrgScore(bid: NormalizedBid, product: Product): {
+  private calculateOrgScore(
+    bid: NormalizedBid,
+    product: Product,
+  ): {
     score: number;
     contractCount: number;
-    preferenceLevel: 'high' | 'medium' | 'low' | 'none';
+    preferenceLevel: "high" | "medium" | "low" | "none";
   } {
-    const org = bid.organization || '';
+    const org = bid.organization || "";
     let score = 0;
     let contractCount = 0;
-    let preferenceLevel: 'high' | 'medium' | 'low' | 'none' = 'none';
+    let preferenceLevel: "high" | "medium" | "low" | "none" = "none";
 
     // 기관 히스토리 조회
     const history = this.orgHistories.get(this.normalizeOrgName(org));
@@ -1325,21 +1377,21 @@ export class EnhancedMatcher {
 
       // 선호도 점수 (15점)
       switch (history.preferenceLevel) {
-        case 'high':
+        case "high":
           score += EnhancedMatcher.WEIGHTS.org.preference;
           break;
-        case 'medium':
+        case "medium":
           score += Math.round(EnhancedMatcher.WEIGHTS.org.preference * 0.6);
           break;
-        case 'low':
+        case "low":
           score += Math.round(EnhancedMatcher.WEIGHTS.org.preference * 0.3);
           break;
       }
     }
 
     // 기관 규모 점수 (10점) - 키워드 기반 추정
-    const largeOrgKeywords = ['K-water', '환경공단', '광역시', '특별시'];
-    if (largeOrgKeywords.some(kw => org.includes(kw))) {
+    const largeOrgKeywords = ["K-water", "환경공단", "광역시", "특별시"];
+    if (largeOrgKeywords.some((kw) => org.includes(kw))) {
       score += EnhancedMatcher.WEIGHTS.org.size;
     }
 
@@ -1349,20 +1401,20 @@ export class EnhancedMatcher {
   /**
    * 액션 결정
    */
-  private determineAction(score: number): 'BID' | 'REVIEW' | 'SKIP' {
-    if (score >= EnhancedMatcher.THRESHOLDS.bid) return 'BID';
-    if (score >= EnhancedMatcher.THRESHOLDS.review) return 'REVIEW';
-    return 'SKIP';
+  private determineAction(score: number): "BID" | "REVIEW" | "SKIP" {
+    if (score >= EnhancedMatcher.THRESHOLDS.bid) return "BID";
+    if (score >= EnhancedMatcher.THRESHOLDS.review) return "REVIEW";
+    return "SKIP";
   }
 
   /**
    * 액션 사유 생성
    */
   private generateActionReason(
-    action: 'BID' | 'REVIEW' | 'SKIP',
+    action: "BID" | "REVIEW" | "SKIP",
     keyword: { score: number; matched: string[]; excluded: string[] },
     spec: { score: number; matched: string[] },
-    org: { score: number; contractCount: number; preferenceLevel: string }
+    org: { score: number; contractCount: number; preferenceLevel: string },
   ): string {
     const reasons: string[] = [];
 
@@ -1380,12 +1432,12 @@ export class EnhancedMatcher {
     }
 
     const prefix = {
-      BID: '적극 참여 권장: ',
-      REVIEW: '검토 필요: ',
-      SKIP: '건너뛰기 권장: ',
+      BID: "적극 참여 권장: ",
+      REVIEW: "검토 필요: ",
+      SKIP: "건너뛰기 권장: ",
     }[action];
 
-    return prefix + (reasons.length > 0 ? reasons.join(', ') : '분석 중');
+    return prefix + (reasons.length > 0 ? reasons.join(", ") : "분석 중");
   }
 
   /**
@@ -1394,8 +1446,8 @@ export class EnhancedMatcher {
   private normalizeText(text: string): string {
     return text
       .toLowerCase()
-      .replace(/[^\w\s가-힣]/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/[^\w\s가-힣]/g, " ")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
@@ -1404,8 +1456,8 @@ export class EnhancedMatcher {
    */
   private normalizeOrgName(org: string): string {
     return org
-      .replace(/\s+/g, '')
-      .replace(/주식회사|㈜|\(주\)/g, '')
+      .replace(/\s+/g, "")
+      .replace(/주식회사|㈜|\(주\)/g, "")
       .toLowerCase();
   }
 
@@ -1419,8 +1471,8 @@ export class EnhancedMatcher {
     if (text.includes(normalizedKeyword)) return true;
 
     // 영문 키워드의 경우 공백 제거 후 매칭
-    const noSpaceText = text.replace(/\s/g, '');
-    const noSpaceKeyword = normalizedKeyword.replace(/\s/g, '');
+    const noSpaceText = text.replace(/\s/g, "");
+    const noSpaceKeyword = normalizedKeyword.replace(/\s/g, "");
     if (noSpaceText.includes(noSpaceKeyword)) return true;
 
     return false;
@@ -1432,13 +1484,15 @@ export class EnhancedMatcher {
   private extractDiameters(text: string): number[] {
     const pattern = /dn\s*(\d+)/gi;
     const matches = [...text.matchAll(pattern)];
-    return matches.map(m => parseInt(m[1])).filter(d => !isNaN(d));
+    return matches.map((m) => parseInt(m[1])).filter((d) => !isNaN(d));
   }
 
   /**
    * 구경 범위 파싱
    */
-  private parseDiameterRange(range: string): { min: number; max: number } | null {
+  private parseDiameterRange(
+    range: string,
+  ): { min: number; max: number } | null {
     const match = range.match(/dn(\d+)\s*[-~]\s*dn(\d+)/i);
     if (match) {
       return {
@@ -1458,9 +1512,9 @@ export class EnhancedMatcher {
 ```typescript
 // src/lib/matching/matching-pipeline.ts
 
-import { createClient } from '@supabase/supabase-js';
-import { EnhancedMatcher } from './enhanced-matcher';
-import { NormalizedBid } from '@/lib/connectors/types';
+import { createClient } from "@supabase/supabase-js";
+import { EnhancedMatcher } from "./enhanced-matcher";
+import { NormalizedBid } from "@/lib/connectors/types";
 
 interface PipelineConfig {
   supabaseUrl: string;
@@ -1473,10 +1527,7 @@ export class MatchingPipeline {
   private matcher: EnhancedMatcher;
 
   constructor(private config: PipelineConfig) {
-    this.supabase = createClient(
-      config.supabaseUrl,
-      config.supabaseServiceKey
-    );
+    this.supabase = createClient(config.supabaseUrl, config.supabaseServiceKey);
     this.matcher = new EnhancedMatcher();
   }
 
@@ -1493,18 +1544,15 @@ export class MatchingPipeline {
     let matched = 0;
 
     // 1. 처리할 공고 조회
-    let query = this.supabase
-      .from('bids')
-      .select('*')
-      .eq('status', 'active');
+    let query = this.supabase.from("bids").select("*").eq("status", "active");
 
     if (bidIds && bidIds.length > 0) {
-      query = query.in('id', bidIds);
+      query = query.in("id", bidIds);
     } else {
       // 최근 24시간 내 수집된 공고
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      query = query.gte('created_at', yesterday.toISOString());
+      query = query.gte("created_at", yesterday.toISOString());
     }
 
     const { data: bids, error: bidsError } = await query;
@@ -1520,9 +1568,9 @@ export class MatchingPipeline {
 
     // 2. 모든 테넌트의 활성 제품 조회
     const { data: products, error: productsError } = await this.supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true);
+      .from("products")
+      .select("*")
+      .eq("is_active", true);
 
     if (productsError) {
       errors.push(`Failed to fetch products: ${productsError.message}`);
@@ -1572,30 +1620,35 @@ export class MatchingPipeline {
 
             const matchResult = this.matcher.matchBest(
               normalizedBid,
-              tenantProducts
+              tenantProducts,
             );
 
             if (matchResult && matchResult.totalScore >= 50) {
               // 매칭 결과 저장
               const { error: insertError } = await this.supabase
-                .from('matches')
-                .upsert({
-                  tenant_id: tenantId,
-                  bid_id: bid.id,
-                  product_id: matchResult.productId,
-                  total_score: matchResult.totalScore,
-                  keyword_score: matchResult.keywordScore,
-                  spec_score: matchResult.specScore,
-                  org_score: matchResult.orgScore,
-                  match_details: matchResult.matchDetails,
-                  action: matchResult.action,
-                  action_reason: matchResult.actionReason,
-                }, {
-                  onConflict: 'tenant_id,bid_id,product_id',
-                });
+                .from("matches")
+                .upsert(
+                  {
+                    tenant_id: tenantId,
+                    bid_id: bid.id,
+                    product_id: matchResult.productId,
+                    total_score: matchResult.totalScore,
+                    keyword_score: matchResult.keywordScore,
+                    spec_score: matchResult.specScore,
+                    org_score: matchResult.orgScore,
+                    match_details: matchResult.matchDetails,
+                    action: matchResult.action,
+                    action_reason: matchResult.actionReason,
+                  },
+                  {
+                    onConflict: "tenant_id,bid_id,product_id",
+                  },
+                );
 
               if (insertError) {
-                errors.push(`Failed to save match for bid ${bid.id}: ${insertError.message}`);
+                errors.push(
+                  `Failed to save match for bid ${bid.id}: ${insertError.message}`,
+                );
               } else {
                 matched++;
               }
@@ -1614,4 +1667,4 @@ export class MatchingPipeline {
 
 ---
 
-*Part 3 끝 - Part 4: UI/UX & Demo로 계속*
+_Part 3 끝 - Part 4: UI/UX & Demo로 계속_

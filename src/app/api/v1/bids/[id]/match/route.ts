@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/bids/[id]/match
  * @description 입찰 제품 매칭 API
@@ -57,7 +58,7 @@ async function handlePost(
 
     return NextResponse.json(serializeForJson(result));
   } catch (error) {
-    console.error('POST /api/v1/bids/[id]/match 오류:', error);
+    logger.error('POST /api/v1/bids/[id]/match 오류:', error);
     return NextResponse.json(
       {
         success: false,

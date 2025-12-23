@@ -9,6 +9,7 @@ import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limite
 import { listBids } from '@/lib/domain/usecases/bid-usecases';
 import { z } from 'zod';
 import type { ApiResponse, BidData } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 요청 스키마
@@ -222,7 +223,7 @@ async function handlePost(
         );
     }
   } catch (error) {
-    console.error('POST /api/v1/export 오류:', error);
+    logger.error('POST /api/v1/export 오류:', error);
     return NextResponse.json(
       {
         success: false,

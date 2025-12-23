@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 환경 변수 스키마
@@ -67,9 +68,9 @@ export function validateEnv(): Env {
     if (process.env.NODE_ENV === 'production') {
       throw new Error(`환경 변수 검증 실패:\n${errors.join('\n')}`);
     } else if (process.env.NODE_ENV === 'development') {
-      console.error('❌ 환경 변수 검증 실패:');
-      console.error(errors.join('\n'));
-      console.warn('⚠️ 개발 환경에서는 경고만 표시합니다');
+      logger.error('❌ 환경 변수 검증 실패:');
+      logger.error(errors.join('\n'));
+      logger.warn('⚠️ 개발 환경에서는 경고만 표시합니다');
     }
   }
 
@@ -111,7 +112,7 @@ if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
   // 서버 사이드 & 개발 환경에서만 실행
   try {
     validateEnv();
-    console.log('✅ 환경 변수 검증 완료');
+    logger.info('✅ 환경 변수 검증 완료');
   } catch {
     // 에러는 이미 위에서 처리됨
   }

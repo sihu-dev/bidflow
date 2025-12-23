@@ -1,48 +1,49 @@
 /**
- * Production-safe logger
- * 개발 환경에서만 로그 출력, 프로덕션에서는 자동 제거
+ * BIDFLOW Structured Logging System
  */
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-export const logger = {
-  log: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.log(...args);
-    }
-  },
-
-  warn: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.warn(...args);
-    }
-  },
-
-  error: (...args: unknown[]) => {
-    // 에러는 프로덕션에서도 출력
-    console.error(...args);
-  },
-
-  info: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.info(...args);
-    }
-  },
-
-  debug: (...args: unknown[]) => {
-    if (isDevelopment) {
-      console.debug(...args);
-    }
-  },
-};
-
-// 타입 안전한 로거 래퍼
-export function createLogger(namespace: string) {
-  return {
-    log: (...args: unknown[]) => logger.log(`[${namespace}]`, ...args),
-    warn: (...args: unknown[]) => logger.warn(`[${namespace}]`, ...args),
-    error: (...args: unknown[]) => logger.error(`[${namespace}]`, ...args),
-    info: (...args: unknown[]) => logger.info(`[${namespace}]`, ...args),
-    debug: (...args: unknown[]) => logger.debug(`[${namespace}]`, ...args),
-  };
+interface LogMeta {
+  [key: string]: unknown;
 }
+
+class Logger {
+  private isDevelopment = process.env.NODE_ENV === 'development';
+
+  debug(message: string, meta?: LogMeta): void {
+    if (!this.isDevelopment) return;
+    console.log('[DEBUG]', message, meta);
+  }
+
+  info(message: string, meta?: LogMeta): void {
+    if (this.isDevelopment) {
+      console.log('[INFO]', message, meta);
+    } else {
+      console.log(JSON.stringify({ level: 'info', message, ...meta }));
+    }
+  }
+
+  warn(message: string, meta?: LogMeta): void {
+    if (this.isDevelopment) {
+      console.warn('[WARN]', message, meta);
+    } else {
+      console.log(JSON.stringify({ level: 'warn', message, ...meta }));
+    }
+  }
+
+  error(message: string, error?: Error | unknown, meta?: LogMeta): void {
+    const errorMeta = error instanceof Error
+      ? { ...meta, error: { name: error.name, message: error.message, stack: error.stack } }
+      : { ...meta, error };
+
+    if (this.isDevelopment) {
+      console.error('[ERROR]', message, errorMeta);
+    } else {
+      console.log(JSON.stringify({ level: 'error', message, ...errorMeta }));
+    }
+  }
+}
+
+export const logger = new Logger();
+export const { debug, info, warn, error } = logger;

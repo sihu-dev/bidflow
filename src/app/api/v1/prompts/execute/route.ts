@@ -9,6 +9,7 @@ import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limite
 import { validatePromptInput, sanitizeAIResponse } from '@/lib/security/prompt-guard';
 import { z } from 'zod';
 import type { ApiResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 스키마
@@ -165,7 +166,7 @@ async function handlePost(
       },
     });
   } catch (error) {
-    console.error('POST /api/v1/prompts/execute 오류:', error);
+    logger.error('POST /api/v1/prompts/execute 오류:', error);
     return NextResponse.json(
       {
         success: false,

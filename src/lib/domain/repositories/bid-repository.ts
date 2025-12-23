@@ -17,6 +17,7 @@ import type {
   ISODateString,
   KRW,
 } from '@/types';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 개발 모드 감지
@@ -558,7 +559,7 @@ export function getBidRepository(): IBidRepository {
   if (!supabaseUrl || !supabaseKey) {
     if (isDevelopment) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[DEV] Supabase 미설정 - Mock Repository 사용');
+        logger.warn('[DEV] Supabase 미설정 - Mock Repository 사용');
       }
       bidRepositoryInstance = new MockBidRepository();
       return bidRepositoryInstance;

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * 문의 API 엔드포인트
  * POST /api/v1/contact
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('[Contact API] DB Error:', dbError);
+      logger.error('[Contact API] DB Error:', dbError);
       // DB 오류가 있어도 Slack 알림은 시도
     }
 
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
         ],
       });
     } catch (slackError) {
-      console.error('[Contact API] Slack Error:', slackError);
+      logger.error('[Contact API] Slack Error:', slackError);
     }
 
     // 3. 접수 확인 이메일 발송 (문의자에게)
@@ -115,10 +116,10 @@ export async function POST(request: NextRequest) {
         html: createConfirmationEmailHtml(data.name, inquiryId),
       });
     } catch (emailError) {
-      console.error('[Contact API] Email Error:', emailError);
+      logger.error('[Contact API] Email Error:', emailError);
     }
 
-    console.log('[Contact API] New inquiry saved:', {
+    logger.info('[Contact API] New inquiry saved:', {
       id: inquiryId,
       name: data.name,
       type: data.inquiryType,
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
       id: inquiryId,
     });
   } catch (error) {
-    console.error('[Contact API] Error:', error);
+    logger.error('[Contact API] Error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
       { status: 500 }

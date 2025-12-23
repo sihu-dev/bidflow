@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/ai/formula
  * @description AI 수식 실행 API
@@ -211,7 +212,7 @@ async function handlePost(request: AuthenticatedRequest): Promise<NextResponse> 
 
     return NextResponse.json({ success: true, result });
   } catch (error) {
-    console.error('[AI Formula API] 오류:', error);
+    logger.error('[AI Formula API] 오류:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : '서버 오류' },
       { status: 500 }

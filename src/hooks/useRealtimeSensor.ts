@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import type { SupabaseClientType } from '@/lib/supabase/client';
+import { logger } from '@/lib/utils/logger';
 
 interface SensorReading {
   id: string;
@@ -39,7 +40,7 @@ export function useRealtimeSensor(sensorId?: string) {
         const supabase = getSupabaseBrowserClient();
 
         if (!supabase) {
-          console.warn('[DEV] Supabase client not available - skipping realtime');
+          logger.warn('[DEV] Supabase client not available - skipping realtime');
           setLoading(false);
           return;
         }

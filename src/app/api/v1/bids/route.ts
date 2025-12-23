@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/bids
  * @description 입찰 목록 조회 및 생성 API
@@ -60,7 +61,7 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
 
     return NextResponse.json(serializeForJson(result));
   } catch (error) {
-    console.error('GET /api/v1/bids 오류:', error);
+    logger.error('GET /api/v1/bids 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -109,7 +110,7 @@ async function handlePost(request: AuthenticatedRequest): Promise<NextResponse<A
 
     return NextResponse.json(serializeForJson(result), { status: 201 });
   } catch (error) {
-    console.error('POST /api/v1/bids 오류:', error);
+    logger.error('POST /api/v1/bids 오류:', error);
     return NextResponse.json(
       {
         success: false,

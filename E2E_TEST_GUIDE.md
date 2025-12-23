@@ -56,6 +56,7 @@ npx playwright test --debug
 ### 총 46개 테스트 (2개 프로젝트)
 
 **Desktop Chrome (23개)**
+
 - Hero Section: 4개
 - Stats Section: 2개
 - Features Section: 2개
@@ -66,6 +67,7 @@ npx playwright test --debug
 - SpreadsheetDemo: 10개
 
 **Mobile Chrome (23개)**
+
 - 동일한 테스트를 모바일 뷰포트에서 실행
 
 ## 대안: Docker로 실행
@@ -84,7 +86,7 @@ npm run test:e2e
 ✅ 테스트 파일 작성 완료 (33개 테스트)
 ✅ Playwright 설정 완료
 ✅ 코드 에러 수정 (ssr: false 제거)
-⚠️  시스템 의존성 설치 필요
+⚠️ 시스템 의존성 설치 필요
 
 ## 다음 단계
 

@@ -9,6 +9,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { HotTable, HotTableClass } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import Handsontable from 'handsontable';
+import type { HyperFormula as HyperFormulaType } from 'hyperformula';
 import 'handsontable/styles/handsontable.min.css';
 import 'handsontable/styles/ht-theme-main.min.css';
 
@@ -24,15 +25,14 @@ import {
   formatAmount,
 } from '@/lib/spreadsheet/column-definitions';
 import { exportToExcel, exportToCSV, exportToJSON } from '@/lib/spreadsheet/excel-export';
+import { logger } from '@/lib/utils/logger';
 
 // Handsontable 모듈 등록
 registerAllModules();
 
 // HyperFormula lazy load 상태를 위한 전역 캐시
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let hyperformulaInstanceCache: any = null;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let hyperformulaLoadPromise: Promise<any> | null = null;
+let hyperformulaInstanceCache: HyperFormulaType | null = null;
+let hyperformulaLoadPromise: Promise<HyperFormulaType> | null = null;
 
 // HyperFormula lazy loader
 async function loadHyperFormula() {
@@ -302,8 +302,7 @@ export function SpreadsheetView({
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [formulaEngine, setFormulaEngine] = useState<any>(null);
+  const [formulaEngine, setFormulaEngine] = useState<HyperFormulaType | null>(null);
 
   // HyperFormula lazy load
   useEffect(() => {
@@ -336,7 +335,7 @@ export function SpreadsheetView({
         try {
           await onBidUpdate(bid.id, { [prop as string]: newValue });
         } catch (error) {
-          console.error('업데이트 실패:', error);
+          logger.error('업데이트 실패:', error);
         }
       }
     },

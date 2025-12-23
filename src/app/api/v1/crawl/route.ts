@@ -10,6 +10,7 @@ import { withCSRF } from '@/lib/security/csrf';
 import { inngest } from '@/inngest/client';
 import { z } from 'zod';
 import type { ApiResponse } from '@forge-labs/types/bidding';
+import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
 // 요청 스키마
@@ -43,7 +44,7 @@ async function handleGet(): Promise<NextResponse<ApiResponse<unknown>>> {
       },
     });
   } catch (error) {
-    console.error('GET /api/v1/crawl 오류:', error);
+    logger.error('GET /api/v1/crawl 오류:', error);
     return NextResponse.json(
       {
         success: false,
@@ -108,7 +109,7 @@ async function handlePost(
       },
     });
   } catch (error) {
-    console.error('POST /api/v1/crawl 오류:', error);
+    logger.error('POST /api/v1/crawl 오류:', error);
     return NextResponse.json(
       {
         success: false,

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/bids/upcoming
  * @description 마감 임박 입찰 조회 API
@@ -53,7 +54,7 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
 
     return NextResponse.json(serializeForJson(result));
   } catch (error) {
-    console.error('GET /api/v1/bids/upcoming 오류:', error);
+    logger.error('GET /api/v1/bids/upcoming 오류:', error);
     return NextResponse.json(
       {
         success: false,

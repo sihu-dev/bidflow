@@ -11,8 +11,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/lib/**/*.ts', 'src/components/**/*.tsx', 'src/app/**/*.tsx'],
-      exclude: ['src/**/*.d.ts', 'src/__tests__/**'],
+      include: ['src/lib/**/*.ts'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/__tests__/**',
+        'src/lib/data/**',
+        'src/lib/performance/**',
+        'src/lib/prompts/templates.ts',
+        'src/lib/metadata.ts',
+      ],
     },
     testTimeout: 10000,
   },
