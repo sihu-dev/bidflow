@@ -9,10 +9,19 @@ import type { ApiErrorResponse } from '@forge-labs/types/bidding';
 import { logger } from '@/lib/utils/logger';
 
 // ============================================================================
-// 개발 모드 감지
+// 개발 모드 감지 (프로덕션 안전 장치)
 // ============================================================================
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// 프로덕션 환경 명시적 확인 (Vercel, AWS 등)
+const isProductionEnv =
+  process.env.VERCEL_ENV === 'production' ||
+  process.env.AWS_EXECUTION_ENV !== undefined ||
+  process.env.ALLOW_MOCK_AUTH === 'false';
+
+// Mock 인증 허용 여부 (개발 모드 AND 프로덕션 환경 아님)
+const allowMockAuth = isDevelopment && !isProductionEnv;
 
 // 개발용 Mock 사용자
 const DEV_MOCK_USER = {
@@ -63,10 +72,8 @@ function createSupabaseClient(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (isDevelopment) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
-      }
+    if (allowMockAuth) {
+      logger.warn('[DEV] Supabase 미설정 - Mock 인증 사용');
       return null;
     }
     throw new Error('Supabase 환경 변수가 설정되지 않았습니다');
@@ -109,8 +116,8 @@ export function withAuth<T>(
       // Supabase 클라이언트 생성
       const supabase = createSupabaseClient(request);
 
-      // 개발 모드에서 Supabase 미설정 시 Mock 사용자 사용
-      if (!supabase && isDevelopment) {
+      // 개발 모드에서 Supabase 미설정 시 Mock 사용자 사용 (프로덕션 환경 제외)
+      if (!supabase && allowMockAuth) {
         const authenticatedRequest = request as AuthenticatedRequest;
         authenticatedRequest.userId = DEV_MOCK_USER.id;
         authenticatedRequest.userEmail = DEV_MOCK_USER.email;

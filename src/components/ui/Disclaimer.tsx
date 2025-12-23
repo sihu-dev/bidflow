@@ -29,7 +29,7 @@ export function DisclaimerBanner({ dismissible = true, className }: DisclaimerPr
     <div
       className={cn(
         'relative w-full px-4 py-2',
-        'bg-amber-500/10 border-b border-amber-500/20',
+        'bg-neutral-700/10 border-b border-neutral-700/20',
         'text-amber-200 text-sm',
         className
       )}
@@ -41,7 +41,7 @@ export function DisclaimerBanner({ dismissible = true, className }: DisclaimerPr
           <button
             type="button"
             onClick={() => setIsDismissed(true)}
-            className="absolute right-4 p-1 hover:bg-amber-500/20 rounded"
+            className="absolute right-4 p-1 hover:bg-neutral-700/20 rounded"
             aria-label={t('dashboard.disclaimer.dismissLabel') as string}
           >
             <X className="h-4 w-4" />
@@ -132,8 +132,8 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
         )}
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-full bg-amber-500/10">
-            <AlertTriangle className="h-6 w-6 text-amber-500" />
+          <div className="p-2 rounded-full bg-neutral-700/10">
+            <AlertTriangle className="h-6 w-6 text-neutral-700" />
           </div>
           <h2 className="text-xl font-semibold text-white">{t('dashboard.disclaimer.modalTitle') as string}</h2>
         </div>
@@ -146,7 +146,7 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
           <ul className="space-y-3">
             {Array.isArray(modalPoints) && modalPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <span className="text-amber-500 mt-1">•</span>
+                <span className="text-neutral-700 mt-1">•</span>
                 <span>{point}</span>
               </li>
             ))}
@@ -183,8 +183,8 @@ export function TradeWarning({ className }: { className?: string }) {
     <div
       className={cn(
         'flex items-center gap-2 p-3 rounded-lg',
-        'bg-red-500/10 border border-red-500/20',
-        'text-red-400 text-xs',
+        'bg-neutral-600/10 border border-neutral-600/20',
+        'text-neutral-500 text-xs',
         className
       )}
     >
@@ -205,8 +205,8 @@ export function BacktestWarning({ className }: { className?: string }) {
     <div
       className={cn(
         'flex items-center gap-2 p-3 rounded-lg',
-        'bg-amber-500/10 border border-amber-500/20',
-        'text-amber-400 text-xs',
+        'bg-neutral-700/10 border border-neutral-700/20',
+        'text-neutral-600 text-xs',
         className
       )}
     >

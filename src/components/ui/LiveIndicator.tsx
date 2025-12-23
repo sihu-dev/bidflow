@@ -22,15 +22,15 @@ const sizeStyles = {
 
 const statusStyles = {
   live: {
-    dot: 'bg-emerald-500',
-    ring: 'border-emerald-500',
-    text: 'text-emerald-400',
+    dot: 'bg-neutral-900',
+    ring: 'border-neutral-900',
+    text: 'text-neutral-800',
     label: 'Live',
   },
   connecting: {
-    dot: 'bg-amber-500',
-    ring: 'border-amber-500',
-    text: 'text-amber-400',
+    dot: 'bg-neutral-700',
+    ring: 'border-neutral-700',
+    text: 'text-neutral-600',
     label: 'Connecting',
   },
   offline: {

@@ -111,8 +111,8 @@ export function AnimatedValue({
     <span
       className={clsx(
         'tabular-nums transition-colors duration-300',
-        flash === 'up' && 'text-emerald-400',
-        flash === 'down' && 'text-red-400',
+        flash === 'up' && 'text-neutral-800',
+        flash === 'down' && 'text-neutral-500',
         className
       )}
     >

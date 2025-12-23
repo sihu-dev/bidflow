@@ -68,8 +68,8 @@ export function PerformanceChart() {
           <div>
             <p className="text-xs text-zinc-400 mb-1">{t('dashboard.performanceChart.returnRate') as string}</p>
             <div className="flex items-center gap-1">
-              <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-base font-medium text-emerald-400">+28.47%</span>
+              <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-neutral-800" />
+              <span className="text-base font-medium text-neutral-800">+28.47%</span>
             </div>
           </div>
         </div>

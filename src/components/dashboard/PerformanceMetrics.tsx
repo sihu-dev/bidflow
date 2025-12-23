@@ -31,7 +31,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       change: portfolioMetrics.vsYesterday,
       changeLabel: 'vs yesterday',
       format: 'currency',
-      icon: <CurrencyDollarIcon className="w-5 h-5 text-emerald-400" />,
+      icon: <CurrencyDollarIcon className="w-5 h-5 text-neutral-800" />,
       variant: portfolioMetrics.todayPnl >= 0 ? 'profit' : 'loss',
     },
     {
@@ -40,7 +40,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       change: portfolioMetrics.vsLastWeek,
       changeLabel: 'vs last week',
       format: 'percent',
-      icon: <ChartBarIcon className="w-5 h-5 text-[#5E6AD2]" />,
+      icon: <ChartBarIcon className="w-5 h-5 text-[theme(colors.neutral.900)]" />,
       variant: 'primary',
     },
     {
@@ -49,7 +49,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       change: portfolioMetrics.vsLastMonth,
       changeLabel: 'vs last month',
       format: 'number',
-      icon: <ArrowTrendingUpIcon className="w-5 h-5 text-amber-400" />,
+      icon: <ArrowTrendingUpIcon className="w-5 h-5 text-neutral-600" />,
       variant: 'default',
     },
     {
@@ -58,7 +58,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       change: 0,
       changeLabel: 'no change',
       format: 'percent',
-      icon: <ShieldExclamationIcon className="w-5 h-5 text-red-400" />,
+      icon: <ShieldExclamationIcon className="w-5 h-5 text-neutral-500" />,
       variant: 'loss',
     },
   ]

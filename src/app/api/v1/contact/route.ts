@@ -2,12 +2,23 @@ import { logger } from '@/lib/utils/logger';
 /**
  * 문의 API 엔드포인트
  * POST /api/v1/contact
+ *
+ * Rate Limit: 5 requests / 15 minutes (스팸 방지)
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { sendSlackMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
+import { withRateLimit } from '@/lib/security/rate-limiter';
+
+// 응답 타입 정의
+type ContactResponse = {
+  success: boolean;
+  message?: string;
+  error?: string;
+  id?: string;
+};
 
 // Supabase 클라이언트 (서비스 역할)
 const supabase = createClient(
@@ -25,7 +36,7 @@ const contactSchema = z.object({
   message: z.string().min(10, '문의 내용을 10자 이상 입력해주세요'),
 });
 
-export async function POST(request: NextRequest) {
+async function handlePost(request: NextRequest): Promise<NextResponse<ContactResponse>> {
   try {
     const body = await request.json();
 
@@ -196,6 +207,9 @@ function createConfirmationEmailHtml(name: string, inquiryId: string): string {
     </html>
   `;
 }
+
+// POST 핸들러 (Rate Limiting 적용 - auth: 5 req/15min)
+export const POST = withRateLimit(handlePost, { type: 'auth' });
 
 // OPTIONS (CORS preflight)
 export async function OPTIONS() {
