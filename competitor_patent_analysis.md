@@ -11,11 +11,13 @@
 ### 1.1 Endress+Hauser - Heartbeat Technology
 
 #### 핵심 특허
+
 - **US7260486B2**: "Method for operating and/or reviewing a magneto-inductive flow meter" (2005)
 - **US7750642B2**: "Magnetic flowmeter with verification" (2016년 Micro Motion으로부터 재할당)
 - **EP1792144A1**: "Method for testing a magnetic inductive flow meter" (2005)
 
 #### Factor 보정 우회 전략
+
 ```
 접근법: "검증(Verification)" 기반 - Factor 변경 없음
 핵심 아이디어:
@@ -26,6 +28,7 @@
 ```
 
 **3단계 전략**:
+
 1. **Heartbeat Diagnostics** (표준 기능)
    - 지속적인 자가 진단 (98% 테스트 커버리지)
    - NAMUR NE107 표준 준수
@@ -43,6 +46,7 @@
    - HBSI (Sensor Integrity) 파라미터
 
 #### 특허 회피 포인트
+
 ```
 ❌ 피해야 할 영역:
 - "Baseline reference + 비교 검증" 조합
@@ -56,12 +60,14 @@
 ### 1.2 Emerson (Micro Motion / Rosemount)
 
 #### 핵심 특허
+
 - **US7865318B2**: "Meter electronics and methods for verification diagnostics for a flow meter" (2008)
 - **US8280651B2**: Divisional patent of US7865318B2
 - **US7750642B2**: "Magnetic flowmeter with verification" (원래 Rosemount, 2016년 Micro Motion 재할당)
 - **US6014902A**: "Magnetic flowmeter with diagnostics" - 전극 fouling 검출
 
 #### Factor 보정 우회 전략
+
 ```
 접근법: "Modal Analysis" 기반 - Tube Stiffness 연관성 활용
 핵심 발견:
@@ -76,6 +82,7 @@
 ```
 
 **전극 Fouling 검출 (US6014902A)**:
+
 ```
 방법:
 - 전극-유체 간 임피던스 측정
@@ -86,6 +93,7 @@
 ```
 
 #### 특허 회피 포인트
+
 ```
 ❌ 피해야 할 영역:
 - "Tube stiffness = Calibration factor" 연관성 명시
@@ -103,6 +111,7 @@
 ### 1.3 Siemens - SIWA Platform
 
 #### 핵심 전략 (특허 미확인, 제품 기반 분석)
+
 ```
 접근법: "AI Application Layer" - 유량계 자체 특허 회피
 구조:
@@ -114,14 +123,17 @@
 ```
 
 **핵심 인사이트**:
+
 > "유량계 하드웨어/펌웨어 특허를 피하고, 상위 소프트웨어 레이어에서 AI 적용"
 
 #### ROI
+
 - Payback: 36개월 이내
 - 누수 감지: 0.2 L/s 이하 감지 가능
 - 누수 감소: 최대 50%
 
 #### 특허 회피 포인트
+
 ```
 ✓ Siemens가 활용한 안전 영역:
 - Application layer AI (meter 내부 로직 변경 X)
@@ -135,6 +147,7 @@
 ### 1.4 Yokogawa
 
 #### 핵심 특허 전략 (연구 논문 기반)
+
 ```
 접근법: "Reinforcement Learning" + "Platform 전략"
 특징:
@@ -145,6 +158,7 @@
 ```
 
 **Reinforcement Learning 기술**:
+
 ```
 공동 개발: Yokogawa + Nara Institute of Science and Technology (NAIST)
 특징:
@@ -154,6 +168,7 @@
 ```
 
 **Flowmeter 진단 기능**:
+
 ```
 1. Adhesion Diagnostic Level Function (독점 기술)
    - 전극 표면 상태 진단
@@ -168,6 +183,7 @@
 ```
 
 #### 특허 회피 포인트
+
 ```
 ❌ 피해야 할 영역:
 - "4-level adhesion diagnostic" 구조
@@ -185,6 +201,7 @@
 ### 1.5 ABB
 
 #### 분석 결과
+
 ```
 상태: AI 기반 flowmeter 특허 미확인
 제품:
@@ -195,6 +212,7 @@
 ```
 
 **ABB Ability Verification**:
+
 ```
 기능: 현장 또는 원격 성능 검증
 특징: 별도 AI 언급 없음
@@ -205,16 +223,18 @@
 
 ## 2. Factor 보정 문제 우회 전략 비교표
 
-| 업체 | 접근법 | Factor 변경 여부 | 핵심 기술 | 특허 강도 |
-|------|--------|------------------|-----------|-----------|
-| **Endress+Hauser** | Baseline Verification | ❌ 변경 안함 | Factory reference 비교 | ⭐⭐⭐⭐⭐ 매우 강함 |
-| **Emerson** | Modal Analysis | ❌ 변경 안함 | Tube stiffness 연관성 | ⭐⭐⭐⭐⭐ 매우 강함 |
-| **Siemens** | Application Layer AI | ❌ 변경 안함 | Cloud 후처리 | ⭐⭐ 약함 (앱 레벨) |
-| **Yokogawa** | Reinforcement Learning | ⚠️ 간접 변경 | Trial & error 학습 | ⭐⭐⭐⭐ 강함 |
-| **ABB** | Auto Adjust | ⚠️ 단순 조정 | Rule-based | ⭐⭐ 약함 |
+| 업체               | 접근법                 | Factor 변경 여부 | 핵심 기술              | 특허 강도            |
+| ------------------ | ---------------------- | ---------------- | ---------------------- | -------------------- |
+| **Endress+Hauser** | Baseline Verification  | ❌ 변경 안함     | Factory reference 비교 | ⭐⭐⭐⭐⭐ 매우 강함 |
+| **Emerson**        | Modal Analysis         | ❌ 변경 안함     | Tube stiffness 연관성  | ⭐⭐⭐⭐⭐ 매우 강함 |
+| **Siemens**        | Application Layer AI   | ❌ 변경 안함     | Cloud 후처리           | ⭐⭐ 약함 (앱 레벨)  |
+| **Yokogawa**       | Reinforcement Learning | ⚠️ 간접 변경     | Trial & error 학습     | ⭐⭐⭐⭐ 강함        |
+| **ABB**            | Auto Adjust            | ⚠️ 단순 조정     | Rule-based             | ⭐⭐ 약함            |
 
 **핵심 인사이트**:
+
 > 모든 주요 경쟁사는 **"Factor를 직접 변경하지 않고"** 우회하는 전략 채택
+>
 > - "검증(Verification)" 프레임워크 활용
 > - "경고(Warning)" 발생 후 사용자 판단
 > - AI는 보조 도구로만 활용
@@ -240,6 +260,7 @@ Claim 1 (독립항):
 ```
 
 **회피 전략**:
+
 ```
 CMNTech는 다음을 피해야 함:
 ❌ Time constant 기반 진단
@@ -271,6 +292,7 @@ Claim 1 (독립항):
 ```
 
 **회피 전략**:
+
 ```
 CMNTech는 다음을 피해야 함:
 ❌ Vibrational response 기반 검증
@@ -301,6 +323,7 @@ Claim 1 (독립항):
 ```
 
 **회피 전략**:
+
 ```
 CMNTech는 다음을 피해야 함:
 ❌ 40초 주기 진단 모드
@@ -318,6 +341,7 @@ CMNTech는 다음을 피해야 함:
 ## 4. CMNTech가 피해야 할 특허 영역 (Red Zones)
 
 ### 🚫 RED ZONE 1: Baseline Verification Architecture
+
 ```
 구조: Factory Reference + Periodic Comparison + Warning Output
 특허: Endress+Hauser US7260486B2, Emerson US7865318B2
@@ -337,6 +361,7 @@ class FlowMeter {
 ```
 
 ### 🚫 RED ZONE 2: Vibrational Modal Analysis
+
 ```
 구조: Tube Stiffness ↔ Calibration Factor 연관성
 특허: Emerson US7865318B2, US8280651B2
@@ -349,6 +374,7 @@ if (tubeStiffnessChange > threshold) {
 ```
 
 ### 🚫 RED ZONE 3: 40-Second Periodic Diagnostics
+
 ```
 구조: 40초 주기 진단 모드 + NE107 출력
 특허: Endress+Hauser, Emerson US6014902A
@@ -363,6 +389,7 @@ setInterval(() => {
 ```
 
 ### 🚫 RED ZONE 4: 4-Level Adhesion Classification
+
 ```
 구조: 전극 코팅을 4단계로 분류
 특허: Yokogawa (Adhesion Diagnostic Level Function)
@@ -375,6 +402,7 @@ enum AdhesionLevel {
 ```
 
 ### 🚫 RED ZONE 5: Reinforcement Learning for Flow Control
+
 ```
 구조: Trial & error 기반 plant control
 특허: Yokogawa (공동 개발 NAIST)
@@ -396,6 +424,7 @@ class FlowController {
 ## 5. 차별화 가능한 빈 공간 (White Space)
 
 ### ✅ WHITE SPACE 1: Real-Time Multi-Sensor AI Fusion
+
 ```
 특징:
 - 단일 센서 의존 X
@@ -425,6 +454,7 @@ class AIFlowMeter {
 ```
 
 ### ✅ WHITE SPACE 2: Statistical Pattern Recognition (물리 법칙 비의존)
+
 ```
 특징:
 - Time constant 측정 X
@@ -454,6 +484,7 @@ class StatisticalDriftDetector {
 ```
 
 ### ✅ WHITE SPACE 3: Transfer Learning from Multiple Plants
+
 ```
 특징:
 - 단일 공장 baseline X
@@ -487,6 +518,7 @@ class TransferLearningFlowMeter {
 ```
 
 ### ✅ WHITE SPACE 4: Generative AI for Virtual Calibration
+
 ```
 특징:
 - Physical calibration X
@@ -520,6 +552,7 @@ class GenerativeCalibration {
 ```
 
 ### ✅ WHITE SPACE 5: Edge AI with Federated Learning
+
 ```
 특징:
 - Cloud 의존 최소화 (Siemens와 차별화)
@@ -609,16 +642,16 @@ Hardware│                   │                   │Software
 
 ## 7. 기술별 특허 위험도 평가
 
-| 기술 | 특허 충돌 위험도 | 차별화 가능성 | 구현 난이도 | 권장도 |
-|------|------------------|---------------|-------------|--------|
-| **Multi-Sensor AI Fusion** | 🟢 낮음 (5%) | 🟢 높음 (90%) | 🟡 중간 | ⭐⭐⭐⭐⭐ 강력 추천 |
-| **Transfer Learning** | 🟢 낮음 (10%) | 🟢 높음 (85%) | 🟡 중간 | ⭐⭐⭐⭐⭐ 강력 추천 |
-| **Edge AI + Federated** | 🟢 낮음 (5%) | 🟢 높음 (95%) | 🔴 높음 | ⭐⭐⭐⭐⭐ 강력 추천 |
-| **Generative AI** | 🟢 낮음 (0%) | 🟢 높음 (100%) | 🔴 매우 높음 | ⭐⭐⭐⭐ 추천 (장기) |
-| **Statistical Pattern** | 🟢 낮음 (15%) | 🟡 중간 (60%) | 🟢 낮음 | ⭐⭐⭐ 추천 |
-| **Baseline Verification** | 🔴 매우 높음 (95%) | 🔴 낮음 (10%) | 🟢 낮음 | ❌ 금지 |
-| **Modal Analysis** | 🔴 매우 높음 (90%) | 🔴 낮음 (20%) | 🟡 중간 | ❌ 금지 |
-| **Reinforcement Learning** | 🟡 중간 (50%) | 🟡 중간 (50%) | 🔴 매우 높음 | ⚠️ 주의 |
+| 기술                       | 특허 충돌 위험도   | 차별화 가능성  | 구현 난이도  | 권장도               |
+| -------------------------- | ------------------ | -------------- | ------------ | -------------------- |
+| **Multi-Sensor AI Fusion** | 🟢 낮음 (5%)       | 🟢 높음 (90%)  | 🟡 중간      | ⭐⭐⭐⭐⭐ 강력 추천 |
+| **Transfer Learning**      | 🟢 낮음 (10%)      | 🟢 높음 (85%)  | 🟡 중간      | ⭐⭐⭐⭐⭐ 강력 추천 |
+| **Edge AI + Federated**    | 🟢 낮음 (5%)       | 🟢 높음 (95%)  | 🔴 높음      | ⭐⭐⭐⭐⭐ 강력 추천 |
+| **Generative AI**          | 🟢 낮음 (0%)       | 🟢 높음 (100%) | 🔴 매우 높음 | ⭐⭐⭐⭐ 추천 (장기) |
+| **Statistical Pattern**    | 🟢 낮음 (15%)      | 🟡 중간 (60%)  | 🟢 낮음      | ⭐⭐⭐ 추천          |
+| **Baseline Verification**  | 🔴 매우 높음 (95%) | 🔴 낮음 (10%)  | 🟢 낮음      | ❌ 금지              |
+| **Modal Analysis**         | 🔴 매우 높음 (90%) | 🔴 낮음 (20%)  | 🟡 중간      | ❌ 금지              |
+| **Reinforcement Learning** | 🟡 중간 (50%)      | 🟡 중간 (50%)  | 🔴 매우 높음 | ⚠️ 주의              |
 
 ---
 
@@ -627,6 +660,7 @@ Hardware│                   │                   │Software
 ### 8.1 즉시 채택 가능 (High Priority)
 
 #### 1️⃣ Multi-Sensor Real-Time AI Fusion
+
 ```python
 # CMNTech 권장 구조
 class CMNTechAIFlowMeter:
@@ -665,12 +699,14 @@ class CMNTechAIFlowMeter:
 ```
 
 **특허 회피 포인트**:
+
 - ✅ Factor 직접 변경 안함 (Endress+Hauser 회피)
 - ✅ Stored baseline 사용 안함 (Emerson 회피)
 - ✅ 40초 주기 진단 안함 (Emerson/E+H 회피)
 - ✅ Confidence score 출력 (diagnostic value X)
 
 #### 2️⃣ Transfer Learning from Global Dataset
+
 ```python
 class GlobalLearningSystem:
     def __init__(self):
@@ -699,11 +735,13 @@ class GlobalLearningSystem:
 ```
 
 **차별화 포인트**:
+
 - 🚀 신규 설치 시 즉시 정확한 예측 (baseline 수집 기간 불필요)
 - 🚀 1000+ 플랜트 지식 활용 (단일 factory reference보다 우수)
 - 🚀 Domain adaptation 가능 (업종별 특화)
 
 #### 3️⃣ Edge AI with Federated Learning
+
 ```python
 class EdgeAIFlowMeter:
     def __init__(self):
@@ -743,6 +781,7 @@ class EdgeAIFlowMeter:
 ### 8.2 중기 개발 목표 (Medium Priority)
 
 #### 4️⃣ Statistical Pattern Recognition
+
 ```python
 class StatisticalDriftAnalyzer:
     def __init__(self):
@@ -771,6 +810,7 @@ class StatisticalDriftAnalyzer:
 ```
 
 **특허 회피**:
+
 - ✅ Time constant 측정 안함 (E+H US7260486B2 회피)
 - ✅ Baseline comparison 안함 (Emerson US7865318B2 회피)
 - ✅ 확률 기반 출력 (diagnostic value X)
@@ -780,6 +820,7 @@ class StatisticalDriftAnalyzer:
 ### 8.3 장기 연구 과제 (Low Priority, High Risk/Reward)
 
 #### 5️⃣ Generative AI for Virtual Calibration
+
 ```python
 class GenerativeVirtualCalibration:
     def __init__(self):
@@ -816,11 +857,13 @@ class GenerativeVirtualCalibration:
 ```
 
 **혁신 포인트**:
+
 - 🔬 Factory calibration 불필요 (혁신적)
 - 🔬 Self-supervised (레이블 데이터 불필요)
 - 🔬 Context-aware (운전 조건 고려)
 
 **위험 요소**:
+
 - ⚠️ 구현 난이도 매우 높음
 - ⚠️ 규제 승인 어려움 (가상 캘리브레이션)
 - ⚠️ 산업 수용성 불확실
@@ -832,6 +875,7 @@ class GenerativeVirtualCalibration:
 ### 9.1 즉시 출원 권장 (Fast Track)
 
 #### Patent Application #1
+
 ```
 제목: "Multi-Sensor Fusion System for Real-Time Flow Measurement Confidence Estimation"
 
@@ -853,6 +897,7 @@ A flow measurement system comprising:
 ```
 
 #### Patent Application #2
+
 ```
 제목: "Transfer Learning-Based Zero-Shot Flow Meter Calibration System"
 
@@ -873,6 +918,7 @@ A method for flow meter calibration comprising:
 ```
 
 #### Patent Application #3
+
 ```
 제목: "Federated Learning-Based Edge AI System for Distributed Flow Meter Networks"
 
@@ -896,6 +942,7 @@ A distributed flow meter system comprising:
 ### 9.2 선행 기술 조사 후 출원 (Due Diligence Required)
 
 #### Patent Application #4
+
 ```
 제목: "Generative AI-Based Virtual Calibration for Flow Meters"
 
@@ -921,6 +968,7 @@ A distributed flow meter system comprising:
    - Yokogawa: Reinforcement learning (간접적)
 
 2. **CMNTech의 차별화 방향**
+
    ```
    위치: Software-based + High AI dependency
    전략: Edge AI + Transfer Learning + Multi-Sensor Fusion
@@ -928,6 +976,7 @@ A distributed flow meter system comprising:
    ```
 
 3. **특허 위험도**
+
    ```
    🔴 매우 위험 (절대 금지):
       - Baseline verification architecture
@@ -949,23 +998,27 @@ A distributed flow meter system comprising:
 ### 📋 즉시 실행 액션 아이템
 
 #### Week 1-2: 특허 회피 검증
+
 - [ ] 현재 CMNTech 구현 코드 리뷰
 - [ ] Red Zone 침범 여부 확인
 - [ ] Baseline verification 로직 제거 (있다면)
 - [ ] 40초 주기 진단 변경 (있다면)
 
 #### Week 3-4: White Space 구현 시작
+
 - [ ] Multi-sensor AI fusion 프로토타입
 - [ ] Transfer learning 데이터셋 수집 계획
 - [ ] Edge AI 아키텍처 설계
 
 #### Month 2: 특허 출원 준비
+
 - [ ] Patent Application #1 작성 (Multi-Sensor Fusion)
 - [ ] Patent Application #2 작성 (Transfer Learning)
 - [ ] Patent Application #3 작성 (Edge AI + Federated)
 - [ ] 특허 변호사 컨설팅
 
 #### Month 3-6: 제품 개발 및 검증
+
 - [ ] 프로토타입 현장 테스트
 - [ ] 경쟁사 대비 성능 벤치마크
 - [ ] 규제 승인 준비 (필요 시)
@@ -975,16 +1028,19 @@ A distributed flow meter system comprising:
 ## Sources
 
 ### Endress+Hauser
+
 - [Flow verification & monitoring with Heartbeat Technology](https://www.mesc.endress.com/en/field-instruments-overview/flow-measurement-product-overview/flow-verification-technology-monitoring)
 - [Heartbeat Technology for electromagnetic flowmeters](https://www.us.endress.com/en/field-instruments-overview/flow-measurement-product-overview/promag-innovations/promag-innovations-heartbeat-technology)
 - [US7260486B2 Patent - Method for operating a magneto-inductive flow meter](https://patents.google.com/patent/US7260486B2/en)
 - [EP1792144A1 Patent - Method for testing a magnetic inductive flow meter](https://patents.google.com/patent/EP1792144A1/en)
 
 ### Siemens
+
 - [AI-based predictive maintenance](https://www.siemens.com/global/en/products/automation/topic-areas/industrial-ai/usecases/ai-based-predictive-maintenance.html)
 - [Siemens Expands Software Portfolio for Water Industry](https://www.engineering.com/siemens-expands-software-portfolio-for-water-industry/)
 
 ### Emerson (Micro Motion / Rosemount)
+
 - [US7750642B2 Patent - Magnetic flowmeter with verification](https://patents.google.com/patent/US7750642B2/en)
 - [US7865318B2 Patent - Meter electronics and methods for verification diagnostics](https://patents.google.com/patent/US7865318)
 - [US6014902A Patent - Magnetic flowmeter with diagnostics](https://patents.google.com/patent/US6014902)
@@ -992,10 +1048,12 @@ A distributed flow meter system comprising:
 - [Coriolis Flowmeter Verification via Embedded Modal Analysis](https://www.emerson.com/documents/automation/white-paper-coriolis-flowmeter-verification-via-embedded-modal-analysis-micro-motion-en-64392.pdf)
 
 ### Yokogawa
+
 - [Industrial AI, Building Next-Gen Autonomous Operations](https://www.yokogawa.com/special/artificial-intelligence/)
 - [AI Control Learning Service](https://www.yokogawa.com/solutions/products-and-services/control/control-devices/real-time-os-based-machine-controllers/ert3-ai-control-en/)
 
 ### General AI & Machine Learning
+
 - [AI-Assisted Calibration: Predictive Drift Compensation](https://eureka.patsnap.com/article/ai-assisted-calibration-predictive-drift-compensation)
 - [First Principles and Machine Learning Virtual Flow Metering](https://www.sciencedirect.com/science/article/pii/S0920410519309088)
 - [Virtual Flow Meter - Turbulent Flux](https://turbulentflux.com/software-solutions/flux-virtual-flow-meter/)

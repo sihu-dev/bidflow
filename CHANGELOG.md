@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### 데이터 레이어
+
 - **CMNTech 5개 제품 카탈로그** (`src/lib/data/products.ts`)
   - UR-1000PLUS (다회선 초음파 유량계)
   - MF-1000C (일체형 전자 유량계)
@@ -35,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced Matcher 실시간 연동
 
 #### AI 매칭 엔진
+
 - **Enhanced Matcher** (`src/lib/matching/enhanced-matcher.ts`)
   - 가중치 기반 알고리즘 (키워드 100점 + 규격 25점 + 기관 50점)
   - 신뢰도 계산 (High/Medium/Low)
@@ -49,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 기관별 제품 점수 매핑
 
 #### 랜딩 페이지 (9개 섹션)
+
 - **Hero** - CMNTech 유량계 전문 배지, 5개 제품 Pills
 - **Stats** - 92% 매칭 정확도, 5+ 제품, 150+ 공고, 3.2x 참여율
 - **Features** - 4개 핵심 기능 (자동 수집, 제품 매칭, AI 함수, 제안서)
@@ -60,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CTA** - 5개 제품 입찰 자동화 CTA
 
 #### 테스트
+
 - **E2E 테스트 46개** (Playwright)
   - Desktop Chrome: 23개
   - Mobile Chrome: 23개
@@ -67,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Landing Sections: 13개 (Hero, Stats, Features 등)
 
 #### 문서화
+
 - **README.md** - 400+ 줄 포괄적 프로젝트 문서
 - **E2E_TEST_GUIDE.md** - E2E 테스트 실행 가이드
 - **CMNTech 분석 문서 10개** (`docs/cmntech-analysis/`)
@@ -75,11 +80,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 #### 성능 최적화
+
 - **Code Splitting** - SpreadsheetDemo dynamic import 적용
 - **Loading UI** - 스피너 + 텍스트 개선
 - **SSR 유지** - SEO 손실 없이 최적화
 
 #### 반응형 디자인
+
 - 40개 반응형 클래스 적용
 - 모바일/태블릿/데스크톱 3단계 브레이크포인트
 - SpreadsheetDemo 테이블 overflow-x-auto
@@ -93,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 #### 빌드 성과
+
 - **빌드 시간**: ~7.4초
 - **First Load JS**: 103KB (공유), 127KB (홈페이지)
 - **총 라우트**: 51개
@@ -100,12 +108,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ESLint 경고**: 0개
 
 #### 코드 통계
+
 - **총 파일 변경**: 36개
 - **총 코드 추가**: 5,102줄
 - **신규 파일**: 24개
 - **수정 파일**: 12개
 
 #### 기술 스택
+
 - Next.js 15.5.9 (App Router)
 - React 19
 - TypeScript 5.7
@@ -114,15 +124,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Supabase (PostgreSQL)
 
 ### Breaking Changes
+
 없음 (초기 릴리스)
 
 ### Deprecated
+
 없음
 
 ### Removed
+
 없음
 
 ### Security
+
 - API 인증 미들웨어 구현
 - Rate Limiting 준비 (Upstash Redis)
 - CSRF 보호 구현
@@ -134,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 다음 버전 (v0.2.0) 계획
 
 ### Planned
+
 - [ ] AI 셀 함수 실제 구현
 - [ ] 크롤링 자동화 (Inngest)
 - [ ] 알림 시스템 (이메일/Slack)

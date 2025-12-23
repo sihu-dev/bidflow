@@ -24,15 +24,18 @@
 ## 프로젝트 개요
 
 ### 목적
+
 제조업 SME(중소기업)를 위한 **입찰 공고 자동 수집 및 AI 제품 매칭 시스템**
 
 ### 핵심 가치
+
 - **자동화**: 45+ 데이터 소스에서 입찰 공고 자동 수집
 - **AI 매칭**: CMNTech 5개 제품과 공고 자동 매칭 (92% 정확도)
 - **생산성**: 입찰 준비 시간 70% 단축
 - **글로벌**: TED(EU), SAM.gov(US) 등 해외 입찰 지원
 
 ### 타겟 사용자
+
 - 씨엠엔텍 영업팀 (유량계/열량계 제조)
 - 중소 제조업 입찰 담당자
 - 공공조달 컨설턴트
@@ -191,16 +194,16 @@ bidflow/
 
 ```typescript
 interface Product {
-  id: string;                     // 'UR-1000PLUS'
-  name: string;                   // '다회선 초음파 유량계'
-  category: string;               // '상수도'
+  id: string; // 'UR-1000PLUS'
+  name: string; // '다회선 초음파 유량계'
+  category: string; // '상수도'
   pipeSizeRange: {
-    min: number;                  // 300 (DN)
-    max: number;                  // 4000 (DN)
+    min: number; // 300 (DN)
+    max: number; // 4000 (DN)
   };
-  strongKeywords: string[];       // ['초음파유량계', '상수도']
-  weakKeywords: string[];         // ['유량계', '계측기']
-  excludeKeywords: string[];      // ['전자유량계', '비만관']
+  strongKeywords: string[]; // ['초음파유량계', '상수도']
+  weakKeywords: string[]; // ['유량계', '계측기']
+  excludeKeywords: string[]; // ['전자유량계', '비만관']
 }
 ```
 
@@ -208,14 +211,14 @@ interface Product {
 
 ```typescript
 interface BidAnnouncement {
-  id: string;                     // 고유 ID
-  title: string;                  // 공고명
-  organization: string;           // 발주기관
-  description: string;            // 공고 상세
-  estimatedPrice: number;         // 추정가격 (원)
-  deadline: Date;                 // 마감일
-  source: 'naramarket' | 'ted' | 'kwater' | 'kepco';
-  sourceUrl: string;              // 원문 링크
+  id: string; // 고유 ID
+  title: string; // 공고명
+  organization: string; // 발주기관
+  description: string; // 공고 상세
+  estimatedPrice: number; // 추정가격 (원)
+  deadline: Date; // 마감일
+  source: "naramarket" | "ted" | "kwater" | "kepco";
+  sourceUrl: string; // 원문 링크
   createdAt: Date;
 }
 ```
@@ -224,16 +227,16 @@ interface BidAnnouncement {
 
 ```typescript
 interface MatchResult {
-  productId: string;              // 매칭된 제품 ID
-  score: number;                  // 총점 (0-175)
-  confidence: 'high' | 'medium' | 'low';
+  productId: string; // 매칭된 제품 ID
+  score: number; // 총점 (0-175)
+  confidence: "high" | "medium" | "low";
   breakdown: {
-    keywordScore: number;         // 키워드 점수 (0-100)
-    pipeSizeScore: number;        // 규격 점수 (0-25)
-    organizationScore: number;    // 기관 점수 (0-50)
+    keywordScore: number; // 키워드 점수 (0-100)
+    pipeSizeScore: number; // 규격 점수 (0-25)
+    organizationScore: number; // 기관 점수 (0-50)
   };
-  reasons: string[];              // 매칭 이유
-  gaps?: string[];                // 요구사항 갭
+  reasons: string[]; // 매칭 이유
+  gaps?: string[]; // 요구사항 갭
 }
 ```
 
@@ -364,6 +367,7 @@ GET  /api/v1/stats
 **위치**: `src/lib/matching/enhanced-matcher.ts`
 
 **알고리즘**:
+
 ```
 총점 = 키워드 점수 (100점) + 규격 점수 (25점) + 기관 점수 (50점)
 최대 175점
@@ -380,12 +384,13 @@ GET  /api/v1/stats
 ```
 
 **주요 함수**:
+
 ```typescript
 export function matchBidToProducts(bid: BidAnnouncement): {
   bestMatch: MatchResult | null;
   allMatches: MatchResult[];
-  recommendation: 'BID' | 'REVIEW' | 'SKIP';
-}
+  recommendation: "BID" | "REVIEW" | "SKIP";
+};
 ```
 
 ### 2. Pipe Size Extractor (규격 추출)
@@ -393,12 +398,14 @@ export function matchBidToProducts(bid: BidAnnouncement): {
 **위치**: `src/lib/matching/pipe-size-extractor.ts`
 
 **지원 패턴**:
+
 - 국제 규격: `DN50`, `DN1000`
 - 한국 표기: `구경 300mm`, `φ500`
 - 범위: `DN100~DN500`
 - 복수: `DN50, DN80, DN100`
 
 **검증 규칙**:
+
 - 표준 DN: 50, 80, 100, 125, 150, 200, 250, 300, ..., 4000
 - 커스텀: 50 또는 100의 배수
 
@@ -407,12 +414,14 @@ export function matchBidToProducts(bid: BidAnnouncement): {
 **위치**: `src/lib/matching/organization-dictionary.ts`
 
 **45개 주요 기관**:
+
 - 중앙정부: 환경부, 국토부, 산업부
 - 공기업: K-water, 한전, 농어촌공사
 - 지자체: 서울시, 부산시, 인천시
 - 해외: TED(EU), ADB, World Bank
 
 **기능**:
+
 ```typescript
 normalizeOrganization(orgName: string): {
   canonical: string;     // 정규화된 이름
@@ -486,11 +495,13 @@ OPENAI_API_KEY=sk-...
 ### E2E 테스트 (Playwright)
 
 **총 46개 테스트**:
+
 - SpreadsheetDemo: 10개
 - Landing Sections: 23개 (Desktop)
 - Landing Sections: 23개 (Mobile)
 
 **실행**:
+
 ```bash
 # 헤드리스 모드
 pnpm test:e2e
@@ -653,13 +664,13 @@ function helper() { ... }
 const apiKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 // ❌ Bad
-const apiKey = 'sk-1234567890abcdef';
+const apiKey = "sk-1234567890abcdef";
 ```
 
 ### 2. 입력 검증
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 const bidSchema = z.object({
   title: z.string().min(1).max(500),
@@ -673,10 +684,7 @@ const result = bidSchema.safeParse(input);
 
 ```typescript
 // ✅ Supabase 쿼리 빌더 사용
-const { data } = await supabase
-  .from('bids')
-  .select('*')
-  .eq('id', bidId);
+const { data } = await supabase.from("bids").select("*").eq("id", bidId);
 
 // ❌ Raw SQL 지양
 ```
@@ -715,12 +723,14 @@ pnpm install
 ## 참고 자료
 
 ### 내부 문서
+
 - [README.md](README.md) - 프로젝트 개요
 - [CHANGELOG.md](CHANGELOG.md) - 버전 히스토리
 - [DEPLOYMENT.md](DEPLOYMENT.md) - 배포 가이드
 - [docs/README.md](docs/README.md) - 문서 센터
 
 ### 외부 자료
+
 - [Next.js 문서](https://nextjs.org/docs)
 - [Supabase 문서](https://supabase.com/docs)
 - [Playwright 문서](https://playwright.dev)

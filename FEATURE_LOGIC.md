@@ -90,7 +90,7 @@ function matchBidToProducts(bid: BidAnnouncement): MatchingResult {
 ```typescript
 function calculateKeywordScore(
   bidText: string,
-  product: Product
+  product: Product,
 ): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
@@ -125,6 +125,7 @@ function calculateKeywordScore(
 ```
 
 **예시**:
+
 ```
 공고: "서울시 상수도본부 초음파 유량계 DN300~DN1000 납품"
 
@@ -139,18 +140,18 @@ UR-1000PLUS 제품:
 ```typescript
 function calculatePipeSizeScore(
   bid: BidAnnouncement,
-  product: Product
+  product: Product,
 ): { score: number; reasons: string[] } {
   // 1. 공고에서 파이프 규격 추출
-  const extractedSizes = extractPipeSizes(bid.title + ' ' + bid.description);
+  const extractedSizes = extractPipeSizes(bid.title + " " + bid.description);
 
   if (extractedSizes.dns.length === 0) {
-    return { score: 0, reasons: ['파이프 규격 정보 없음'] };
+    return { score: 0, reasons: ["파이프 규격 정보 없음"] };
   }
 
   // 2. 제품 지원 범위와 비교
   const matchedSizes = extractedSizes.dns.filter(
-    dn => dn >= product.pipeSizeRange.min && dn <= product.pipeSizeRange.max
+    (dn) => dn >= product.pipeSizeRange.min && dn <= product.pipeSizeRange.max,
   );
 
   // 3. 매칭 비율에 따른 점수
@@ -164,21 +165,22 @@ function calculatePipeSizeScore(
   } else if (matchRatio >= 0.5) {
     score = 10; // 50% 이상
   } else {
-    score = 5;  // 일부 매칭
+    score = 5; // 일부 매칭
   }
 
   return {
     score,
     reasons: [
-      `파이프 규격: ${extractedSizes.dns.join(', ')}`,
+      `파이프 규격: ${extractedSizes.dns.join(", ")}`,
       `제품 지원 범위: DN${product.pipeSizeRange.min}~DN${product.pipeSizeRange.max}`,
-      `매칭률: ${(matchRatio * 100).toFixed(0)}% (+${score}점)`
-    ]
+      `매칭률: ${(matchRatio * 100).toFixed(0)}% (+${score}점)`,
+    ],
   };
 }
 ```
 
 **예시**:
+
 ```
 공고: "DN300, DN500, DN800 납품"
 제품: UR-1000PLUS (DN300~DN4000)
@@ -191,13 +193,13 @@ function calculatePipeSizeScore(
 ```typescript
 function calculateOrganizationScore(
   bid: BidAnnouncement,
-  product: Product
+  product: Product,
 ): { score: number; reasons: string[] } {
   // 1. 발주기관 정규화
   const normalized = normalizeOrganization(bid.organization);
 
   if (!normalized.entry) {
-    return { score: 0, reasons: ['기관 정보 매칭 실패'] };
+    return { score: 0, reasons: ["기관 정보 매칭 실패"] };
   }
 
   // 2. 해당 기관의 제품별 가중치 확인
@@ -205,8 +207,11 @@ function calculateOrganizationScore(
 
   // 3. 신뢰도에 따른 보너스
   const confidenceBonus =
-    normalized.confidence === 'exact' ? 5 :
-    normalized.confidence === 'alias' ? 3 : 0;
+    normalized.confidence === "exact"
+      ? 5
+      : normalized.confidence === "alias"
+        ? 3
+        : 0;
 
   const totalScore = productScore + confidenceBonus;
 
@@ -215,13 +220,14 @@ function calculateOrganizationScore(
     reasons: [
       `발주기관: ${normalized.canonical}`,
       `기관 점수: ${productScore}점`,
-      `매칭 신뢰도: ${normalized.confidence} (+${confidenceBonus}점)`
-    ]
+      `매칭 신뢰도: ${normalized.confidence} (+${confidenceBonus}점)`,
+    ],
   };
 }
 ```
 
 **예시**:
+
 ```
 공고: "한국수자원공사 정수장 유량계 납품"
 
@@ -234,10 +240,10 @@ K-water의 UR-1000PLUS 가중치: 45점
 #### 3. 신뢰도 계산
 
 ```typescript
-function calculateConfidence(totalScore: number): 'high' | 'medium' | 'low' {
-  if (totalScore >= 80) return 'high';
-  if (totalScore >= 60) return 'medium';
-  return 'low';
+function calculateConfidence(totalScore: number): "high" | "medium" | "low" {
+  if (totalScore >= 80) return "high";
+  if (totalScore >= 60) return "medium";
+  return "low";
 }
 ```
 
@@ -246,25 +252,25 @@ function calculateConfidence(totalScore: number): 'high' | 'medium' | 'low' {
 ```typescript
 function determineRecommendation(
   match: MatchResult,
-  bid: BidAnnouncement
-): 'BID' | 'REVIEW' | 'SKIP' {
+  bid: BidAnnouncement,
+): "BID" | "REVIEW" | "SKIP" {
   // 1. 제외 키워드가 있으면 무조건 SKIP
   if (match.score === 0) {
-    return 'SKIP';
+    return "SKIP";
   }
 
   // 2. High 신뢰도 + 갭 없음 → BID
-  if (match.confidence === 'high' && (!match.gaps || match.gaps.length === 0)) {
-    return 'BID';
+  if (match.confidence === "high" && (!match.gaps || match.gaps.length === 0)) {
+    return "BID";
   }
 
   // 3. Medium 이상 → REVIEW
-  if (match.confidence === 'medium' || match.confidence === 'high') {
-    return 'REVIEW';
+  if (match.confidence === "medium" || match.confidence === "high") {
+    return "REVIEW";
   }
 
   // 4. Low 신뢰도 → SKIP
-  return 'SKIP';
+  return "SKIP";
 }
 ```
 
@@ -323,9 +329,7 @@ function determineRecommendation(
       "파이프 규격 정보 없음 (0점)",
       "발주기관: 한국전력공사 (+45점)"
     ],
-    "gaps": [
-      "파이프 규격 정보 부족 - 추가 확인 필요"
-    ]
+    "gaps": ["파이프 규격 정보 부족 - 추가 확인 필요"]
   },
   "recommendation": "REVIEW"
 }
@@ -348,9 +352,7 @@ function determineRecommendation(
       "pipeSizeScore": 0,
       "organizationScore": 0
     },
-    "reasons": [
-      "제외 키워드 발견: \"전자식\" - UR-1000PLUS는 초음파 방식"
-    ],
+    "reasons": ["제외 키워드 발견: \"전자식\" - UR-1000PLUS는 초음파 방식"],
     "gaps": []
   },
   "recommendation": "SKIP"
@@ -388,6 +390,7 @@ function AI_SUMMARY(bidText: string): string {
 ```
 
 **예시**:
+
 ```
 입력: "서울특별시 상수도사업본부에서 2025년 상수도 관로 유량계 교체사업을 위한 초음파 유량계 50대를 구매하고자 합니다. DN300~DN1000 규격이며, 납기는 2025년 6월 30일입니다. 추정가격은 450,000,000원입니다..."
 
@@ -412,17 +415,15 @@ function AI_SCORE(bid: BidAnnouncement, product: Product): number {
   const competitionScore = calculateCompetitionIntensity(bid);
   const historyScore = getHistoricalSuccessRate(bid, product);
 
-  const finalScore = (
-    matchScore * 0.6 +
-    competitionScore * 0.2 +
-    historyScore * 0.2
-  ) * 100;
+  const finalScore =
+    (matchScore * 0.6 + competitionScore * 0.2 + historyScore * 0.2) * 100;
 
   return Math.round(finalScore);
 }
 ```
 
 **예시**:
+
 ```
 매칭 점수: 140/175 = 0.8 → 80점 (가중치 60% = 48점)
 경쟁 강도: 0.7 (중간) → 70점 (가중치 20% = 14점)
@@ -452,18 +453,22 @@ function AI_MATCH(bid: BidAnnouncement): {
 
   // 차선책 찾기 (점수 차이 20점 이내)
   const alternatives = result.allMatches
-    .filter(m => m.score >= bestMatch.score - 20 && m.productId !== bestMatch.productId)
-    .map(m => m.productId);
+    .filter(
+      (m) =>
+        m.score >= bestMatch.score - 20 && m.productId !== bestMatch.productId,
+    )
+    .map((m) => m.productId);
 
   return {
     primary: bestMatch.productId,
     alternatives: alternatives.length > 0 ? alternatives : undefined,
-    reason: bestMatch.reasons[0]
+    reason: bestMatch.reasons[0],
   };
 }
 ```
 
 **예시**:
+
 ```
 입력: "상수도 초음파 유량계 DN500"
 
@@ -491,20 +496,28 @@ function AI_KEYWORDS(bidText: string): string[] {
   const tfidf = calculateTFIDF(words);
 
   // 제품 관련 키워드에 가중치 부여
-  const productKeywords = ['초음파', '유량계', '전자', '비만관', '개수로', '열량계'];
-  const boosted = tfidf.map(item => ({
+  const productKeywords = [
+    "초음파",
+    "유량계",
+    "전자",
+    "비만관",
+    "개수로",
+    "열량계",
+  ];
+  const boosted = tfidf.map((item) => ({
     ...item,
-    score: productKeywords.includes(item.word) ? item.score * 1.5 : item.score
+    score: productKeywords.includes(item.word) ? item.score * 1.5 : item.score,
   }));
 
   return boosted
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
-    .map(item => item.word);
+    .map((item) => item.word);
 }
 ```
 
 **예시**:
+
 ```
 입력: "서울시 상수도본부 초음파 유량계 DN300~DN1000 납품 및 설치"
 
@@ -524,35 +537,37 @@ function AI_KEYWORDS(bidText: string): string[] {
  */
 function AI_DEADLINE(deadline: Date): {
   dday: number;
-  urgency: 'urgent' | 'normal' | 'relaxed';
+  urgency: "urgent" | "normal" | "relaxed";
   actions: string[];
 } {
   const today = new Date();
-  const dday = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const dday = Math.ceil(
+    (deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
-  let urgency: 'urgent' | 'normal' | 'relaxed';
+  let urgency: "urgent" | "normal" | "relaxed";
   let actions: string[];
 
   if (dday <= 3) {
-    urgency = 'urgent';
+    urgency = "urgent";
     actions = [
-      '즉시 내부 검토 회의',
-      '오늘 중 입찰 참여 여부 결정',
-      '기존 제안서 템플릿 활용'
+      "즉시 내부 검토 회의",
+      "오늘 중 입찰 참여 여부 결정",
+      "기존 제안서 템플릿 활용",
     ];
   } else if (dday <= 7) {
-    urgency = 'normal';
+    urgency = "normal";
     actions = [
-      'D-7: 내부 검토 및 의사결정',
-      'D-3: 제안서 작성 완료',
-      'D-1: 최종 검토 및 제출'
+      "D-7: 내부 검토 및 의사결정",
+      "D-3: 제안서 작성 완료",
+      "D-1: 최종 검토 및 제출",
     ];
   } else {
-    urgency = 'relaxed';
+    urgency = "relaxed";
     actions = [
-      `D-${dday-7}: 예비 검토`,
-      'D-7: 제안서 작성 시작',
-      'D-2: 최종 검토 및 제출'
+      `D-${dday - 7}: 예비 검토`,
+      "D-7: 제안서 작성 시작",
+      "D-2: 최종 검토 및 제출",
     ];
   }
 
@@ -626,7 +641,7 @@ function AI_DEADLINE(deadline: Date): {
 async function generateProposal(
   bid: BidAnnouncement,
   product: Product,
-  company: CompanyInfo
+  company: CompanyInfo,
 ): Promise<ProposalDocument> {
   // 1. 템플릿 로드
   const template = await loadProposalTemplate(product.category);
@@ -745,7 +760,7 @@ return result;
 ```typescript
 // 여러 공고를 한 번에 매칭
 async function batchMatch(bids: BidAnnouncement[]): Promise<MatchResult[]> {
-  return Promise.all(bids.map(bid => matchBidToProducts(bid)));
+  return Promise.all(bids.map((bid) => matchBidToProducts(bid)));
 }
 ```
 
@@ -770,14 +785,14 @@ try {
   const result = matchBidToProducts(bid);
   return result;
 } catch (error) {
-  logger.error('Matching failed', { bidId: bid.id, error });
+  logger.error("Matching failed", { bidId: bid.id, error });
 
   // 폴백: 기본 매칭 결과 반환
   return {
     bestMatch: null,
     allMatches: [],
-    recommendation: 'REVIEW',
-    error: '자동 매칭 실패 - 수동 검토 필요'
+    recommendation: "REVIEW",
+    error: "자동 매칭 실패 - 수동 검토 필요",
   };
 }
 ```

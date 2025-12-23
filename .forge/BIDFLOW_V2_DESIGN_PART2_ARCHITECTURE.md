@@ -1,4 +1,5 @@
 # BIDFLOW V2 Beta Design Document
+
 ## Part 2: Database & Architecture
 
 > GPT 5.2 Pro 검수용 마스터 설계 문서
@@ -849,4 +850,4 @@ supabase/migrations/
 
 ---
 
-*Part 2 끝 - Part 3: Connector & Matching Engine으로 계속*
+_Part 2 끝 - Part 3: Connector & Matching Engine으로 계속_

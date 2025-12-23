@@ -1,4 +1,5 @@
 # BIDFLOW V2 Beta Design Document
+
 ## Part 4: UI/UX & Demo Scenario
 
 > GPT 5.2 Pro 검수용 마스터 설계 문서
@@ -15,31 +16,31 @@
 
 ```yaml
 Primary Colors:
-  bidflow-primary: "#2563EB"      # Blue 600 - 주요 액션
+  bidflow-primary: "#2563EB" # Blue 600 - 주요 액션
   bidflow-primary-dark: "#1D4ED8" # Blue 700 - 호버
   bidflow-primary-light: "#3B82F6" # Blue 500 - 강조
 
 Secondary Colors:
-  bidflow-secondary: "#10B981"    # Emerald 500 - 성공/긍정
-  bidflow-warning: "#F59E0B"      # Amber 500 - 경고/주의
-  bidflow-danger: "#EF4444"       # Red 500 - 위험/오류
+  bidflow-secondary: "#10B981" # Emerald 500 - 성공/긍정
+  bidflow-warning: "#F59E0B" # Amber 500 - 경고/주의
+  bidflow-danger: "#EF4444" # Red 500 - 위험/오류
 
 Neutral Colors:
-  bidflow-bg: "#F8FAFC"           # Slate 50 - 배경
-  bidflow-surface: "#FFFFFF"      # White - 카드/패널
-  bidflow-border: "#E2E8F0"       # Slate 200 - 테두리
-  bidflow-text: "#1E293B"         # Slate 800 - 본문
-  bidflow-muted: "#64748B"        # Slate 500 - 보조 텍스트
+  bidflow-bg: "#F8FAFC" # Slate 50 - 배경
+  bidflow-surface: "#FFFFFF" # White - 카드/패널
+  bidflow-border: "#E2E8F0" # Slate 200 - 테두리
+  bidflow-text: "#1E293B" # Slate 800 - 본문
+  bidflow-muted: "#64748B" # Slate 500 - 보조 텍스트
 
 Action Colors:
-  action-bid: "#10B981"           # 적극 참여 (BID)
-  action-review: "#F59E0B"        # 검토 필요 (REVIEW)
-  action-skip: "#94A3B8"          # 건너뛰기 (SKIP)
+  action-bid: "#10B981" # 적극 참여 (BID)
+  action-review: "#F59E0B" # 검토 필요 (REVIEW)
+  action-skip: "#94A3B8" # 건너뛰기 (SKIP)
 
 Source Colors:
-  source-ted: "#003399"           # EU Blue
-  source-sam: "#B22234"           # US Red
-  source-g2b: "#003478"           # Korea Blue
+  source-ted: "#003399" # EU Blue
+  source-sam: "#B22234" # US Red
+  source-g2b: "#003478" # Korea Blue
 ```
 
 ### 7.1.2 Typography
@@ -69,15 +70,15 @@ Font Weights:
 
 ```yaml
 Spacing Scale:
-  1: "0.25rem"   # 4px
-  2: "0.5rem"    # 8px
-  3: "0.75rem"   # 12px
-  4: "1rem"      # 16px
-  5: "1.25rem"   # 20px
-  6: "1.5rem"    # 24px
-  8: "2rem"      # 32px
-  10: "2.5rem"   # 40px
-  12: "3rem"     # 48px
+  1: "0.25rem" # 4px
+  2: "0.5rem" # 8px
+  3: "0.75rem" # 12px
+  4: "1rem" # 16px
+  5: "1.25rem" # 20px
+  6: "1.5rem" # 24px
+  8: "2rem" # 32px
+  10: "2.5rem" # 40px
+  12: "3rem" # 48px
 
 Container:
   max-width: "1440px"
@@ -479,7 +480,7 @@ interface BidCardProps {
     sourceId: string;
     match: {
       totalScore: number;
-      action: 'BID' | 'REVIEW' | 'SKIP';
+      action: "BID" | "REVIEW" | "SKIP";
       productName: string;
       keywordMatches: string[];
     };
@@ -490,23 +491,23 @@ interface BidCardProps {
 
 export function BidCard({ bid, onView, onAction }: BidCardProps) {
   const sourceConfig = {
-    ted: { flag: '🇪🇺', name: 'EU TED', color: 'bg-blue-100' },
-    sam_gov: { flag: '🇺🇸', name: 'SAM.gov', color: 'bg-red-100' },
-    g2b: { flag: '🇰🇷', name: '나라장터', color: 'bg-indigo-100' },
-    g2b_stub: { flag: '🇰🇷', name: '나라장터', color: 'bg-indigo-100' },
+    ted: { flag: "🇪🇺", name: "EU TED", color: "bg-blue-100" },
+    sam_gov: { flag: "🇺🇸", name: "SAM.gov", color: "bg-red-100" },
+    g2b: { flag: "🇰🇷", name: "나라장터", color: "bg-indigo-100" },
+    g2b_stub: { flag: "🇰🇷", name: "나라장터", color: "bg-indigo-100" },
   };
 
   const actionConfig = {
-    BID: { label: 'BID', color: 'bg-emerald-500', icon: '✓' },
-    REVIEW: { label: 'REVIEW', color: 'bg-amber-500', icon: '○' },
-    SKIP: { label: 'SKIP', color: 'bg-slate-400', icon: '×' },
+    BID: { label: "BID", color: "bg-emerald-500", icon: "✓" },
+    REVIEW: { label: "REVIEW", color: "bg-amber-500", icon: "○" },
+    SKIP: { label: "SKIP", color: "bg-slate-400", icon: "×" },
   };
 
   const source = sourceConfig[bid.sourceId as keyof typeof sourceConfig];
   const action = actionConfig[bid.match.action];
 
   const daysLeft = Math.ceil(
-    (bid.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    (bid.deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
   );
 
   return (
@@ -537,8 +538,8 @@ export function BidCard({ bid, onView, onAction }: BidCardProps) {
         <div>
           <div className="text-sm text-slate-500">💰 예정가격</div>
           <div className="font-medium">
-            {new Intl.NumberFormat('ko-KR', {
-              style: 'currency',
+            {new Intl.NumberFormat("ko-KR", {
+              style: "currency",
               currency: bid.currency,
               maximumFractionDigits: 0,
             }).format(bid.estimatedPrice)}
@@ -570,7 +571,7 @@ export function BidCard({ bid, onView, onAction }: BidCardProps) {
       <div className="flex items-center justify-between pt-4 border-t">
         <div className="flex gap-2">
           <button
-            onClick={() => window.open(bid.sourceUrl, '_blank')}
+            onClick={() => window.open(bid.sourceUrl, "_blank")}
             className="text-slate-600 hover:text-slate-800"
           >
             🔗 원문
@@ -615,16 +616,18 @@ export function ScoreProgress({
   const percentage = (score / maxScore) * 100;
 
   const getColor = (pct: number) => {
-    if (pct >= 80) return 'bg-emerald-500';
-    if (pct >= 60) return 'bg-amber-500';
-    return 'bg-slate-400';
+    if (pct >= 80) return "bg-emerald-500";
+    if (pct >= 60) return "bg-amber-500";
+    return "bg-slate-400";
   };
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
         <span className="text-slate-600">{label}</span>
-        <span className="font-medium">{score}/{maxScore}</span>
+        <span className="font-medium">
+          {score}/{maxScore}
+        </span>
       </div>
 
       <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -650,4 +653,4 @@ export function ScoreProgress({
 
 ---
 
-*Part 4 끝 - Part 5: Operations & Roadmap으로 계속*
+_Part 4 끝 - Part 5: Operations & Roadmap으로 계속_

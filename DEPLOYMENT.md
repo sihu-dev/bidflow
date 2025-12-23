@@ -179,7 +179,7 @@ CMD ["node", "server.js"]
 ### Docker Compose
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   bidflow:
@@ -301,7 +301,7 @@ npx lighthouse https://yourdomain.com --view
 
 ```javascript
 // src/app/layout.tsx
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({ children }) {
   return (
@@ -336,44 +336,44 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
-    tags: ['v*']
+    tags: ["v*"]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-      
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Type check
         run: pnpm typecheck
-      
+
       - name: Lint
         run: pnpm lint
-      
+
       - name: Build
         run: pnpm build
-      
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
-          vercel-args: '--prod'
+          vercel-args: "--prod"
 ```
 
 ---
@@ -425,8 +425,8 @@ curl https://your-project.supabase.co/rest/v1/
 
 ## 📅 배포 이력
 
-| 버전 | 날짜 | 변경사항 | 배포자 |
-|------|------|----------|--------|
+| 버전   | 날짜       | 변경사항    | 배포자      |
+| ------ | ---------- | ----------- | ----------- |
 | v0.1.0 | 2025-12-21 | 초기 릴리스 | Claude Code |
 
 ---
