@@ -125,6 +125,11 @@ const stageColors = {
     text: 'text-neutral-400',
     border: 'border-neutral-500/20',
   },
+  violet: {
+    bg: 'bg-neutral-500/10',
+    text: 'text-neutral-400',
+    border: 'border-neutral-500/20',
+  },
 }
 
 export const Sidebar = memo(function Sidebar() {
