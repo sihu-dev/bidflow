@@ -29,11 +29,15 @@ function getRedis(): Redis | null {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url || !token) {
+  // Check for missing or placeholder values
+  const isPlaceholder = !url || !token ||
+    url.includes('placeholder') ||
+    url.includes('your-') ||
+    token.includes('your-');
+
+  if (isPlaceholder) {
     if (isDevelopment) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.warn('[DEV] Upstash Redis 미설정 - Rate Limiting 비활성화');
-      }
+      // Only log once
       redisAvailable = false;
       return null;
     }

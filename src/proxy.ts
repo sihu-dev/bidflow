@@ -1,14 +1,14 @@
 /**
- * @module middleware
- * @description Next.js 미들웨어 - 보안 헤더 및 라우팅
+ * @module proxy
+ * @description Next.js 16 Proxy - 보안 헤더 및 라우팅
  *
+ * NOTE: Next.js 16에서 middleware → proxy로 변경
  * NOTE: i18n은 app/[locale] 구조 전환 후 활성화
- * 현재는 클라이언트 사이드 i18n만 사용
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // API 라우트는 스킵
