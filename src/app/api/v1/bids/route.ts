@@ -4,7 +4,7 @@ import { logger } from '@/lib/utils/logger';
  * @description 입찰 목록 조회 및 생성 API
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middleware';
 import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 import { withCSRF } from '@/lib/security/csrf';

@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { PageNavigation } from '@/components/marketing';
 import Link from 'next/link';
 import { Code, Zap, Lock, Book, Check } from 'lucide-react';
-import { logger } from '@/lib/utils/logger';
 
 export const metadata = generateMetadata(pageMetadata.features.api);
 

@@ -2,7 +2,7 @@
  * BIDFLOW Structured Logging System
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 interface LogMeta {
   [key: string]: unknown;
