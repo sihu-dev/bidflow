@@ -73,6 +73,7 @@
 
   // 터미널
   "terminal.integrated.cwd": "${workspaceFolder}",
+    "terminal.integrated.defaultProfile.linux": "zsh",
   "terminal.integrated.env.linux": {
     "NODE_ENV": "development"
   },
