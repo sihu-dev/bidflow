@@ -22,6 +22,7 @@ interface MetricCardProps {
   className?: string
 }
 
+// 모노크롬 디자인 시스템 - neutral 계열만 사용
 const variantStyles = {
   default: {
     bg: 'bg-white/[0.02]',
@@ -29,19 +30,19 @@ const variantStyles = {
     accent: 'bg-white/[0.06]',
   },
   profit: {
-    bg: 'bg-emerald-500/[0.05]',
-    border: 'border-emerald-500/20',
-    accent: 'bg-emerald-500/20',
+    bg: 'bg-neutral-900/[0.05]',
+    border: 'border-neutral-700/20',
+    accent: 'bg-neutral-800/20',
   },
   loss: {
-    bg: 'bg-red-500/[0.05]',
-    border: 'border-red-500/20',
-    accent: 'bg-red-500/20',
+    bg: 'bg-neutral-700/[0.05]',
+    border: 'border-neutral-600/20',
+    accent: 'bg-neutral-600/20',
   },
   primary: {
-    bg: 'bg-[#5E6AD2]/[0.05]',
-    border: 'border-[#5E6AD2]/20',
-    accent: 'bg-[#5E6AD2]/20',
+    bg: 'bg-neutral-800/[0.05]',
+    border: 'border-neutral-700/20',
+    accent: 'bg-neutral-700/20',
   },
 }
 
@@ -87,7 +88,8 @@ export function MetricCard({
   const determinedTrend = trend || (change !== undefined ? (change > 0 ? 'up' : change < 0 ? 'down' : 'neutral') : 'neutral')
 
   const TrendIcon = determinedTrend === 'up' ? ArrowUpIcon : determinedTrend === 'down' ? ArrowDownIcon : MinusIcon
-  const trendColor = determinedTrend === 'up' ? 'text-emerald-400' : determinedTrend === 'down' ? 'text-red-400' : 'text-zinc-500'
+  // 모노크롬: 밝기로 트렌드 구분 (up=밝음, down=어두움)
+  const trendColor = determinedTrend === 'up' ? 'text-neutral-300' : determinedTrend === 'down' ? 'text-neutral-600' : 'text-neutral-500'
 
   return (
     <div
@@ -146,13 +148,13 @@ export function MetricCard({
           </div>
         )}
 
-        {/* Mini progress bar */}
+        {/* Mini progress bar - 모노크롬 */}
         {change !== undefined && (
           <div className="mt-3 h-1 bg-white/[0.06] rounded-full overflow-hidden">
             <div
               className={clsx(
                 'h-full rounded-full transition-all duration-500',
-                determinedTrend === 'up' ? 'bg-emerald-500' : determinedTrend === 'down' ? 'bg-red-500' : 'bg-zinc-500'
+                determinedTrend === 'up' ? 'bg-neutral-400' : determinedTrend === 'down' ? 'bg-neutral-700' : 'bg-neutral-500'
               )}
               style={{ width: `${Math.min(Math.abs(change) * 5, 100)}%` }}
             />

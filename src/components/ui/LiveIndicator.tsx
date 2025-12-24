@@ -20,23 +20,24 @@ const sizeStyles = {
   lg: 'w-2.5 h-2.5',
 }
 
+// 모노크롬 디자인 시스템 - neutral 계열만 사용
 const statusStyles = {
   live: {
-    dot: 'bg-emerald-500',
-    ring: 'border-emerald-500',
-    text: 'text-emerald-400',
+    dot: 'bg-neutral-900',
+    ring: 'border-neutral-700',
+    text: 'text-neutral-800',
     label: 'Live',
   },
   connecting: {
-    dot: 'bg-amber-500',
-    ring: 'border-amber-500',
-    text: 'text-amber-400',
+    dot: 'bg-neutral-600',
+    ring: 'border-neutral-500',
+    text: 'text-neutral-500',
     label: 'Connecting',
   },
   offline: {
-    dot: 'bg-zinc-500',
-    ring: 'border-zinc-500',
-    text: 'text-zinc-500',
+    dot: 'bg-neutral-400',
+    ring: 'border-neutral-400',
+    text: 'text-neutral-400',
     label: 'Offline',
   },
 }

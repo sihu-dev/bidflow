@@ -19,6 +19,7 @@ const DEV_MOCK_USER = {
   id: 'dev-user-001',
   email: 'dev@bidflow.local',
   role: 'admin' as const,
+  tenantId: 'dev-tenant-001',
 };
 
 // ============================================================================
@@ -29,6 +30,7 @@ export interface AuthenticatedRequest extends NextRequest {
   userId: string;
   userEmail: string;
   userRole: 'admin' | 'user' | 'viewer';
+  tenantId: string;
 }
 
 interface AuthConfig {
@@ -115,6 +117,7 @@ export function withAuth<T>(
         authenticatedRequest.userId = DEV_MOCK_USER.id;
         authenticatedRequest.userEmail = DEV_MOCK_USER.email;
         authenticatedRequest.userRole = DEV_MOCK_USER.role;
+        authenticatedRequest.tenantId = DEV_MOCK_USER.tenantId;
         return handler(authenticatedRequest);
       }
 
@@ -137,11 +140,11 @@ export function withAuth<T>(
         );
       }
 
-      // 사용자 역할 조회
+      // 사용자 역할 및 테넌트 조회
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
-        .eq('id', user.id)
+        .select('role, tenant_id')
+        .eq('user_id', user.id)
         .single();
 
       if (profileError) {
@@ -153,7 +156,18 @@ export function withAuth<T>(
         );
       }
 
+      // 테넌트 ID 필수 검증
+      if (!profile?.tenant_id) {
+        logger.error('테넌트 ID 없음:', { userId: user.id });
+        return createErrorResponse(
+          'NO_TENANT',
+          '테넌트 정보가 없습니다. 관리자에게 문의하세요.',
+          403
+        );
+      }
+
       const userRole = (profile?.role as 'admin' | 'user' | 'viewer') || 'viewer';
+      const tenantId = profile.tenant_id as string;
 
       // 역할 권한 확인
       if (!allowedRoles.includes(userRole)) {
@@ -169,6 +183,7 @@ export function withAuth<T>(
       authenticatedRequest.userId = user.id;
       authenticatedRequest.userEmail = user.email || '';
       authenticatedRequest.userRole = userRole;
+      authenticatedRequest.tenantId = tenantId;
 
       return handler(authenticatedRequest);
     } catch (error) {

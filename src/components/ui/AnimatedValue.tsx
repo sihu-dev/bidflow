@@ -111,8 +111,9 @@ export function AnimatedValue({
     <span
       className={clsx(
         'tabular-nums transition-colors duration-300',
-        flash === 'up' && 'text-emerald-400',
-        flash === 'down' && 'text-red-400',
+        // 모노크롬: 밝기로 변화 방향 표시
+        flash === 'up' && 'text-neutral-200',
+        flash === 'down' && 'text-neutral-500',
         className
       )}
     >

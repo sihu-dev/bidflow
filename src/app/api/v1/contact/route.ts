@@ -1,21 +1,73 @@
-import { logger } from '@/lib/utils/logger';
 /**
  * 문의 API 엔드포인트
  * POST /api/v1/contact
+ *
+ * 보안: Rate Limiting + CORS 제한
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { sendSlackMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
+import { logger } from '@/lib/utils/logger';
+import { getCorsHeaders } from '@/lib/clients/base-api-client';
 
-// Supabase 클라이언트 (서비스 역할)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// ============================================================================
+// Rate Limiting (간단한 인메모리 구현)
+// ============================================================================
 
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 5; // 15분당 5회
+const RATE_WINDOW = 15 * 60 * 1000; // 15분
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return true;
+  }
+
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+
+  record.count++;
+  return true;
+}
+
+// 주기적으로 만료된 항목 정리 (서버리스 환경에서는 제한적)
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, record] of rateLimitMap.entries()) {
+      if (now > record.resetTime) {
+        rateLimitMap.delete(ip);
+      }
+    }
+  }, 60000);
+}
+
+// ============================================================================
+// Supabase 클라이언트
+// ============================================================================
+
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    return null;
+  }
+
+  return createClient(url, key);
+}
+
+// ============================================================================
 // 문의 스키마
+// ============================================================================
+
 const contactSchema = z.object({
   name: z.string().min(1, '이름을 입력해주세요'),
   company: z.string().optional(),
@@ -25,8 +77,26 @@ const contactSchema = z.object({
   message: z.string().min(10, '문의 내용을 10자 이상 입력해주세요'),
 });
 
+// ============================================================================
+// POST 핸들러 (Rate Limit 포함)
+// ============================================================================
+
 export async function POST(request: NextRequest) {
   try {
+    // IP 추출
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown';
+
+    // Rate Limit 체크
+    if (!checkRateLimit(ip)) {
+      logger.warn(`[Contact API] Rate limit exceeded: ${ip}`);
+      return NextResponse.json(
+        { success: false, error: '요청이 너무 많습니다. 15분 후 다시 시도해주세요.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
     // 유효성 검사
@@ -44,9 +114,6 @@ export async function POST(request: NextRequest) {
     const data = result.data;
 
     // 메타데이터 수집
-    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] ||
-                     request.headers.get('x-real-ip') ||
-                     'unknown';
     const userAgent = request.headers.get('user-agent') || '';
     const referrer = request.headers.get('referer') || '';
 
@@ -56,41 +123,45 @@ export async function POST(request: NextRequest) {
     const utmMedium = url.searchParams.get('utm_medium');
     const utmCampaign = url.searchParams.get('utm_campaign');
 
+    let inquiryId = `INQ-${Date.now()}`;
+
     // 1. Supabase에 저장
-    const { data: submission, error: dbError } = await supabase
-      .from('contact_submissions')
-      .insert({
-        name: data.name,
-        email: data.email,
-        company: data.company || null,
-        phone: data.phone || null,
-        inquiry_type: data.inquiryType,
-        message: data.message,
-        status: 'pending',
-        ip_address: ipAddress,
-        user_agent: userAgent,
-        referrer: referrer,
-        utm_source: utmSource,
-        utm_medium: utmMedium,
-        utm_campaign: utmCampaign,
-      })
-      .select('id')
-      .single();
+    const supabase = getSupabaseClient();
+    if (supabase) {
+      const { data: submission, error: dbError } = await supabase
+        .from('contact_submissions')
+        .insert({
+          name: data.name,
+          email: data.email,
+          company: data.company || null,
+          phone: data.phone || null,
+          inquiry_type: data.inquiryType,
+          message: data.message,
+          status: 'pending',
+          ip_address: ip,
+          user_agent: userAgent,
+          referrer: referrer,
+          utm_source: utmSource,
+          utm_medium: utmMedium,
+          utm_campaign: utmCampaign,
+        })
+        .select('id')
+        .single();
 
-    if (dbError) {
-      logger.error('[Contact API] DB Error:', dbError);
-      // DB 오류가 있어도 Slack 알림은 시도
+      if (dbError) {
+        logger.error('[Contact API] DB Error:', dbError);
+      } else if (submission?.id) {
+        inquiryId = submission.id;
+      }
     }
-
-    const inquiryId = submission?.id || `INQ-${Date.now()}`;
 
     // 2. Slack 알림 발송
     try {
       await sendSlackMessage({
-        text: `📬 *새 문의 접수*`,
+        text: `*새 문의 접수*`,
         attachments: [
           {
-            color: '#2563eb',
+            color: '#171717',
             fields: [
               { title: '이름', value: data.name, short: true },
               { title: '회사', value: data.company || '-', short: true },
@@ -141,7 +212,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 문의 유형 이름 변환
+// ============================================================================
+// OPTIONS (CORS preflight) - 보안 강화
+// ============================================================================
+
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      ...corsHeaders,
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}
+
+// ============================================================================
+// 헬퍼 함수
+// ============================================================================
+
 function getInquiryTypeName(code: string): string {
   const types: Record<string, string> = {
     demo: '데모 요청',
@@ -154,7 +247,6 @@ function getInquiryTypeName(code: string): string {
   return types[code] || code;
 }
 
-// 접수 확인 이메일 HTML
 function createConfirmationEmailHtml(name: string, inquiryId: string): string {
   return `
     <!DOCTYPE html>
@@ -189,22 +281,10 @@ function createConfirmationEmailHtml(name: string, inquiryId: string): string {
         </div>
         <div class="footer">
           <p>본 메일은 발신 전용입니다. 추가 문의사항은 웹사이트를 통해 연락해주세요.</p>
-          <p>© ${new Date().getFullYear()} BIDFLOW. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} BIDFLOW. All rights reserved.</p>
         </div>
       </div>
     </body>
     </html>
   `;
-}
-
-// OPTIONS (CORS preflight)
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
 }

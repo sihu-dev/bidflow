@@ -29,8 +29,9 @@ export function DisclaimerBanner({ dismissible = true, className }: DisclaimerPr
     <div
       className={cn(
         'relative w-full px-4 py-2',
-        'bg-amber-500/10 border-b border-amber-500/20',
-        'text-amber-200 text-sm',
+        // 모노크롬 디자인 시스템
+        'bg-neutral-800/50 border-b border-neutral-700/50',
+        'text-neutral-300 text-sm',
         className
       )}
     >
@@ -41,7 +42,7 @@ export function DisclaimerBanner({ dismissible = true, className }: DisclaimerPr
           <button
             type="button"
             onClick={() => setIsDismissed(true)}
-            className="absolute right-4 p-1 hover:bg-amber-500/20 rounded"
+            className="absolute right-4 p-1 hover:bg-neutral-700/50 rounded"
             aria-label={t('dashboard.disclaimer.dismissLabel') as string}
           >
             <X className="h-4 w-4" />
@@ -132,8 +133,8 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
         )}
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-full bg-amber-500/10">
-            <AlertTriangle className="h-6 w-6 text-amber-500" />
+          <div className="p-2 rounded-full bg-neutral-800/50">
+            <AlertTriangle className="h-6 w-6 text-neutral-400" />
           </div>
           <h2 className="text-xl font-semibold text-white">{t('dashboard.disclaimer.modalTitle') as string}</h2>
         </div>
@@ -146,7 +147,7 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
           <ul className="space-y-3">
             {Array.isArray(modalPoints) && modalPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <span className="text-amber-500 mt-1">•</span>
+                <span className="text-neutral-500 mt-1">•</span>
                 <span>{point}</span>
               </li>
             ))}
@@ -183,8 +184,9 @@ export function TradeWarning({ className }: { className?: string }) {
     <div
       className={cn(
         'flex items-center gap-2 p-3 rounded-lg',
-        'bg-red-500/10 border border-red-500/20',
-        'text-red-400 text-xs',
+        // 모노크롬 디자인 - 경고는 진한 neutral
+        'bg-neutral-900/50 border border-neutral-700/50',
+        'text-neutral-300 text-xs',
         className
       )}
     >
@@ -205,8 +207,9 @@ export function BacktestWarning({ className }: { className?: string }) {
     <div
       className={cn(
         'flex items-center gap-2 p-3 rounded-lg',
-        'bg-amber-500/10 border border-amber-500/20',
-        'text-amber-400 text-xs',
+        // 모노크롬 디자인
+        'bg-neutral-800/50 border border-neutral-700/50',
+        'text-neutral-400 text-xs',
         className
       )}
     >
