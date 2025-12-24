@@ -2,9 +2,10 @@
 
 > **AI-Powered International Tender Automation for Korean SME Exporters**
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
+[![Tests](https://img.shields.io/badge/Tests-734%20passed-brightgreen)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **BIDFLOW automates international tender discovery and proposal generation for Korean manufacturing SMEs looking to export globally.**
@@ -126,9 +127,9 @@ Output: Professional proposal.docx (70% complete)
 
 ```yaml
 Frontend:
-  Framework: Next.js 15 (App Router)
+  Framework: Next.js 16.1 (App Router + Turbopack)
   Language: TypeScript 5.7 (Strict mode)
-  UI: React 19 + TailwindCSS
+  UI: React 19 + TailwindCSS 4
   Spreadsheet: Handsontable 16 (Dynamic import)
   Charts: ECharts 6, MapLibre GL
 
@@ -138,7 +139,7 @@ Backend:
   Cache: Upstash Redis (Rate limiting)
 
 AI/ML:
-  LLM: Claude API (Anthropic)
+  LLM: Claude API (Vercel AI SDK 6.0 + @ai-sdk/anthropic)
   ML: XGBoost (Bid score prediction)
   Formula Engine: HyperFormula (AI cell functions)
 
@@ -270,7 +271,7 @@ Year 3: 150 customers × $1,188/year + Success fees = $200K+ ARR
 
 ## 🗺️ Roadmap
 
-### ✅ Phase 1-3: MVP Complete (Current - 81%)
+### ✅ Phase 1-3: MVP Complete (Current - 87.5%)
 
 - [x] Infrastructure setup (Supabase, Upstash, Inngest)
 - [x] 5-layer security implementation
@@ -279,14 +280,17 @@ Year 3: 150 customers × $1,188/year + Success fees = $200K+ ARR
 - [x] Multi-channel notifications (Slack, Email, Kakao)
 - [x] Dashboard UI (spreadsheet-like)
 - [x] Crawling scheduler (Inngest cron jobs)
+- [x] TED API client integration
+- [x] SAM.gov API client integration
+- [x] AI proposal generator (Claude API)
+- [x] Unit tests (734 passed)
+- [x] E2E tests (Playwright - 6 specs)
 
 ### 🚧 Phase 4: Production Launch (Q1 2025)
 
-- [ ] TED API integration (Live)
-- [ ] SAM.gov API integration (Live)
-- [ ] AI proposal generator (GPT-4o)
-- [ ] E2E testing (Playwright)
+- [x] Vercel deployment config
 - [ ] Production deployment (Vercel)
+- [ ] API keys activation (TED/SAM.gov/Resend)
 - [ ] First pilot customer
 
 ### 📅 Phase 5: Scale (Q2-Q3 2025)
@@ -338,9 +342,12 @@ npm run test:e2e:ui
 
 **Test Coverage:**
 
-- E2E: 46 Playwright tests written
-- Unit: In progress
-- Integration: API route tests
+```
+✅ Unit Tests:     734 passed (28 test files)
+✅ E2E Tests:      6 specs passed (Playwright)
+✅ TypeScript:     0 errors (strict mode)
+✅ Build:          Success (54 routes)
+```
 
 ---
 
