@@ -4,8 +4,8 @@ import { logger } from '@/lib/utils/logger';
  * @description 마감 임박 입찰 조회 API
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { withAuth } from '@/lib/security/auth-middleware';
+import { NextResponse } from 'next/server';
+import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middleware';
 import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 import { getUpcomingDeadlines } from '@/lib/domain/usecases/bid-usecases';
 import { z } from 'zod';
@@ -26,7 +26,7 @@ const querySchema = z.object({
 // GET /api/v1/bids/upcoming - 마감 임박 입찰 조회
 // ============================================================================
 
-async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse<BidData[]>>> {
+async function handleGet(request: AuthenticatedRequest): Promise<NextResponse<ApiResponse<BidData[]>>> {
   try {
     const url = new URL(request.url);
     const queryParams = Object.fromEntries(url.searchParams.entries());
@@ -46,7 +46,8 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
       );
     }
 
-    const result = await getUpcomingDeadlines(parseResult.data.days);
+    // Multi-tenant 격리: tenantId 전달
+    const result = await getUpcomingDeadlines(parseResult.data.days, request.tenantId);
 
     if (!result.success) {
       return NextResponse.json(result, { status: 500 });

@@ -46,10 +46,12 @@ export async function getBidById(id: UUID): Promise<ApiResponse<BidData>> {
 
 /**
  * 마감 임박 입찰 조회
+ * @param days - 조회할 일수
+ * @param tenantId - Multi-tenant 격리용 테넌트 ID
  */
-export async function getUpcomingDeadlines(days: number = 7): Promise<ApiResponse<BidData[]>> {
+export async function getUpcomingDeadlines(days: number = 7, tenantId?: string): Promise<ApiResponse<BidData[]>> {
   const repository = getBidRepository();
-  return repository.findUpcoming(days);
+  return repository.findUpcoming(days, tenantId);
 }
 
 // ============================================================================
@@ -270,12 +272,17 @@ interface DashboardStats {
 
 /**
  * 대시보드 통계 조회
+ * @param tenantId - Multi-tenant 격리용 테넌트 ID
  */
-export async function getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
+export async function getDashboardStats(tenantId?: string): Promise<ApiResponse<DashboardStats>> {
   const repository = getBidRepository();
 
-  // 전체 입찰 조회
-  const allBids = await repository.findAll(undefined, undefined, { page: 1, limit: 1000 });
+  // 전체 입찰 조회 (tenantId 필터 적용)
+  const allBids = await repository.findAll(
+    tenantId ? { tenantId } : undefined,
+    undefined,
+    { page: 1, limit: 1000 }
+  );
 
   if (!allBids.success) {
     return allBids as ApiResponse<never>;

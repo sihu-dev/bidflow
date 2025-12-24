@@ -37,6 +37,7 @@ export interface BidFilters {
   fromDate?: string;
   toDate?: string;
   organizationLike?: string;
+  tenantId?: string;  // Multi-tenant 격리 필터
 }
 
 export interface BidSortOptions {
@@ -55,7 +56,7 @@ export interface IBidRepository {
   update(id: UUID, data: UpdateInput<BidData>): Promise<ApiResponse<BidData>>;
   delete(id: UUID): Promise<ApiResponse<{ deleted: boolean }>>;
   findByExternalId(source: BidSource, externalId: string): Promise<ApiResponse<BidData | null>>;
-  findUpcoming(days: number): Promise<ApiResponse<BidData[]>>;
+  findUpcoming(days: number, tenantId?: string): Promise<ApiResponse<BidData[]>>;
   updateStatus(id: UUID, status: BidStatus): Promise<ApiResponse<BidData>>;
   bulkCreate(data: CreateInput<BidData>[]): Promise<ApiResponse<{ created: number; failed: number }>>;
 }
@@ -113,6 +114,10 @@ export class SupabaseBidRepository implements IBidRepository {
       let query = this.supabase.from('bids').select('*', { count: 'exact' });
 
       // 필터 적용
+      // CRITICAL: tenant_id 필터 우선 적용 (Multi-tenant 격리)
+      if (filters?.tenantId) {
+        query = query.eq('tenant_id', filters.tenantId);
+      }
       if (filters?.source) {
         query = query.eq('source', filters.source);
       }
@@ -287,18 +292,24 @@ export class SupabaseBidRepository implements IBidRepository {
     }
   }
 
-  async findUpcoming(days: number): Promise<ApiResponse<BidData[]>> {
+  async findUpcoming(days: number, tenantId?: string): Promise<ApiResponse<BidData[]>> {
     try {
       const today = new Date();
       const futureDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
 
-      const { data, error } = await this.supabase
+      let query = this.supabase
         .from('bids')
         .select('*')
         .gte('deadline', today.toISOString())
         .lte('deadline', futureDate.toISOString())
-        .in('status', ['new', 'reviewing', 'preparing'])
-        .order('deadline', { ascending: true });
+        .in('status', ['new', 'reviewing', 'preparing']);
+
+      // CRITICAL: tenant_id 필터 적용 (Multi-tenant 격리)
+      if (tenantId) {
+        query = query.eq('tenant_id', tenantId);
+      }
+
+      const { data, error } = await query.order('deadline', { ascending: true });
 
       if (error) {
         return {
@@ -517,11 +528,12 @@ class MockBidRepository implements IBidRepository {
     return { success: true, data: bid ?? null };
   }
 
-  async findUpcoming(days: number): Promise<ApiResponse<BidData[]>> {
+  async findUpcoming(days: number, _tenantId?: string): Promise<ApiResponse<BidData[]>> {
     const now = new Date();
     const future = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
     const upcoming = this.bids.filter((b) => {
       const d = new Date(b.deadline);
+      // Mock에서는 tenantId 필터링 생략 (개발 환경용)
       return d >= now && d <= future && ['new', 'reviewing', 'preparing'].includes(b.status);
     });
     return { success: true, data: upcoming };

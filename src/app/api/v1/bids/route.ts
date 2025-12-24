@@ -23,7 +23,7 @@ function serializeForJson<T>(obj: T): T {
 // GET /api/v1/bids - 입찰 목록 조회
 // ============================================================================
 
-async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse<PaginatedResult<BidData>>>> {
+async function handleGet(request: AuthenticatedRequest): Promise<NextResponse<ApiResponse<PaginatedResult<BidData>>>> {
   try {
     // 쿼리 파라미터 파싱
     const url = new URL(request.url);
@@ -47,9 +47,9 @@ async function handleGet(request: NextRequest): Promise<NextResponse<ApiResponse
 
     const { page, limit, sortBy, sortOrder, ...filters } = parseResult.data;
 
-    // 비즈니스 로직 실행
+    // 비즈니스 로직 실행 (tenantId 추가 - Multi-tenant 격리)
     const result = await listBids({
-      filters,
+      filters: { ...filters, tenantId: request.tenantId },
       sort: sortBy ? { field: sortBy as 'deadline', direction: sortOrder } : undefined,
       page,
       limit,

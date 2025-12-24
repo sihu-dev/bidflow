@@ -247,6 +247,20 @@ function getInquiryTypeName(code: string): string {
   return types[code] || code;
 }
 
+/**
+ * HTML 이스케이프 - XSS 방지
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, char => map[char]);
+}
+
 function createConfirmationEmailHtml(name: string, inquiryId: string): string {
   return `
     <!DOCTYPE html>
@@ -269,7 +283,7 @@ function createConfirmationEmailHtml(name: string, inquiryId: string): string {
           <p style="margin: 10px 0 0 0; opacity: 0.9;">문의 접수 확인</p>
         </div>
         <div class="content">
-          <h2 style="margin: 0 0 20px 0; color: #171717;">${name}님, 문의해주셔서 감사합니다!</h2>
+          <h2 style="margin: 0 0 20px 0; color: #171717;">${escapeHtml(name)}님, 문의해주셔서 감사합니다!</h2>
           <p>고객님의 문의가 정상적으로 접수되었습니다.</p>
           <p><strong>접수번호:</strong> ${String(inquiryId).substring(0, 8).toUpperCase()}</p>
           <p>담당자가 확인 후 빠른 시일 내에 연락드리겠습니다.<br>보통 1~2 영업일 내에 답변을 받으실 수 있습니다.</p>

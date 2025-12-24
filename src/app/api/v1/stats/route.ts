@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/security/auth-middleware';
+import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middleware';
 import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 import { getDashboardStats } from '@/lib/domain/usecases/bid-usecases';
 import type { ApiResponse } from '@forge-labs/types/bidding';
@@ -14,9 +14,10 @@ import { logger } from '@/lib/utils/logger';
 // GET /api/v1/stats - 대시보드 통계 조회
 // ============================================================================
 
-async function handleGet(): Promise<NextResponse<ApiResponse<unknown>>> {
+async function handleGet(request: AuthenticatedRequest): Promise<NextResponse<ApiResponse<unknown>>> {
   try {
-    const result = await getDashboardStats();
+    // Multi-tenant 격리: tenantId 전달
+    const result = await getDashboardStats(request.tenantId);
 
     if (!result.success) {
       return NextResponse.json(result, { status: 500 });
