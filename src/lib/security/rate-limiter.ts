@@ -129,12 +129,23 @@ export async function checkRateLimit(
     };
   } catch (error) {
     logger.error('Rate limit 체크 실패:', error);
-    // 오류 시 통과 (fail-open)
+    // SECURITY: fail-closed 전략 - 오류 시 요청 차단
+    // 개발 모드에서만 통과 허용
+    if (process.env.NODE_ENV === 'development') {
+      logger.warn('개발 모드: Rate limit 오류 시 통과 허용');
+      return {
+        success: true,
+        remaining: -1,
+        reset: Date.now() + 60000,
+        limit: -1,
+      };
+    }
+    // 프로덕션: 안전을 위해 차단
     return {
-      success: true,
-      remaining: -1,
+      success: false,
+      remaining: 0,
       reset: Date.now() + 60000,
-      limit: -1,
+      limit: 0,
     };
   }
 }

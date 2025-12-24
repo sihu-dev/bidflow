@@ -17,6 +17,7 @@ export default function Error({
         <p className="text-xl text-gray-600 mb-4">문제가 발생했습니다</p>
         <p className="text-sm text-gray-500 mb-8">{error.message}</p>
         <button
+          type="button"
           onClick={() => reset()}
           className="inline-flex items-center px-4 py-2 bg-neutral-900 text-white rounded-md hover:bg-neutral-800 transition-colors"
         >

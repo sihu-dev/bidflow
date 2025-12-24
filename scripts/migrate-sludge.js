@@ -7,8 +7,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const ACCESS_TOKEN = 'sbp_19c81537257044f10cc4de81d0b1cf014f53a222';
-const PROJECT_REF = 'srmyrrenbhwdfdgnnlnn';
+// SECURITY: 환경 변수에서 로드 (하드코딩 금지)
+const ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN;
+const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'srmyrrenbhwdfdgnnlnn';
+
+if (!ACCESS_TOKEN) {
+  console.error('❌ SUPABASE_ACCESS_TOKEN 환경 변수가 필요합니다');
+  console.error('   export SUPABASE_ACCESS_TOKEN=your_token');
+  process.exit(1);
+}
 
 async function runMigration() {
   console.log('🚀 Sludge AI 모듈 마이그레이션 시작...\n');

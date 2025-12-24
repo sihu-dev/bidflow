@@ -82,6 +82,7 @@ export function Header({ className }: HeaderProps) {
                 {link.children ? (
                   <>
                     <button
+                      type="button"
                       className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
                       aria-haspopup="true"
                       aria-expanded="false"
@@ -131,6 +132,7 @@ export function Header({ className }: HeaderProps) {
 
           {/* Mobile Menu Button */}
           <button
+            type="button"
             className="md:hidden p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="메뉴 열기"

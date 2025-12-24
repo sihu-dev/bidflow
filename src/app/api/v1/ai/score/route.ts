@@ -16,6 +16,7 @@ import {
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
 import { getCorsHeaders } from '@/lib/clients/base-api-client';
+import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 
 // ============================================================================
 // 요청 스키마
@@ -119,7 +120,7 @@ function getRecommendationMessage(code: 'BID' | 'REVIEW' | 'SKIP'): string {
 // API 핸들러
 // ============================================================================
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handlePost(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
 
@@ -243,3 +244,12 @@ export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
     headers: corsHeaders,
   });
 }
+
+// ============================================================================
+// 라우트 익스포트 (Rate Limit 적용)
+// ============================================================================
+
+export const POST = withRateLimit(handlePost, {
+  type: 'ai',
+  getIdentifier: getEndpointIdentifier,
+});

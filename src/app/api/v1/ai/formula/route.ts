@@ -15,6 +15,7 @@ import {
   getMockResponse,
   type ClaudeModel,
 } from '@/lib/ai/claude-client';
+import { validatePromptInput, sanitizeInput } from '@/lib/security/prompt-guard';
 
 // ============================================================================
 // 요청 스키마
@@ -73,9 +74,19 @@ async function executeGeneralAI(
   context: FormulaContext,
   bidAmount?: number
 ): Promise<string> {
+  // SECURITY: Prompt Injection 방어
+  const validation = validatePromptInput(prompt);
+  if (!validation.isValid) {
+    logger.warn(`[AI Formula] Prompt Injection 감지: ${validation.threats.join(', ')}`);
+    throw new Error('입력에 허용되지 않는 패턴이 포함되어 있습니다');
+  }
+
+  // 입력 정제
+  const sanitizedPrompt = sanitizeInput(prompt);
+
   if (!ANTHROPIC_API_KEY) {
     if (isDevelopment) {
-      return getMockResponse(prompt);
+      return getMockResponse(sanitizedPrompt);
     }
     throw new Error('ANTHROPIC_API_KEY가 설정되지 않았습니다');
   }
@@ -89,7 +100,7 @@ async function executeGeneralAI(
     ? `당신은 입찰 공고 분석 전문가입니다. 다음 입찰 데이터를 참고하세요:\n${JSON.stringify(context.cellData, null, 2)}`
     : '당신은 입찰 공고 분석 전문가입니다.';
 
-  const response = await client.sendMessage(prompt, {
+  const response = await client.sendMessage(sanitizedPrompt, {
     model,
     systemPrompt,
     bidAmount,

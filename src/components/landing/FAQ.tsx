@@ -51,6 +51,7 @@ export function FAQ() {
           {faqs.map((faq, index) => (
             <div key={index} className="border-b border-neutral-200">
               <button
+                type="button"
                 className="w-full py-6 flex items-center justify-between text-left group"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 aria-expanded={openIndex === index}
