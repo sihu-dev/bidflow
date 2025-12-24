@@ -6,6 +6,8 @@
 
 import { z } from 'zod';
 import { logger } from '@/lib/utils/logger';
+import { checkCrawlingRateLimit } from '../security/rate-limiter';
+import { BaseAPIClient, APIClientError } from './base-api-client';
 
 // ============================================================================
 // 타입 정의
@@ -79,11 +81,13 @@ export interface MappedBid {
 // 클라이언트 구현
 // ============================================================================
 
-export class NaraJangtoClient {
-  private readonly baseUrl = 'http://apis.data.go.kr/1230000';
+export class NaraJangtoClient extends BaseAPIClient {
+  protected readonly source = 'NaraJangto';
+  protected readonly baseUrl = 'http://apis.data.go.kr/1230000';
   private readonly apiKey: string;
 
   constructor(apiKey?: string) {
+    super();
     this.apiKey = apiKey || process.env.NARA_JANGTO_API_KEY || '';
 
     if (!this.apiKey) {
@@ -95,6 +99,17 @@ export class NaraJangtoClient {
    * 물품 입찰공고 검색
    */
   async searchProductBids(options: SearchOptions = {}): Promise<BidNotice[]> {
+    // Rate Limit 체크
+    const rateLimitResult = await checkCrawlingRateLimit('narajangto');
+    if (!rateLimitResult.success) {
+      throw new APIClientError(
+        `나라장터 API Rate Limit 초과: ${rateLimitResult.reset - Date.now()}ms 후 재시도`,
+        this.source,
+        429,
+        true
+      );
+    }
+
     const {
       keywords = [],
       fromDate,
@@ -120,14 +135,15 @@ export class NaraJangtoClient {
       url.searchParams.set('bidNtceNm', keywords[0]); // 첫 번째 키워드만 사용
     }
 
+    // 캐시 키 생성
+    const cacheKey = `narajangto:product:${url.searchParams.toString()}`;
+
     try {
-      const response = await fetch(url.toString());
+      const data = await this.fetchWithRetry<unknown>(url.toString(), {
+        cacheKey,
+        cacheTTL: 5 * 60 * 1000, // 5분 캐시
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
       const parsed = ApiResponseSchema.safeParse(data);
 
       if (!parsed.success) {
@@ -138,7 +154,7 @@ export class NaraJangtoClient {
       return parsed.data.response.body.items || [];
     } catch (error) {
       logger.error('[NaraJangtoClient] API 호출 실패:', error);
-      return [];
+      throw error;
     }
   }
 
@@ -146,6 +162,17 @@ export class NaraJangtoClient {
    * 용역 입찰공고 검색
    */
   async searchServiceBids(options: SearchOptions = {}): Promise<BidNotice[]> {
+    // Rate Limit 체크
+    const rateLimitResult = await checkCrawlingRateLimit('narajangto');
+    if (!rateLimitResult.success) {
+      throw new APIClientError(
+        `나라장터 API Rate Limit 초과`,
+        this.source,
+        429,
+        true
+      );
+    }
+
     const {
       keywords = [],
       fromDate,
@@ -171,14 +198,15 @@ export class NaraJangtoClient {
       url.searchParams.set('bidNtceNm', keywords[0]);
     }
 
+    // 캐시 키 생성
+    const cacheKey = `narajangto:service:${url.searchParams.toString()}`;
+
     try {
-      const response = await fetch(url.toString());
+      const data = await this.fetchWithRetry<unknown>(url.toString(), {
+        cacheKey,
+        cacheTTL: 5 * 60 * 1000,
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
       const parsed = ApiResponseSchema.safeParse(data);
 
       if (!parsed.success) {
@@ -189,7 +217,7 @@ export class NaraJangtoClient {
       return parsed.data.response.body.items || [];
     } catch (error) {
       logger.error('[NaraJangtoClient] API 호출 실패:', error);
-      return [];
+      throw error;
     }
   }
 
@@ -213,22 +241,27 @@ export class NaraJangtoClient {
 
     // 각 키워드로 검색
     for (const keyword of flowMeterKeywords) {
-      const results = await this.searchProductBids({
-        keywords: [keyword],
-        ...options,
-      });
+      try {
+        const results = await this.searchProductBids({
+          keywords: [keyword],
+          ...options,
+        });
 
-      // 중복 제거
-      for (const bid of results) {
-        const key = `${bid.bidNtceNo}-${bid.bidNtceOrd || '0'}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          allResults.push(bid);
+        // 중복 제거
+        for (const bid of results) {
+          const key = `${bid.bidNtceNo}-${bid.bidNtceOrd || '0'}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            allResults.push(bid);
+          }
         }
-      }
 
-      // Rate limit 방지
-      await this.delay(200);
+        // Rate limit 방지 - 베이스 클라이언트의 delay 사용
+        await this.delay(200);
+      } catch (error) {
+        logger.warn(`[NaraJangtoClient] 키워드 "${keyword}" 검색 실패: ${error instanceof Error ? error.message : String(error)}`);
+        // 일부 키워드 실패해도 계속 진행
+      }
     }
 
     // BIDFLOW 형식으로 변환
@@ -296,13 +329,6 @@ export class NaraJangtoClient {
     const min = dateStr.slice(10, 12) || '00';
 
     return new Date(`${year}-${month}-${day}T${hour}:${min}:00`);
-  }
-
-  /**
-   * 딜레이 유틸리티
-   */
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

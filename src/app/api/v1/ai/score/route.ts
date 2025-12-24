@@ -15,6 +15,7 @@ import {
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+import { getCorsHeaders } from '@/lib/clients/base-api-client';
 
 // ============================================================================
 // 요청 스키마
@@ -230,16 +231,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // ============================================================================
-// OPTIONS (CORS Preflight)
+// OPTIONS (CORS Preflight) - 보안 강화
 // ============================================================================
 
-export async function OPTIONS(): Promise<NextResponse> {
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const origin = request.headers.get('origin');
+  const corsHeaders = getCorsHeaders(origin);
+
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: corsHeaders,
   });
 }

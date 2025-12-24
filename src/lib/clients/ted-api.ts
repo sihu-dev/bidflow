@@ -6,6 +6,7 @@
 
 import type { BidData, BidSource, CreateInput, ISODateString, KRW } from '@forge-labs/types/bidding';
 import { checkCrawlingRateLimit } from '../security/rate-limiter';
+import { BaseAPIClient, APIClientError } from './base-api-client';
 
 // ============================================================================
 // TED API 타입 정의
@@ -53,10 +54,12 @@ interface TEDSearchResponse {
 // TED API 클라이언트
 // ============================================================================
 
-export class TEDAPIClient {
-  private baseUrl = 'https://api.ted.europa.eu/v3';
+export class TEDAPIClient extends BaseAPIClient {
+  protected readonly source = 'TED';
+  protected readonly baseUrl = 'https://api.ted.europa.eu/v3';
 
   constructor() {
+    super();
     // TED API는 공개 API로 API Key 불필요
   }
 
@@ -67,26 +70,33 @@ export class TEDAPIClient {
     // Rate Limit 체크
     const rateLimitResult = await checkCrawlingRateLimit('ted');
     if (!rateLimitResult.success) {
-      throw new Error(`TED API Rate Limit 초과: ${rateLimitResult.reset - Date.now()}ms 후 재시도`);
+      throw new APIClientError(
+        `TED API Rate Limit 초과: ${rateLimitResult.reset - Date.now()}ms 후 재시도`,
+        this.source,
+        429,
+        true
+      );
     }
 
     const searchBody = this.buildSearchQuery(params);
 
-    const response = await fetch(`${this.baseUrl}/notices/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(searchBody),
-    });
+    // 캐시 키 생성
+    const cacheKey = `ted:search:${JSON.stringify(searchBody)}`;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`TED API 오류 (${response.status}): ${errorText}`);
-    }
+    const data = await this.fetchWithRetry<Record<string, unknown>>(
+      `${this.baseUrl}/notices/search`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify(searchBody),
+        cacheKey,
+        cacheTTL: 5 * 60 * 1000, // 5분 캐시
+      }
+    );
 
-    const data = await response.json();
     return this.parseSearchResponse(data);
   }
 
@@ -96,25 +106,30 @@ export class TEDAPIClient {
   async getNotice(noticeId: string): Promise<TEDNotice | null> {
     const rateLimitResult = await checkCrawlingRateLimit('ted');
     if (!rateLimitResult.success) {
-      throw new Error(`TED API Rate Limit 초과`);
+      throw new APIClientError('TED API Rate Limit 초과', this.source, 429, true);
     }
 
-    const response = await fetch(`${this.baseUrl}/notices/${noticeId}`, {
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
+    const cacheKey = `ted:notice:${noticeId}`;
 
-    if (response.status === 404) {
-      return null;
+    try {
+      const data = await this.fetchWithRetry<Record<string, unknown>>(
+        `${this.baseUrl}/notices/${noticeId}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+          },
+          cacheKey,
+          cacheTTL: 10 * 60 * 1000, // 10분 캐시
+        }
+      );
+
+      return this.parseNotice(data);
+    } catch (error) {
+      if (error instanceof APIClientError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(`TED API 오류 (${response.status})`);
-    }
-
-    const data = await response.json();
-    return this.parseNotice(data);
   }
 
   /**

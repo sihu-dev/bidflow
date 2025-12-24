@@ -1,7 +1,7 @@
 import { logger } from '@/lib/utils/logger';
 /**
  * @route /api/v1/ai/formula
- * @description AI 수식 실행 API
+ * @description AI 수식 실행 API - Prompt Caching 및 모델 선택 최적화
  */
 
 import { NextResponse } from 'next/server';
@@ -9,6 +9,12 @@ import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middlew
 import { withRateLimit, getEndpointIdentifier } from '@/lib/security/rate-limiter';
 import { parseFormula, type FormulaContext } from '@/lib/spreadsheet/formula-parser';
 import { z } from 'zod';
+import {
+  getClaudeClient,
+  selectModel,
+  getMockResponse,
+  type ClaudeModel,
+} from '@/lib/ai/claude-client';
 
 // ============================================================================
 // 요청 스키마
@@ -33,7 +39,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 // ============================================================================
-// AI 함수 실행
+// AI 함수 실행 (Prompt Caching 적용)
 // ============================================================================
 
 async function executeAIFunction(
@@ -41,15 +47,18 @@ async function executeAIFunction(
   args: string[],
   context: FormulaContext = {}
 ): Promise<string> {
+  // 입찰금액 추출 (모델 선택용)
+  const bidAmount = context.cellData?.estimated_amount as number | undefined;
+
   switch (fn) {
     case 'AI':
-      return executeGeneralAI(args[0], context);
+      return executeGeneralAI(args[0], context, bidAmount);
     case 'AI_SUMMARY':
-      return executeSummaryAI(context);
+      return executeSummaryAI(context, bidAmount);
     case 'AI_SCORE':
-      return executeScoreAI(context);
+      return executeScoreAI(context, bidAmount);
     case 'AI_MATCH':
-      return executeMatchAI(context);
+      return executeMatchAI(context, bidAmount);
     case 'AI_KEYWORDS':
       return executeKeywordsAI(context);
     case 'AI_DEADLINE':
@@ -59,43 +68,39 @@ async function executeAIFunction(
   }
 }
 
-async function executeGeneralAI(prompt: string, context: FormulaContext): Promise<string> {
+async function executeGeneralAI(
+  prompt: string,
+  context: FormulaContext,
+  bidAmount?: number
+): Promise<string> {
   if (!ANTHROPIC_API_KEY) {
     if (isDevelopment) {
-      return `[DEV] AI 응답: "${prompt}"에 대한 분석 결과입니다.`;
+      return getMockResponse(prompt);
     }
     throw new Error('ANTHROPIC_API_KEY가 설정되지 않았습니다');
   }
+
+  const client = getClaudeClient();
+
+  // 입찰금액 기반 모델 자동 선택
+  const model = selectModel({ bidAmount });
 
   const systemPrompt = context.cellData
     ? `당신은 입찰 공고 분석 전문가입니다. 다음 입찰 데이터를 참고하세요:\n${JSON.stringify(context.cellData, null, 2)}`
     : '당신은 입찰 공고 분석 전문가입니다.';
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: prompt }],
-    }),
+  const response = await client.sendMessage(prompt, {
+    model,
+    systemPrompt,
+    bidAmount,
+    enableCaching: true,
+    maxTokens: 500,
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'AI API 호출 실패');
-  }
-
-  const data = await response.json();
-  return data.content[0]?.text || '';
+  return response.content[0]?.text || '';
 }
 
-async function executeSummaryAI(context: FormulaContext): Promise<string> {
+async function executeSummaryAI(context: FormulaContext, bidAmount?: number): Promise<string> {
   if (!context.cellData) {
     return '데이터가 없습니다';
   }
@@ -106,10 +111,10 @@ async function executeSummaryAI(context: FormulaContext): Promise<string> {
 추정가: ${context.cellData.estimated_amount}
 마감일: ${context.cellData.deadline}`;
 
-  return executeGeneralAI(prompt, context);
+  return executeGeneralAI(prompt, context, bidAmount);
 }
 
-async function executeScoreAI(context: FormulaContext): Promise<string> {
+async function executeScoreAI(context: FormulaContext, bidAmount?: number): Promise<string> {
   if (!context.cellData) {
     return '-';
   }
@@ -120,17 +125,38 @@ async function executeScoreAI(context: FormulaContext): Promise<string> {
     return `${score}%`;
   }
 
+  // 고액 입찰 (1억원 이상)은 Extended Thinking 활성화
+  const useExtendedThinking = (bidAmount || 0) >= 100_000_000;
+
   const prompt = `다음 입찰 공고에 대한 낙찰 확률을 0-100% 사이로 평가해주세요. 숫자와 %만 응답하세요.
 제목: ${context.cellData.title}
 기관: ${context.cellData.organization}
 추정가: ${context.cellData.estimated_amount}`;
 
-  const result = await executeGeneralAI(prompt, context);
+  if (!ANTHROPIC_API_KEY) {
+    return getMockResponse(prompt);
+  }
+
+  const client = getClaudeClient();
+  const model: ClaudeModel = useExtendedThinking
+    ? 'claude-opus-4-5-20251101'
+    : selectModel({ bidAmount });
+
+  const response = await client.sendMessage(prompt, {
+    model,
+    bidAmount,
+    enableCaching: true,
+    extendedThinking: useExtendedThinking,
+    thinkingBudget: 5000,
+    maxTokens: 100,
+  });
+
+  const result = response.content[0]?.text || '';
   const match = result.match(/(\d+)/);
   return match ? `${match[1]}%` : result;
 }
 
-async function executeMatchAI(context: FormulaContext): Promise<string> {
+async function executeMatchAI(context: FormulaContext, bidAmount?: number): Promise<string> {
   if (!context.cellData) {
     return '-';
   }
@@ -145,7 +171,7 @@ async function executeMatchAI(context: FormulaContext): Promise<string> {
 기관: ${context.cellData.organization}
 키워드: ${context.cellData.keywords}`;
 
-  return executeGeneralAI(prompt, context);
+  return executeGeneralAI(prompt, context, bidAmount);
 }
 
 async function executeKeywordsAI(context: FormulaContext): Promise<string> {
@@ -157,10 +183,23 @@ async function executeKeywordsAI(context: FormulaContext): Promise<string> {
     return '유량계, 초음파, 계측';
   }
 
-  const prompt = `다음 입찰 공고에서 핵심 키워드 3개를 추출해주세요. 쉼표로 구분하여 응답하세요.
-제목: ${context.cellData.title}`;
+  if (!ANTHROPIC_API_KEY) {
+    return getMockResponse('키워드');
+  }
 
-  return executeGeneralAI(prompt, context);
+  const client = getClaudeClient();
+
+  // 키워드 추출은 Haiku로 빠르게 처리
+  const response = await client.sendMessage(
+    `다음 입찰 공고에서 핵심 키워드 3개를 추출해주세요. 쉼표로 구분하여 응답하세요.\n제목: ${context.cellData.title}`,
+    {
+      model: 'claude-haiku-4-5-20250514',
+      enableCaching: true,
+      maxTokens: 100,
+    }
+  );
+
+  return response.content[0]?.text || '';
 }
 
 async function executeDeadlineAI(context: FormulaContext): Promise<string> {
@@ -168,15 +207,19 @@ async function executeDeadlineAI(context: FormulaContext): Promise<string> {
     return '-';
   }
 
-  const deadline = new Date(context.cellData.deadline as string);
-  const now = new Date();
-  const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  // 마감일 분석은 AI 호출 없이 직접 계산 (비용 절감)
+  const client = getClaudeClient();
+  const analysis = client.analyzeDeadline(context.cellData.deadline as string);
 
-  if (diffDays < 0) return '마감됨';
-  if (diffDays === 0) return 'D-Day 🔴';
-  if (diffDays <= 3) return `D-${diffDays} 🔴 긴급`;
-  if (diffDays <= 7) return `D-${diffDays} 🟡`;
-  return `D-${diffDays} 🟢`;
+  const urgencyEmoji = {
+    critical: '🔴',
+    high: '🟠',
+    medium: '🟡',
+    low: '🟢',
+  };
+
+  if (analysis.daysLeft <= 0) return '마감됨';
+  return `D-${analysis.daysLeft} ${urgencyEmoji[analysis.urgency]} ${analysis.action}`;
 }
 
 // ============================================================================

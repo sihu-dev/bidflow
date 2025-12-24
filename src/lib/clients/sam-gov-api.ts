@@ -7,6 +7,7 @@
 import type { BidData, BidSource, CreateInput, ISODateString, KRW } from '@forge-labs/types/bidding';
 import { checkCrawlingRateLimit } from '../security/rate-limiter';
 import { logger } from '@/lib/utils/logger';
+import { BaseAPIClient, APIClientError } from './base-api-client';
 
 // ============================================================================
 // SAM.gov API 타입 정의
@@ -83,11 +84,13 @@ interface SAMSearchResponse {
 // SAM.gov API 클라이언트
 // ============================================================================
 
-export class SAMGovAPIClient {
-  private baseUrl = 'https://api.sam.gov/opportunities/v2';
+export class SAMGovAPIClient extends BaseAPIClient {
+  protected readonly source = 'SAM.gov';
+  protected readonly baseUrl = 'https://api.sam.gov/opportunities/v2';
   private apiKey: string;
 
   constructor(apiKey?: string) {
+    super();
     this.apiKey = apiKey || process.env.SAM_GOV_API_KEY || '';
     if (!this.apiKey) {
       logger.warn('[SAM.gov] API 키가 설정되지 않았습니다. 일부 기능이 제한될 수 있습니다.');
@@ -101,26 +104,31 @@ export class SAMGovAPIClient {
     // Rate Limit 체크
     const rateLimitResult = await checkCrawlingRateLimit('sam');
     if (!rateLimitResult.success) {
-      throw new Error(`SAM.gov API Rate Limit 초과: ${rateLimitResult.reset - Date.now()}ms 후 재시도`);
+      throw new APIClientError(
+        `SAM.gov API Rate Limit 초과: ${rateLimitResult.reset - Date.now()}ms 후 재시도`,
+        this.source,
+        429,
+        true
+      );
     }
 
     const queryParams = this.buildQueryParams(params);
     const url = `${this.baseUrl}/search?${queryParams}`;
 
-    const response = await fetch(url, {
+    // 캐시 키 생성
+    const cacheKey = `sam:search:${queryParams}`;
+
+    const data = await this.fetchWithRetry<Record<string, unknown>>(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
+        // API 키는 Header로만 전송 (URL 노출 방지)
         ...(this.apiKey ? { 'X-Api-Key': this.apiKey } : {}),
       },
+      cacheKey,
+      cacheTTL: 5 * 60 * 1000, // 5분 캐시
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`SAM.gov API 오류 (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json();
     return this.parseSearchResponse(data);
   }
 
@@ -130,28 +138,28 @@ export class SAMGovAPIClient {
   async getOpportunity(noticeId: string): Promise<SAMOpportunity | null> {
     const rateLimitResult = await checkCrawlingRateLimit('sam');
     if (!rateLimitResult.success) {
-      throw new Error('SAM.gov API Rate Limit 초과');
+      throw new APIClientError('SAM.gov API Rate Limit 초과', this.source, 429, true);
     }
 
     const url = `${this.baseUrl}/${noticeId}`;
+    const cacheKey = `sam:opportunity:${noticeId}`;
 
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        ...(this.apiKey ? { 'X-Api-Key': this.apiKey } : {}),
-      },
-    });
-
-    if (response.status === 404) {
-      return null;
+    try {
+      const data = await this.fetchWithRetry<SAMOpportunity>(url, {
+        headers: {
+          'Accept': 'application/json',
+          ...(this.apiKey ? { 'X-Api-Key': this.apiKey } : {}),
+        },
+        cacheKey,
+        cacheTTL: 10 * 60 * 1000, // 10분 캐시
+      });
+      return data;
+    } catch (error) {
+      if (error instanceof APIClientError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
     }
-
-    if (!response.ok) {
-      throw new Error(`SAM.gov API 오류 (${response.status})`);
-    }
-
-    const data = await response.json();
-    return data as SAMOpportunity;
   }
 
   /**
@@ -255,10 +263,8 @@ export class SAMGovAPIClient {
       queryParts.push(`sortBy=${params.sortBy}`);
     }
 
-    // API 키 추가
-    if (this.apiKey) {
-      queryParts.push(`api_key=${this.apiKey}`);
-    }
+    // API 키는 URL에 포함하지 않음 (Header로만 전송)
+    // 보안: URL에 API 키가 노출되면 로그/브라우저 히스토리에 기록됨
 
     return queryParts.join('&');
   }
@@ -432,4 +438,8 @@ export function getSAMGovClient(): SAMGovAPIClient {
  * 4. 데이터 갱신
  *    - 공고 데이터는 매일 업데이트됨
  *    - 일일 크롤링 권장
+ *
+ * 5. 보안 주의사항
+ *    - API 키는 절대 URL에 포함하지 말 것
+ *    - Header (X-Api-Key)로만 전송
  */

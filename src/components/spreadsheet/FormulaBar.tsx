@@ -47,36 +47,52 @@ interface FormulaBarProps {
   isExecuting?: boolean;
 }
 
-// 스마트 함수 목록 (모노크롬)
+// 스마트 함수 목록 (모노크롬) - AI_ prefix로 통일
 const SMART_FUNCTIONS = [
   {
-    name: 'SUMMARY',
+    name: 'AI_SUMMARY',
     description: '입찰 공고를 3줄로 요약',
-    example: '=SUMMARY()',
+    example: '=AI_SUMMARY()',
     icon: FileText,
     color: 'text-neutral-700',
     bg: 'bg-neutral-100',
   },
   {
-    name: 'SCORE',
+    name: 'AI_SCORE',
     description: '낙찰 확률 예측 (0-100%)',
-    example: '=SCORE()',
+    example: '=AI_SCORE()',
     icon: TrendingUp,
     color: 'text-neutral-700',
     bg: 'bg-neutral-100',
   },
   {
-    name: 'MATCH',
+    name: 'AI_MATCH',
     description: '자사 제품 매칭 점수',
-    example: '=MATCH()',
+    example: '=AI_MATCH()',
     icon: Target,
     color: 'text-neutral-700',
     bg: 'bg-neutral-100',
   },
   {
-    name: 'ASK',
+    name: 'AI_KEYWORDS',
+    description: '핵심 키워드 3개 추출',
+    example: '=AI_KEYWORDS()',
+    icon: Lightbulb,
+    color: 'text-neutral-700',
+    bg: 'bg-neutral-100',
+  },
+  {
+    name: 'AI_DEADLINE',
+    description: 'D-Day 분석 및 액션 권고',
+    example: '=AI_DEADLINE()',
+    icon: Target,
+    color: 'text-neutral-700',
+    bg: 'bg-neutral-100',
+  },
+  {
+    name: 'AI',
     description: '자유 질문 (커스텀 프롬프트)',
-    example: '=ASK("핵심 요구사항은?")',
+    example: '=AI("핵심 요구사항은?")',
     icon: MessageSquare,
     color: 'text-neutral-700',
     bg: 'bg-neutral-100',
@@ -142,7 +158,7 @@ export function FormulaBar({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isSmartFormula = value.startsWith('=SUMMARY') || value.startsWith('=SCORE') || value.startsWith('=MATCH') || value.startsWith('=ASK');
+  const isSmartFormula = value.startsWith('=AI_') || value.startsWith('=AI(');
 
   return (
     <div className="border-b bg-white">
