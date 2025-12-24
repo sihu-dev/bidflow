@@ -1,17 +1,31 @@
-# 🌍 BIDFLOW - Global Procurement Intelligence Platform
+# BIDFLOW - Global Procurement Intelligence Platform
 
 > **AI-Powered International Tender Automation for Korean SME Exporters**
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
+[![Claude](https://img.shields.io/badge/Claude-API-orange)](https://www.anthropic.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **BIDFLOW automates international tender discovery and proposal generation for Korean manufacturing SMEs looking to export globally.**
 
 ---
 
-## 🎯 Problem Statement
+## Development Status
+
+| Component | Status | Score | Notes |
+|-----------|--------|-------|-------|
+| **International Bid APIs** | Implemented | 68/100 | TED, SAM.gov, G2B clients complete |
+| **Claude API Optimization** | Partial | 58/100 | Design complete, implementation gap |
+| **Spreadsheet Engine** | Implemented | 73/100 | HyperFormula + AI functions |
+| **Cross-Integration** | Good | 79/100 | Data pipeline established |
+
+**Overall Progress: Phase 4 (Production Launch) - 75%**
+
+---
+
+## Problem Statement
 
 Korean SME manufacturers face critical barriers to international expansion:
 
@@ -26,13 +40,13 @@ Korean SME manufacturers face critical barriers to international expansion:
 
 ---
 
-## 💡 Solution
+## Solution
 
 **BIDFLOW = Your AI Export Advisor**
 
 ```
 Automated Discovery → AI Translation → Smart Matching → Proposal Generation
-      (TED/SAM.gov)      (GPT-4o)        (175-point)      (Template-based)
+   (TED/SAM.gov)       (Claude API)     (175-point)      (Template-based)
 ```
 
 ### Core Value Proposition
@@ -44,24 +58,29 @@ Automated Discovery → AI Translation → Smart Matching → Proposal Generatio
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-### 🔍 1. Global Tender Discovery
+### 1. Global Tender Discovery
 
 ```yaml
 Data Sources (45+):
-  EU: TED API (Tenders Electronic Daily)
-  US: SAM.gov API (System for Award Management)
-  Korea: G2B, Public Procurement Service
-  Asia: Singapore GeBIZ, Hong Kong eTender
+  EU: TED API (Tenders Electronic Daily) - 815B EUR/year
+  US: SAM.gov API (System for Award Management) - Federal procurement
+  Korea: G2B (Nara Jangto), Public Procurement Service
+  Asia: Singapore GeBIZ, Hong Kong eTender (planned)
+
+API Clients (Implemented):
+  - src/lib/clients/ted-api.ts (330 lines)
+  - src/lib/clients/sam-gov-api.ts (436 lines)
+  - src/lib/clients/narajangto-api.ts (321 lines)
 
 Auto-Collection:
-  - Scheduled crawling (3x daily)
+  - Scheduled crawling via Inngest (3x daily)
   - Keyword filtering by industry
   - Real-time notifications
 ```
 
-### 🎯 2. AI-Powered Matching Engine
+### 2. AI-Powered Matching Engine
 
 **175-Point Scoring System:**
 
@@ -76,53 +95,51 @@ Auto-Collection:
 **Example Output:**
 
 ```
-🇪🇺 EU Tender: Water Flow Meters (€500K)
+EU Tender: Water Flow Meters (EUR 500K)
    Match Score: 92/100 (Excellent)
-   ✓ Technical: 34/35 (Your UR-1000PLUS meets DN200-500 spec)
-   ✓ Price: 28/30 (Budget €500K, your range €450-480K)
-   ✓ Org: 45/50 (Buyer prefers Korean suppliers, you have EU cert)
-   ⚠️ Competition: High (8 expected bidders)
+   - Technical: 34/35 (Your UR-1000PLUS meets DN200-500 spec)
+   - Price: 28/30 (Budget EUR 500K, your range EUR 450-480K)
+   - Org: 45/50 (Buyer prefers Korean suppliers, you have EU cert)
+   - Competition: High (8 expected bidders)
 
    Recommendation: APPLY - High win probability
 ```
 
-### 📊 3. Spreadsheet-Like Interface
+### 3. AI-Powered Spreadsheet Interface
 
-**Inspired by Excel, Powered by AI:**
+**Excel-Like UI with AI Functions:**
 
 ```excel
-=AI_SUMMARY(A2)      → "EU Water Authority seeks ultrasonic flowmeters..."
-=AI_TRANSLATE(A2)    → Full Korean translation
-=AI_SCORE(A2)        → 92 (Excellent match)
-=AI_PROPOSAL(A2)     → Generate proposal.docx
-=AI_COMPETITOR(A2)   → "Siemens (40%), E+H (30%)"
+=AI_SUMMARY(A2)    -> "EU Water Authority seeks ultrasonic flowmeters..."
+=AI_SCORE(A2)      -> 92 (Match score 0-100)
+=AI_MATCH(A2)      -> "UR-1000PLUS" (Best matching product)
+=AI_KEYWORDS(A2)   -> "ultrasonic, water, flowmeter"
+=AI_DEADLINE(A2)   -> "D-7 - Submit technical docs"
 ```
 
-Built on [Handsontable](https://handsontable.com/) + [HyperFormula](https://hyperformula.handsontable.com/)
+**Implementation:**
+- Formula Engine: HyperFormula (395+ Excel functions, lazy loaded)
+- UI Component: Handsontable (dynamic import, 912KB separated)
+- AI Backend: Claude API (Sonnet model)
 
-### 🤖 4. AI Proposal Generator
+### 4. Claude API Integration
 
-**From Tender to Proposal in 45 Minutes:**
+**Model Selection Strategy:**
 
-```
-Input: EU TED Tender PDF (120 pages, English)
-       ↓
-AI Processing:
-  1. Extract requirements (GPT-4o Vision)
-  2. Map to your product specs
-  3. Generate technical compliance matrix
-  4. Draft proposal (English)
-  5. Insert company credentials
-       ↓
-Output: Professional proposal.docx (70% complete)
-        - Technical section: 95% ready
-        - Pricing section: Manual review needed
-        - Past performance: Auto-filled
-```
+| Use Case | Model | Response Time | Cost |
+|----------|-------|---------------|------|
+| Quick analysis | Claude Haiku 4.5 | <500ms | Low |
+| Standard analysis | Claude Sonnet 4.5 | 1-2s | Medium |
+| High-value bids (>100M KRW) | Claude Opus 4.5 | 2-5s | High |
+
+**Optimization Features (Designed):**
+- Prompt Caching: 90% cost reduction
+- Extended Thinking: 40% accuracy improvement for complex bids
+- Batch Processing: 50% cost reduction for overnight jobs
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 ```yaml
 Frontend:
@@ -138,8 +155,8 @@ Backend:
   Cache: Upstash Redis (Rate limiting)
 
 AI/ML:
-  LLM: Claude API (Anthropic)
-  ML: XGBoost (Bid score prediction)
+  LLM: Claude API (Anthropic) - Haiku/Sonnet/Opus
+  Matching: Enhanced Matcher (175-point rule-based)
   Formula Engine: HyperFormula (AI cell functions)
 
 Data Collection:
@@ -161,7 +178,7 @@ Security:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -207,7 +224,7 @@ npm run start
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 bidflow/
@@ -222,74 +239,46 @@ bidflow/
 │   │   ├── domain/             # Domain logic (Repository pattern)
 │   │   ├── matching/           # 175-point matching engine
 │   │   ├── security/           # 5-layer security (Auth, CSRF, etc.)
-│   │   ├── clients/            # External API clients (TED, SAM.gov)
+│   │   ├── clients/            # External API clients (TED, SAM.gov, G2B)
 │   │   ├── notifications/      # Multi-channel notifications
-│   │   └── spreadsheet/        # AI cell functions
+│   │   └── spreadsheet/        # HyperFormula engine
 │   │
 │   └── components/             # React components (63)
 │
 ├── supabase/migrations/        # Database schema (11 migrations)
 ├── .forge/                     # Design docs, business plans
-├── tests/e2e/                  # Playwright E2E tests (46)
+├── .claude/                    # Claude API optimization docs
+├── tests/e2e/                  # Playwright E2E tests
 └── types/                      # TypeScript branded types
 ```
 
 ---
 
-## 📊 Business Model
+## Roadmap
 
-### Target Market
-
-**Korean Manufacturing SMEs (100-500 employees)**
-
-Industries:
-
-- Flow meters, pumps, valves
-- Industrial equipment
-- Water treatment
-- Measurement instruments
-- Construction materials
-
-### Revenue Streams
-
-| Stream                | Model                            | Pricing                    |
-| --------------------- | -------------------------------- | -------------------------- |
-| **SaaS Subscription** | Monthly/Annual                   | $99-299/month              |
-| **Success Fee**       | % of won contracts               | 1-3% of contract value     |
-| **AI Voucher**        | Government-funded AI development | $70K per project (70% gov) |
-
-### Growth Projection (Conservative)
-
-```
-Year 1: 10 customers × $1,188/year = $11,880 ARR
-Year 2: 50 customers × $1,188/year = $59,400 ARR
-Year 3: 150 customers × $1,188/year + Success fees = $200K+ ARR
-```
-
----
-
-## 🗺️ Roadmap
-
-### ✅ Phase 1-3: MVP Complete (Current - 81%)
+### Phase 1-3: MVP Complete (81%)
 
 - [x] Infrastructure setup (Supabase, Upstash, Inngest)
 - [x] 5-layer security implementation
-- [x] 175-point matching engine
-- [x] AI cell functions (5 functions)
+- [x] 175-point matching engine (Enhanced Matcher)
+- [x] AI cell functions (5 functions defined)
 - [x] Multi-channel notifications (Slack, Email, Kakao)
 - [x] Dashboard UI (spreadsheet-like)
-- [x] Crawling scheduler (Inngest cron jobs)
+- [x] International API clients (TED, SAM.gov, G2B)
+- [x] HyperFormula lazy loading (912KB separated)
 
-### 🚧 Phase 4: Production Launch (Q1 2025)
+### Phase 4: Production Launch (In Progress)
 
-- [ ] TED API integration (Live)
-- [ ] SAM.gov API integration (Live)
-- [ ] AI proposal generator (GPT-4o)
-- [ ] E2E testing (Playwright)
+- [x] TED API client implementation
+- [x] SAM.gov API client implementation
+- [x] G2B (Nara Jangto) API client
+- [ ] **Claude API optimization** (Prompt Caching, Model Selection)
+- [ ] Realtime spreadsheet sync
+- [ ] AI function auto-execution in cells
+- [ ] E2E testing completion
 - [ ] Production deployment (Vercel)
-- [ ] First pilot customer
 
-### 📅 Phase 5: Scale (Q2-Q3 2025)
+### Phase 5: Scale (Planned)
 
 - [ ] Multilingual support (EN, KO, CN, JP)
 - [ ] Mobile app (React Native)
@@ -299,7 +288,35 @@ Year 3: 150 customers × $1,188/year + Success fees = $200K+ ARR
 
 ---
 
-## 🔒 Security
+## Known Issues & Improvements Needed
+
+Based on code review (Dec 2024):
+
+### Critical (P0)
+| Issue | Location | Impact |
+|-------|----------|--------|
+| Claude API Prompt Caching not implemented | `api/v1/ai/*.ts` | 90% cost savings lost |
+| SAM.gov API key in URL | `sam-gov-api.ts:258` | Security vulnerability |
+| Model selection hardcoded | `ai/formula/route.ts:82` | Cost inefficiency |
+
+### High (P1)
+| Issue | Location | Impact |
+|-------|----------|--------|
+| No retry logic in API clients | All 3 clients | Network failures |
+| No timeout settings | All 3 clients | Potential hangs |
+| CORS set to `*` | `ai/score/route.ts` | Security risk |
+| Realtime not connected to spreadsheet | `SpreadsheetView.tsx` | No live updates |
+
+### Medium (P2)
+| Issue | Location | Impact |
+|-------|----------|--------|
+| AI function name mismatch | `FormulaBar.tsx` | SCORE vs AI_SCORE |
+| No debouncing on AI calls | `SpreadsheetContainer.tsx` | API overload |
+| Missing caching layer | API clients | Redundant requests |
+
+---
+
+## Security
 
 **5-Layer Defense:**
 
@@ -309,15 +326,18 @@ Year 3: 150 customers × $1,188/year + Success fees = $200K+ ARR
 4. **Rate Limiting** - Upstash Redis (100 req/min per user)
 5. **Input Validation** - Zod schemas on all inputs
 
-**Compliance:**
+**AI-Specific Security:**
+- Prompt Injection prevention (`validatePromptInput`)
+- Rate limiting on AI endpoints (10 req/min)
 
+**Compliance:**
 - GDPR ready (EU data protection)
 - ISO 27001 guidelines
 - SOC 2 Type II (planned)
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Type checking
@@ -336,24 +356,41 @@ npm run test:e2e
 npm run test:e2e:ui
 ```
 
-**Test Coverage:**
-
-- E2E: 46 Playwright tests written
-- Unit: In progress
-- Integration: API route tests
-
 ---
 
-## 📚 Documentation
+## Documentation
 
 - **Design Docs:** [.forge/](/.forge/) - System architecture, business plans
-- **API Docs:** [API Reference](/.forge/TECH_ARCHITECTURE.md)
-- **Data Sources:** [45+ Tender Sources](/.forge/BID_DATA_SOURCES.md)
-- **Development Guide:** [NEXT_STEPS.md](/NEXT_STEPS.md)
+- **Claude Optimization:** [.claude/CHROME_EXTENSION_OPTIMIZATION.md](/.claude/)
+- **API Sources:** [BID_DATA_SOURCES.md](/.forge/BID_DATA_SOURCES.md)
+- **Spreadsheet Architecture:** [AI_SPREADSHEET_ARCHITECTURE.md](/.forge/AI_SPREADSHEET_ARCHITECTURE.md)
 
 ---
 
-## 🤝 Contributing
+## Business Model
+
+### Target Market
+
+**Korean Manufacturing SMEs (100-500 employees)**
+
+Industries:
+- Flow meters, pumps, valves
+- Industrial equipment
+- Water treatment
+- Measurement instruments
+- Construction materials
+
+### Revenue Streams
+
+| Stream                | Model                            | Pricing                    |
+| --------------------- | -------------------------------- | -------------------------- |
+| **SaaS Subscription** | Monthly/Annual                   | $99-299/month              |
+| **Success Fee**       | % of won contracts               | 1-3% of contract value     |
+| **AI Voucher**        | Government-funded AI development | $70K per project (70% gov) |
+
+---
+
+## Contributing
 
 Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
@@ -373,34 +410,35 @@ git push origin feature/amazing-feature
 
 ---
 
-## 📝 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Next.js](https://nextjs.org/) - React framework
 - [Supabase](https://supabase.com/) - Backend infrastructure
 - [Anthropic Claude](https://www.anthropic.com/) - AI capabilities
 - [Handsontable](https://handsontable.com/) - Spreadsheet component
 - [Inngest](https://www.inngest.com/) - Background jobs
+- [HyperFormula](https://hyperformula.handsontable.com/) - Formula engine
 
 ---
 
-## ⚠️ Important Note
+## Notes
 
-**CMNTech References:** Some files in `.forge/` reference "CMNTech" (a flowmeter company). These are **mock-up scenarios** for concept demonstration, not actual clients.
+**CMNTech References:** Some files in `.forge/` reference "CMNTech" (a flowmeter company). These are **demo scenarios** for concept demonstration.
 
-**Actual Business Model:** International tender platform for Korean SME exporters (TED, SAM.gov focus).
+**Focus:** International tender platform for Korean SME exporters (TED, SAM.gov, G2B integration).
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for Korean SMEs going global**
+**Built for Korean SMEs going global**
 
-[🌐 Website](https://bidflow.app) • [📖 Docs](/.forge/) • [🐛 Issues](https://github.com/yourusername/bidflow/issues)
+[Website](https://bidflow.app) | [Docs](/.forge/) | [Issues](https://github.com/yourusername/bidflow/issues)
 
 </div>
