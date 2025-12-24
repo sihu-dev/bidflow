@@ -39,6 +39,7 @@ export function AnimatedMetric({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm"
+      data-testid="animated-metric"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">

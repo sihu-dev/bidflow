@@ -64,7 +64,7 @@ export const AnomalyAlert: FC<AnomalyAlertProps> = ({ alerts }) => {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="anomaly-alert">
       {/* Timeline SVG */}
       <div className="relative">
         <svg

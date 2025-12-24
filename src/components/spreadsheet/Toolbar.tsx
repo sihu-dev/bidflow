@@ -180,6 +180,7 @@ export function Toolbar({
                   'h-9 gap-2 text-sm font-medium border-neutral-200',
                   hasActiveFilters && 'border-neutral-400 bg-neutral-100 text-neutral-800'
                 )}
+                data-testid="status-filter"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 필터
@@ -339,6 +340,7 @@ export function Toolbar({
             className="h-9 w-9 p-0 text-neutral-500 hover:text-neutral-700"
             title="새로고침"
             aria-label="새로고침"
+            data-testid="refresh-button"
           >
             <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} aria-hidden="true" />
           </Button>

@@ -329,7 +329,7 @@ export function SludgeMap() {
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" data-testid="sludge-map">
       <div
         ref={mapContainer}
         className="w-full h-full rounded-lg overflow-hidden"

@@ -122,7 +122,7 @@ const FlowGauge: React.FC<FlowGaugeProps> = ({
   };
 
   return (
-    <div className="w-full h-48" role="img" aria-label={`${label} gauge showing ${value} ${unit} out of ${max} ${unit}, status: ${status}`}>
+    <div className="w-full h-48" data-testid="flow-gauge" role="img" aria-label={`${label} gauge showing ${value} ${unit} out of ${max} ${unit}, status: ${status}`}>
       <ReactECharts
         option={option}
         style={{ height: '100%', width: '100%' }}
