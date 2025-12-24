@@ -152,12 +152,12 @@ export function FormulaBar({
         <div className="flex items-center">
           <div className={cn(
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md min-w-[70px] transition-colors',
-            selectedCell ? 'bg-slate-100' : 'bg-slate-50'
+            selectedCell ? 'bg-neutral-100' : 'bg-neutral-50'
           )}>
             <span
               className={cn(
                 'text-xs font-mono font-semibold',
-                selectedCell ? 'text-slate-700' : 'text-slate-400'
+                selectedCell ? 'text-neutral-700' : 'text-neutral-400'
               )}
             >
               {cellAddress || '—'}
@@ -166,7 +166,7 @@ export function FormulaBar({
         </div>
 
         {/* 구분선 */}
-        <div className="h-6 w-px bg-slate-200" />
+        <div className="h-6 w-px bg-neutral-200" />
 
         {/* 함수 아이콘 */}
         <div className={cn(
@@ -335,8 +335,8 @@ export function FormulaBar({
                 disabled={!selectedCell}
                 className={cn(
                   'flex flex-col items-start p-3 bg-white border border-neutral-200 rounded-xl transition-all group',
-                  'hover:border-neutral-400 hover:shadow-md hover:-translate-y-0.5',
-                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0'
+                  'hover:border-neutral-400 hover:shadow-md hover:-tranneutral-y-0.5',
+                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:tranneutral-y-0'
                 )}
               >
                 <div className="flex items-center gap-2 mb-2">

@@ -111,7 +111,7 @@ export function LoginForm() {
 
       <div className="relative mb-4">
         <Separator />
-        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+        <span className="absolute left-1/2 top-1/2 -tranneutral-x-1/2 -tranneutral-y-1/2 bg-background px-2 text-xs text-muted-foreground">
           또는 로그인
         </span>
       </div>
@@ -158,7 +158,7 @@ export function LoginForm() {
 
       <div className="relative my-6">
         <Separator />
-        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+        <span className="absolute left-1/2 top-1/2 -tranneutral-x-1/2 -tranneutral-y-1/2 bg-background px-2 text-xs text-muted-foreground">
           또는
         </span>
       </div>

@@ -150,7 +150,7 @@ export default function PricingPage() {
                 )}
               >
                 {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                  <div className="absolute -top-4 left-1/2 -tranneutral-x-1/2 px-4 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded-full">
                     가장 인기
                   </div>
                 )}

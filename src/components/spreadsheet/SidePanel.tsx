@@ -158,30 +158,30 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
   const keywordArray = bid.keywords || [];
 
   return (
-    <div className="w-full md:w-[360px] lg:w-[400px] border-l border-slate-200 bg-white flex flex-col h-full animate-slide-in">
+    <div className="w-full md:w-[360px] lg:w-[400px] border-l border-neutral-200 bg-white flex flex-col h-full animate-slide-in">
       {/* 헤더 */}
-      <div className="flex items-start justify-between p-4 border-b border-slate-100">
+      <div className="flex items-start justify-between p-4 border-b border-neutral-100">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded">
+            <span className="px-2 py-0.5 text-xs font-medium bg-neutral-100 text-neutral-600 rounded">
               {SOURCE_LABELS[bid.source] || bid.source}
             </span>
             <button
               onClick={handleCopyId}
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition"
+              className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600 transition"
               title="공고번호 복사"
             >
               <span className="font-mono">{bid.external_id}</span>
               {copied ? <Check className="w-3 h-3 text-neutral-700" /> : <Copy className="w-3 h-3" />}
             </button>
           </div>
-          <h3 className="text-base font-semibold text-slate-900 leading-snug line-clamp-2">
+          <h3 className="text-base font-semibold text-neutral-900 leading-snug line-clamp-2">
             {bid.title}
           </h3>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 -mr-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition"
+          className="p-1.5 -mr-1 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition"
           aria-label="패널 닫기"
         >
           <X className="w-5 h-5" aria-hidden="true" />
@@ -199,7 +199,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
                 <button
                   className={cn(
                     'px-3 py-1.5 text-xs font-medium rounded-lg border flex items-center gap-1.5 transition hover:opacity-80',
-                    STATUS_STYLE[bid.status] || 'bg-slate-50 text-slate-600 border-slate-200'
+                    STATUS_STYLE[bid.status] || 'bg-neutral-50 text-neutral-600 border-neutral-200'
                   )}
                   disabled={isUpdating}
                 >
@@ -212,7 +212,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
                   <DropdownMenuItem
                     key={value}
                     onClick={() => handleStatusChange(value)}
-                    className={cn('text-xs', value === bid.status && 'bg-slate-100')}
+                    className={cn('text-xs', value === bid.status && 'bg-neutral-100')}
                   >
                     {label}
                   </DropdownMenuItem>
@@ -224,7 +224,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-200 bg-white flex items-center gap-1.5 hover:bg-slate-50 transition"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-white flex items-center gap-1.5 hover:bg-neutral-50 transition"
                   disabled={isUpdating}
                 >
                   {PRIORITY_COLORS[bid.priority]} {bid.priority === 'high' ? '높음' : bid.priority === 'medium' ? '보통' : '낮음'}
@@ -247,7 +247,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
             {/* 더보기 */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition ml-auto">
+                <button className="p-1.5 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition ml-auto">
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -263,25 +263,25 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
           {/* D-Day */}
           <div className={cn(
             'flex items-center justify-between p-3 rounded-xl border',
-            isOverdue ? 'bg-slate-50 border-slate-200' :
+            isOverdue ? 'bg-neutral-50 border-neutral-200' :
             isUrgent ? 'bg-neutral-200 border-neutral-400' :
             'bg-neutral-100 border-neutral-300'
           )}>
             <div className="flex items-center gap-2">
               <Clock className={cn(
                 'w-4 h-4',
-                isOverdue ? 'text-slate-400' : isUrgent ? 'text-neutral-700' : 'text-neutral-600'
+                isOverdue ? 'text-neutral-400' : isUrgent ? 'text-neutral-700' : 'text-neutral-600'
               )} />
-              <span className="text-xs text-slate-600">마감</span>
+              <span className="text-xs text-neutral-600">마감</span>
             </div>
             <div className="text-right">
               <div className={cn(
                 'text-lg font-bold',
-                isOverdue ? 'text-slate-400' : isUrgent ? 'text-neutral-800' : 'text-neutral-700'
+                isOverdue ? 'text-neutral-400' : isUrgent ? 'text-neutral-800' : 'text-neutral-700'
               )}>
                 {dday}
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-neutral-500">
                 {new Date(bid.deadline).toLocaleDateString('ko-KR', {
                   month: 'short',
                   day: 'numeric',
@@ -294,22 +294,22 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
 
           {/* 정보 그리드 */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+            <div className="p-3 bg-neutral-50 rounded-xl">
+              <div className="flex items-center gap-1.5 text-neutral-500 mb-1">
                 <Building2 className="w-3.5 h-3.5" />
                 <span className="text-xs">발주기관</span>
               </div>
-              <div className="text-sm font-medium text-slate-800 truncate" title={bid.organization}>
+              <div className="text-sm font-medium text-neutral-800 truncate" title={bid.organization}>
                 {bid.organization}
               </div>
             </div>
 
-            <div className="p-3 bg-slate-50 rounded-xl">
-              <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+            <div className="p-3 bg-neutral-50 rounded-xl">
+              <div className="flex items-center gap-1.5 text-neutral-500 mb-1">
                 <DollarSign className="w-3.5 h-3.5" />
                 <span className="text-xs">추정가격</span>
               </div>
-              <div className="text-sm font-medium text-slate-800">
+              <div className="text-sm font-medium text-neutral-800">
                 {bid.estimated_amount ? formatAmount(bid.estimated_amount) : '-'}
               </div>
             </div>
@@ -318,7 +318,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
           {/* 키워드 */}
           {keywordArray.length > 0 && (
             <div>
-              <div className="flex items-center gap-1.5 text-slate-500 mb-2">
+              <div className="flex items-center gap-1.5 text-neutral-500 mb-2">
                 <Tag className="w-3.5 h-3.5" />
                 <span className="text-xs font-medium">키워드</span>
               </div>
@@ -326,7 +326,7 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
                 {keywordArray.map((kw: string, i: number) => (
                   <span
                     key={i}
-                    className="px-2 py-1 text-xs bg-slate-100 text-slate-600 rounded-md"
+                    className="px-2 py-1 text-xs bg-neutral-100 text-neutral-600 rounded-md"
                   >
                     {kw}
                   </span>
@@ -350,26 +350,26 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
         </div>
 
         {/* 제품 매칭 */}
-        <div className="border-t border-slate-100">
+        <div className="border-t border-neutral-100">
           <button
             onClick={() => setIsProductExpanded(!isProductExpanded)}
-            className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-50 transition"
+            className="flex items-center justify-between w-full px-4 py-3 hover:bg-neutral-50 transition"
           >
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 text-neutral-700" />
-              <span className="text-sm font-medium text-slate-700">제품 매칭</span>
+              <span className="text-sm font-medium text-neutral-700">제품 매칭</span>
               {matchScore !== null && (
                 <span className={cn(
                   'px-2 py-0.5 text-xs font-medium rounded-full',
                   matchScore >= 70 ? 'bg-neutral-200 text-neutral-800' :
                   matchScore >= 50 ? 'bg-neutral-100 text-neutral-700' :
-                  'bg-slate-100 text-slate-600'
+                  'bg-neutral-100 text-neutral-600'
                 )}>
                   {matchScore}%
                 </span>
               )}
             </div>
-            {isProductExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            {isProductExpanded ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
           </button>
 
           {isProductExpanded && (
@@ -377,19 +377,19 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
               {matchScore !== null && (
                 <div className="mb-3">
                   <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-500">매칭 점수</span>
+                    <span className="text-neutral-500">매칭 점수</span>
                     <span className={cn(
                       'font-medium',
-                      matchScore >= 70 ? 'text-neutral-800' : matchScore >= 50 ? 'text-neutral-700' : 'text-slate-500'
+                      matchScore >= 70 ? 'text-neutral-800' : matchScore >= 50 ? 'text-neutral-700' : 'text-neutral-500'
                     )}>
                       {matchScore}%
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all',
-                        matchScore >= 70 ? 'bg-neutral-800' : matchScore >= 50 ? 'bg-neutral-500' : 'bg-slate-400'
+                        matchScore >= 70 ? 'bg-neutral-800' : matchScore >= 50 ? 'bg-neutral-500' : 'bg-neutral-400'
                       )}
                       style={{ width: `${matchScore}%` }}
                     />
@@ -403,20 +403,20 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
                     <Target className="w-4 h-4 text-neutral-700" />
                     <span className="text-xs font-medium text-neutral-700">추천 제품</span>
                   </div>
-                  <div className="text-sm font-semibold text-slate-800">{matchedProductInfo.name}</div>
-                  <div className="text-xs text-slate-600 mt-0.5">{matchedProductInfo.description}</div>
+                  <div className="text-sm font-semibold text-neutral-800">{matchedProductInfo.name}</div>
+                  <div className="text-xs text-neutral-600 mt-0.5">{matchedProductInfo.description}</div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {matchedProductInfo.specs.map((spec, i) => (
-                      <span key={i} className="px-1.5 py-0.5 text-xs bg-white text-slate-600 rounded border border-neutral-200">
+                      <span key={i} className="px-1.5 py-0.5 text-xs bg-white text-neutral-600 rounded border border-neutral-200">
                         {spec}
                       </span>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-slate-50 rounded-xl text-center">
-                  <AlertCircle className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-                  <div className="text-xs text-slate-500">매칭된 제품 없음</div>
+                <div className="p-4 bg-neutral-50 rounded-xl text-center">
+                  <AlertCircle className="w-6 h-6 text-neutral-300 mx-auto mb-2" />
+                  <div className="text-xs text-neutral-500">매칭된 제품 없음</div>
                 </div>
               )}
             </div>
@@ -424,17 +424,17 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
         </div>
 
         {/* AI 분석 */}
-        <div className="border-t border-slate-100">
+        <div className="border-t border-neutral-100">
           <button
             onClick={() => setIsAIExpanded(!isAIExpanded)}
-            className="flex items-center justify-between w-full px-4 py-3 hover:bg-slate-50 transition"
+            className="flex items-center justify-between w-full px-4 py-3 hover:bg-neutral-50 transition"
           >
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-neutral-600" />
-              <span className="text-sm font-medium text-slate-700">AI 분석</span>
+              <span className="text-sm font-medium text-neutral-700">AI 분석</span>
               {bid.ai_summary && <CheckCircle2 className="w-3.5 h-3.5 text-neutral-700" />}
             </div>
-            {isAIExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            {isAIExpanded ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
           </button>
 
           {isAIExpanded && (
@@ -443,13 +443,13 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
                 <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl">
                   <div className="flex items-start gap-2">
                     <Sparkles className="w-4 h-4 text-neutral-500 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-slate-700 leading-relaxed">{bid.ai_summary}</div>
+                    <div className="text-sm text-neutral-700 leading-relaxed">{bid.ai_summary}</div>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 bg-slate-50 rounded-xl text-center">
-                  <Sparkles className="w-6 h-6 text-slate-300 mx-auto mb-2" />
-                  <div className="text-xs text-slate-500 mb-3">AI 분석 실행</div>
+                <div className="p-4 bg-neutral-50 rounded-xl text-center">
+                  <Sparkles className="w-6 h-6 text-neutral-300 mx-auto mb-2" />
+                  <div className="text-xs text-neutral-500 mb-3">AI 분석 실행</div>
                   <Button
                     size="sm"
                     variant="outline"
@@ -470,8 +470,8 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
         </div>
 
         {/* 메모 */}
-        <div className="border-t border-slate-100 p-4">
-          <div className="flex items-center gap-1.5 text-slate-500 mb-2">
+        <div className="border-t border-neutral-100 p-4">
+          <div className="flex items-center gap-1.5 text-neutral-500 mb-2">
             <FileText className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">메모</span>
           </div>
@@ -479,13 +479,13 @@ export function SidePanel({ bid, onClose, onUpdate }: SidePanelProps) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="메모 입력..."
-            className="w-full h-20 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent"
+            className="w-full h-20 p-3 text-sm bg-neutral-50 border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* 푸터 */}
-      <div className="border-t border-slate-100 p-4 bg-slate-50">
+      <div className="border-t border-neutral-100 p-4 bg-neutral-50">
         <Button className="w-full h-10 text-sm font-medium bg-neutral-900 hover:bg-neutral-800 text-white">
           <FileText className="w-4 h-4 mr-2" />
           제안서 작성 시작

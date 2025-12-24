@@ -30,7 +30,7 @@ export function DisclaimerBanner({ dismissible = true, className }: DisclaimerPr
       className={cn(
         'relative w-full px-4 py-2',
         'bg-neutral-700/10 border-b border-neutral-700/20',
-        'text-amber-200 text-sm',
+        'text-neutral-300 text-sm',
         className
       )}
     >

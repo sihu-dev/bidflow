@@ -299,7 +299,7 @@ export function PromptLibrary({
           {/* 검색 */}
           <div className="p-4 pb-2">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -tranneutral-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="템플릿 검색..."
                 value={searchQuery}
@@ -309,7 +309,7 @@ export function PromptLibrary({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-3 top-1/2 -tranneutral-y-1/2"
                 >
                   <X className="w-4 h-4 text-muted-foreground" />
                 </button>

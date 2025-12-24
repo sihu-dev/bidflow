@@ -44,10 +44,10 @@ export default function KogasPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <Badge variant="secondary" className="mb-4">한국가스공사</Badge>
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            <h1 className="text-4xl font-bold text-neutral-900 mb-4">
               KOGAS 입찰 자동화
             </h1>
-            <p className="text-lg text-slate-600 mb-8">
+            <p className="text-lg text-neutral-600 mb-8">
               한국가스공사의 가스 설비, 배관, 계측 장비 입찰 공고를
               자동으로 수집하고 분석합니다.
             </p>
@@ -64,13 +64,13 @@ export default function KogasPage() {
       </section>
 
       {/* 통계 */}
-      <section className="border-b bg-slate-50">
+      <section className="border-b bg-neutral-50">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-slate-900 font-mono">{stat.value}</div>
-                <div className="text-sm text-slate-500">{stat.label}</div>
+                <div className="text-3xl font-bold text-neutral-900 font-mono">{stat.value}</div>
+                <div className="text-sm text-neutral-500">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -80,12 +80,12 @@ export default function KogasPage() {
       {/* 기능 */}
       <section className="border-b">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">연동 기능</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">연동 기능</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((item) => (
               <div key={item.title} className="p-6 border rounded-lg">
-                <h3 className="font-semibold text-slate-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-500">{item.desc}</p>
+                <h3 className="font-semibold text-neutral-900 mb-2">{item.title}</h3>
+                <p className="text-sm text-neutral-500">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -93,9 +93,9 @@ export default function KogasPage() {
       </section>
 
       {/* 카테고리 */}
-      <section className="border-b bg-slate-50">
+      <section className="border-b bg-neutral-50">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">수집 카테고리</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">수집 카테고리</h2>
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <Badge key={cat} variant="outline" className="text-sm py-1.5 px-3">
@@ -109,23 +109,23 @@ export default function KogasPage() {
       {/* 데이터 흐름 */}
       <section className="border-b">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">데이터 수집 프로세스</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">데이터 수집 프로세스</h2>
           <div className="grid md:grid-cols-4 gap-4">
             <div className="p-4 border rounded-lg text-center">
-              <div className="text-lg font-semibold text-slate-900">1. 크롤링</div>
-              <p className="text-sm text-slate-500">KOGAS 입찰 페이지</p>
+              <div className="text-lg font-semibold text-neutral-900">1. 크롤링</div>
+              <p className="text-sm text-neutral-500">KOGAS 입찰 페이지</p>
             </div>
             <div className="p-4 border rounded-lg text-center">
-              <div className="text-lg font-semibold text-slate-900">2. 정제</div>
-              <p className="text-sm text-slate-500">데이터 표준화</p>
+              <div className="text-lg font-semibold text-neutral-900">2. 정제</div>
+              <p className="text-sm text-neutral-500">데이터 표준화</p>
             </div>
             <div className="p-4 border rounded-lg text-center">
-              <div className="text-lg font-semibold text-slate-900">3. 분석</div>
-              <p className="text-sm text-slate-500">매칭 점수 계산</p>
+              <div className="text-lg font-semibold text-neutral-900">3. 분석</div>
+              <p className="text-sm text-neutral-500">매칭 점수 계산</p>
             </div>
             <div className="p-4 border rounded-lg text-center">
-              <div className="text-lg font-semibold text-slate-900">4. 알림</div>
-              <p className="text-sm text-slate-500">적합 공고 통지</p>
+              <div className="text-lg font-semibold text-neutral-900">4. 알림</div>
+              <p className="text-sm text-neutral-500">적합 공고 통지</p>
             </div>
           </div>
         </div>
@@ -134,8 +134,8 @@ export default function KogasPage() {
       {/* CTA */}
       <section>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">KOGAS 입찰 자동화 시작하기</h2>
-          <p className="text-slate-600 mb-6">Pro 플랜 이상에서 KOGAS 연동을 이용할 수 있습니다.</p>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-4">KOGAS 입찰 자동화 시작하기</h2>
+          <p className="text-neutral-600 mb-6">Pro 플랜 이상에서 KOGAS 연동을 이용할 수 있습니다.</p>
           <Button asChild size="lg">
             <Link href="/pricing">요금제 확인</Link>
           </Button>

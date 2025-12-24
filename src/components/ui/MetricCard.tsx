@@ -94,7 +94,7 @@ export function MetricCard({
       className={clsx(
         'relative rounded-xl border backdrop-blur-lg',
         'transition-all duration-300',
-        'hover:border-white/[0.12] hover:-translate-y-0.5',
+        'hover:border-white/[0.12] hover:-tranneutral-y-0.5',
         'hover:shadow-lg hover:shadow-black/30',
         styles.bg,
         styles.border,

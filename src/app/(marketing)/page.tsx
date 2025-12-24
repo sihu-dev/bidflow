@@ -40,7 +40,9 @@ export default function LandingPage() {
       <FeaturesV2 />
 
       {/* Interactive Demo */}
-      <SpreadsheetDemo />
+      <section id="spreadsheet-demo">
+        <SpreadsheetDemo />
+      </section>
 
       {/* How It Works */}
       <HowItWorks />

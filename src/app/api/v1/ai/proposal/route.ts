@@ -6,6 +6,8 @@ import { logger } from '@/lib/utils/logger';
  * POST /api/v1/ai/proposal
  * - 입찰 공고 정보를 기반으로 제안서 초안 생성
  * - Claude API (Vercel AI SDK) 사용
+ *
+ * Security: withAuth + withRateLimit + CORS 화이트리스트
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -15,6 +17,30 @@ import { generateText } from 'ai';
 import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middleware';
 import { withRateLimit } from '@/lib/security/rate-limiter';
 import { validatePromptInput } from '@/lib/security/prompt-guard';
+
+// ============================================================================
+// CORS 허용 도메인
+// ============================================================================
+
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'http://localhost:3010',
+  'http://localhost:3000',
+].filter(Boolean) as string[];
+
+function getCorsHeaders(origin: string | null): HeadersInit {
+  const headers: HeadersInit = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
 
 // ============================================================================
 // 요청 스키마
@@ -319,13 +345,10 @@ const authenticatedHandler = withAuth(generateProposal, {
 export const POST = withRateLimit(authenticatedHandler, { type: 'ai' });
 
 // OPTIONS (CORS)
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: getCorsHeaders(origin),
   });
 }

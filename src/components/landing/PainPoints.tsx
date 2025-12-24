@@ -80,7 +80,7 @@ export function PainPoints() {
               </div>
 
               {/* Arrow */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white border border-neutral-200 rounded-full flex items-center justify-center z-10">
+              <div className="absolute left-1/2 top-1/2 -tranneutral-x-1/2 -tranneutral-y-1/2 w-8 h-8 bg-white border border-neutral-200 rounded-full flex items-center justify-center z-10">
                 <svg
                   className="w-4 h-4 text-neutral-600"
                   fill="none"

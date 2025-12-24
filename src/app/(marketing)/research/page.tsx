@@ -100,18 +100,18 @@ export default function ResearchPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <Badge variant="secondary" className="mb-4">Research Team</Badge>
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">
+            <h1 className="text-4xl font-bold text-neutral-900 mb-4">
               데이터 분석 & 예측 전문 연구팀
             </h1>
-            <p className="text-lg text-slate-600 mb-6">
+            <p className="text-lg text-neutral-600 mb-6">
               KAIST 문술대학원 연계 연구팀으로, 확률적 예측 모형과
               데이터 기반 의사결정 시스템을 개발합니다.
             </p>
-            <div className="flex items-center gap-4 text-sm text-slate-500">
+            <div className="flex items-center gap-4 text-sm text-neutral-500">
               <span>Seoul National University</span>
-              <span className="text-slate-300">|</span>
+              <span className="text-neutral-300">|</span>
               <span>London Business School</span>
-              <span className="text-slate-300">|</span>
+              <span className="text-neutral-300">|</span>
               <span>University of Oxford</span>
             </div>
           </div>
@@ -119,13 +119,13 @@ export default function ResearchPage() {
       </section>
 
       {/* 팀 현황 */}
-      <section className="border-b bg-slate-50">
+      <section className="border-b bg-neutral-50">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {teamStats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-slate-900 font-mono">{stat.value}</div>
-                <div className="text-sm text-slate-500">{stat.label}</div>
+                <div className="text-3xl font-bold text-neutral-900 font-mono">{stat.value}</div>
+                <div className="text-sm text-neutral-500">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -135,12 +135,12 @@ export default function ResearchPage() {
       {/* 연구 분야 */}
       <section className="border-b">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">연구 분야</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">연구 분야</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {researchAreas.map((area) => (
-              <div key={area.title} className="p-6 border rounded-lg hover:border-slate-400 transition-colors">
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">{area.title}</h3>
-                <p className="text-sm text-slate-500 mb-4">{area.description}</p>
+              <div key={area.title} className="p-6 border rounded-lg hover:border-neutral-400 transition-colors">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-1">{area.title}</h3>
+                <p className="text-sm text-neutral-500 mb-4">{area.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {area.applications.map((app) => (
                     <Badge key={app} variant="outline" className="text-xs">
@@ -155,15 +155,15 @@ export default function ResearchPage() {
       </section>
 
       {/* 연구 프로젝트 */}
-      <section className="border-b bg-slate-50">
+      <section className="border-b bg-neutral-50">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">연구 프로젝트</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">연구 프로젝트</h2>
           <div className="space-y-4">
             {projects.map((project) => (
               <div key={project.title} className="flex items-center justify-between p-4 bg-white border rounded-lg">
                 <div>
-                  <h3 className="font-medium text-slate-900">{project.title}</h3>
-                  <p className="text-sm text-slate-500">{project.partner}</p>
+                  <h3 className="font-medium text-neutral-900">{project.title}</h3>
+                  <p className="text-sm text-neutral-500">{project.partner}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{project.type}</Badge>
@@ -178,15 +178,15 @@ export default function ResearchPage() {
       {/* 교육 과정 */}
       <section className="border-b">
         <div className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">교육 과정</h2>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-8">교육 과정</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {courses.map((course) => (
               <div key={course.code} className="p-6 border rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <code className="text-sm font-mono text-slate-500">{course.code}</code>
+                  <code className="text-sm font-mono text-neutral-500">{course.code}</code>
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">{course.title}</h3>
-                <p className="text-sm text-slate-500">{course.description}</p>
+                <h3 className="text-lg font-semibold text-neutral-900">{course.title}</h3>
+                <p className="text-sm text-neutral-500">{course.description}</p>
               </div>
             ))}
           </div>
@@ -194,26 +194,26 @@ export default function ResearchPage() {
       </section>
 
       {/* BIDFLOW 적용 */}
-      <section className="border-b bg-slate-900 text-white">
+      <section className="border-b bg-neutral-900 text-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-2xl font-bold mb-4">BIDFLOW에 적용된 연구 역량</h2>
-            <p className="text-slate-400 mb-8">
+            <p className="text-neutral-400 mb-8">
               입찰 시장 예측, 경쟁 분석, 낙찰률 예측 등 핵심 기능에
               연구팀의 통계적 모형과 데이터 분석 역량이 적용되었습니다.
             </p>
             <div className="grid grid-cols-3 gap-4 text-left mb-8">
-              <div className="p-4 bg-slate-800 rounded-lg">
+              <div className="p-4 bg-neutral-800 rounded-lg">
                 <div className="text-2xl font-bold font-mono text-neutral-300">87%</div>
-                <div className="text-sm text-slate-400">예측 정확도</div>
+                <div className="text-sm text-neutral-400">예측 정확도</div>
               </div>
-              <div className="p-4 bg-slate-800 rounded-lg">
+              <div className="p-4 bg-neutral-800 rounded-lg">
                 <div className="text-2xl font-bold font-mono text-neutral-300">32%</div>
-                <div className="text-sm text-slate-400">낙찰률 향상</div>
+                <div className="text-sm text-neutral-400">낙찰률 향상</div>
               </div>
-              <div className="p-4 bg-slate-800 rounded-lg">
+              <div className="p-4 bg-neutral-800 rounded-lg">
                 <div className="text-2xl font-bold font-mono text-neutral-300">5x</div>
-                <div className="text-sm text-slate-400">분석 속도</div>
+                <div className="text-sm text-neutral-400">분석 속도</div>
               </div>
             </div>
             <Button asChild variant="secondary">
@@ -227,8 +227,8 @@ export default function ResearchPage() {
       <section>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-slate-900 mb-4">연구 협력 문의</h2>
-            <p className="text-slate-600 mb-6">
+            <h2 className="text-2xl font-bold text-neutral-900 mb-4">연구 협력 문의</h2>
+            <p className="text-neutral-600 mb-6">
               산학협력, 공동연구, 기술이전 등 다양한 형태의 협력을 환영합니다.
             </p>
             <div className="flex items-center justify-center gap-4">

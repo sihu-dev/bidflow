@@ -4,13 +4,42 @@ import { logger } from '@/lib/utils/logger';
  * POST /api/v1/contact
  *
  * Rate Limit: 5 requests / 15 minutes (스팸 방지)
+ * Security: CORS 화이트리스트 + Rate Limiting
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { sendSlackMessage } from '@/lib/notifications/slack';
 import { sendEmail } from '@/lib/notifications/email';
 import { withRateLimit } from '@/lib/security/rate-limiter';
+
+// ============================================================================
+// CORS 허용 도메인
+// ============================================================================
+
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'http://localhost:3010',
+  'http://localhost:3000',
+].filter(Boolean) as string[];
+
+function getCorsHeaders(origin: string | null): HeadersInit {
+  const headers: HeadersInit = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
+
+// ============================================================================
+// Supabase 클라이언트 (런타임 검증)
+// ============================================================================
 
 // 응답 타입 정의
 type ContactResponse = {
@@ -20,11 +49,22 @@ type ContactResponse = {
   id?: string;
 };
 
-// Supabase 클라이언트 (서비스 역할)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseClient(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  // Placeholder 값 감지
+  const isPlaceholder = !url || !key ||
+    url.includes('placeholder') ||
+    url.includes('your-') ||
+    key.includes('your-');
+
+  if (isPlaceholder) {
+    return null;
+  }
+
+  return createClient(url, key);
+}
 
 // 문의 스키마
 const contactSchema = z.object({
@@ -67,33 +107,42 @@ async function handlePost(request: NextRequest): Promise<NextResponse<ContactRes
     const utmMedium = url.searchParams.get('utm_medium');
     const utmCampaign = url.searchParams.get('utm_campaign');
 
-    // 1. Supabase에 저장
-    const { data: submission, error: dbError } = await supabase
-      .from('contact_submissions')
-      .insert({
-        name: data.name,
-        email: data.email,
-        company: data.company || null,
-        phone: data.phone || null,
-        inquiry_type: data.inquiryType,
-        message: data.message,
-        status: 'pending',
-        ip_address: ipAddress,
-        user_agent: userAgent,
-        referrer: referrer,
-        utm_source: utmSource,
-        utm_medium: utmMedium,
-        utm_campaign: utmCampaign,
-      })
-      .select('id')
-      .single();
+    // 1. Supabase에 저장 (클라이언트 사용 가능 시)
+    const supabase = getSupabaseClient();
+    let inquiryId = `INQ-${Date.now()}`;
 
-    if (dbError) {
-      logger.error('[Contact API] DB Error:', dbError);
-      // DB 오류가 있어도 Slack 알림은 시도
+    if (supabase) {
+      const { data: submission, error: dbError } = await supabase
+        .from('contact_submissions')
+        .insert({
+          name: data.name,
+          email: data.email,
+          company: data.company || null,
+          phone: data.phone || null,
+          inquiry_type: data.inquiryType,
+          message: data.message,
+          status: 'pending',
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          referrer: referrer,
+          utm_source: utmSource,
+          utm_medium: utmMedium,
+          utm_campaign: utmCampaign,
+        })
+        .select('id')
+        .single();
+
+      if (dbError) {
+        logger.error('[Contact API] DB Error:', dbError);
+        // DB 오류가 있어도 Slack 알림은 시도
+      }
+
+      if (submission?.id) {
+        inquiryId = submission.id;
+      }
+    } else {
+      logger.warn('[Contact API] Supabase not configured - skipping DB save');
     }
-
-    const inquiryId = submission?.id || `INQ-${Date.now()}`;
 
     // 2. Slack 알림 발송
     try {
@@ -212,13 +261,10 @@ function createConfirmationEmailHtml(name: string, inquiryId: string): string {
 export const POST = withRateLimit(handlePost, { type: 'auth' });
 
 // OPTIONS (CORS preflight)
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin');
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers: getCorsHeaders(origin),
   });
 }

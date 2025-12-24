@@ -28,8 +28,8 @@ interface MetricCardProps {
 const variantStyles = {
   default: {
     bg: 'bg-white',
-    border: 'border-slate-200',
-    hover: 'hover:border-slate-300 hover:shadow-md',
+    border: 'border-neutral-200',
+    hover: 'hover:border-neutral-300 hover:shadow-md',
   },
   highlight: {
     bg: 'bg-neutral-100',
@@ -54,8 +54,8 @@ export function MetricCard({
   subtitle,
   change,
   icon: Icon,
-  iconColor = 'text-slate-600',
-  iconBg = 'bg-slate-100',
+  iconColor = 'text-neutral-600',
+  iconBg = 'bg-neutral-100',
   variant = 'default',
   className,
   onClick,
@@ -77,12 +77,12 @@ export function MetricCard({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           {/* 제목 */}
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
+          <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
             {title}
           </p>
 
           {/* 값 */}
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
+          <p className="text-2xl font-bold text-neutral-900">{value}</p>
 
           {/* 서브타이틀 또는 변화 */}
           {(subtitle || change) && (
@@ -93,7 +93,7 @@ export function MetricCard({
                     'flex items-center gap-0.5 text-xs font-medium',
                     change.type === 'increase' && 'text-neutral-800',
                     change.type === 'decrease' && 'text-neutral-600',
-                    change.type === 'neutral' && 'text-slate-500'
+                    change.type === 'neutral' && 'text-neutral-500'
                   )}
                 >
                   {change.type === 'increase' && <TrendingUp className="w-3 h-3" />}
@@ -104,7 +104,7 @@ export function MetricCard({
                 </span>
               )}
               {(subtitle || change?.label) && (
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-neutral-500">
                   {change?.label || subtitle}
                 </span>
               )}
@@ -167,20 +167,20 @@ export function MiniMetricCard({
   label,
   value,
   icon: Icon,
-  iconColor = 'text-slate-500',
+  iconColor = 'text-neutral-500',
   className,
 }: MiniMetricCardProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-lg',
+        'flex items-center gap-3 px-4 py-3 bg-white border border-neutral-200 rounded-lg',
         className
       )}
     >
       {Icon && <Icon className={cn('w-4 h-4 flex-shrink-0', iconColor)} />}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold text-slate-800">{value}</span>
-        <span className="text-xs text-slate-500">{label}</span>
+        <span className="text-sm font-semibold text-neutral-800">{value}</span>
+        <span className="text-xs text-neutral-500">{label}</span>
       </div>
     </div>
   );

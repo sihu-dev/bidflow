@@ -17,7 +17,7 @@ export function Stats() {
           {stats.map((stat, idx) => (
             <div key={stat.label} className="text-center relative">
               {idx > 0 && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-12 bg-neutral-700 hidden md:block" />
+                <div className="absolute left-0 top-1/2 -tranneutral-y-1/2 w-px h-12 bg-neutral-700 hidden md:block" />
               )}
               <div className="text-4xl md:text-5xl font-bold text-white font-mono tracking-tight">
                 {stat.value}

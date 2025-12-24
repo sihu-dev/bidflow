@@ -152,18 +152,18 @@ export function Toolbar({
         <div className="flex items-center gap-3 flex-1">
           {/* 검색 */}
           <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -tranneutral-y-1/2 w-4 h-4 text-neutral-400" />
             <Input
               type="text"
               placeholder="공고 검색..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-9 h-9 text-sm border-slate-200 focus:border-neutral-500 focus-visible:ring-neutral-100"
+              className="pl-9 h-9 text-sm border-neutral-200 focus:border-neutral-500 focus-visible:ring-neutral-100"
             />
             {searchQuery && (
               <button
                 onClick={() => handleSearchChange('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                className="absolute right-2 top-1/2 -tranneutral-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 rounded-full"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -177,7 +177,7 @@ export function Toolbar({
                 variant="outline"
                 size="sm"
                 className={cn(
-                  'h-9 gap-2 text-sm font-medium border-slate-200',
+                  'h-9 gap-2 text-sm font-medium border-neutral-200',
                   hasActiveFilters && 'border-neutral-400 bg-neutral-100 text-neutral-800'
                 )}
               >
@@ -191,13 +191,13 @@ export function Toolbar({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-0" align="start">
-              <div className="p-3 border-b bg-slate-50">
+              <div className="p-3 border-b bg-neutral-50">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-700">필터</h4>
+                  <h4 className="text-sm font-semibold text-neutral-700">필터</h4>
                   {hasActiveFilters && (
                     <button
                       onClick={clearAllFilters}
-                      className="text-xs text-slate-500 hover:text-slate-700"
+                      className="text-xs text-neutral-500 hover:text-neutral-700"
                     >
                       모두 초기화
                     </button>
@@ -208,7 +208,7 @@ export function Toolbar({
               <div className="p-3 space-y-4">
                 {/* 상태 필터 */}
                 <div>
-                  <h5 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">상태</h5>
+                  <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">상태</h5>
                   <div className="flex flex-wrap gap-1.5">
                     {STATUS_OPTIONS.map((status) => (
                       <button
@@ -218,7 +218,7 @@ export function Toolbar({
                           'px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all',
                           activeFilters.status.includes(status.value)
                             ? status.color + ' ring-2 ring-offset-1 ring-current'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                         )}
                       >
                         {status.icon} {status.label}
@@ -229,7 +229,7 @@ export function Toolbar({
 
                 {/* 우선순위 필터 */}
                 <div>
-                  <h5 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">우선순위</h5>
+                  <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">우선순위</h5>
                   <div className="flex gap-1.5">
                     {PRIORITY_OPTIONS.map((priority) => (
                       <button
@@ -239,7 +239,7 @@ export function Toolbar({
                           'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
                           activeFilters.priority.includes(priority.value)
                             ? 'bg-neutral-200 text-neutral-800 ring-2 ring-offset-1 ring-neutral-400'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                         )}
                       >
                         {priority.icon} {priority.label}
@@ -250,7 +250,7 @@ export function Toolbar({
 
                 {/* 출처 필터 */}
                 <div>
-                  <h5 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">출처</h5>
+                  <h5 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">출처</h5>
                   <div className="flex flex-wrap gap-1.5">
                     {SOURCE_OPTIONS.map((source) => (
                       <button
@@ -260,7 +260,7 @@ export function Toolbar({
                           'px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all',
                           activeFilters.source.includes(source.value)
                             ? 'bg-neutral-200 text-neutral-800 ring-2 ring-offset-1 ring-neutral-400'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                         )}
                       >
                         {source.label}
@@ -273,11 +273,11 @@ export function Toolbar({
           </Popover>
 
           {/* 결과 카운트 */}
-          <div className="flex items-center gap-1.5 text-sm text-slate-500">
-            <span className="font-medium text-slate-700">{displayCount.toLocaleString()}</span>
+          <div className="flex items-center gap-1.5 text-sm text-neutral-500">
+            <span className="font-medium text-neutral-700">{displayCount.toLocaleString()}</span>
             <span>건</span>
             {filteredCount !== undefined && filteredCount !== totalCount && (
-              <span className="text-slate-400">/ {totalCount.toLocaleString()}</span>
+              <span className="text-neutral-400">/ {totalCount.toLocaleString()}</span>
             )}
           </div>
         </div>
@@ -285,14 +285,14 @@ export function Toolbar({
         {/* 우측: 액션 버튼 */}
         <div className="flex items-center gap-2">
           {/* 뷰 전환 */}
-          <div className="flex items-center p-1 bg-slate-100 rounded-lg">
+          <div className="flex items-center p-1 bg-neutral-100 rounded-lg">
             <button
               onClick={() => setViewMode('spreadsheet')}
               className={cn(
                 'p-1.5 rounded-md transition-colors',
                 viewMode === 'spreadsheet'
-                  ? 'bg-white text-slate-700 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-neutral-700 shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-700'
               )}
               title="스프레드시트 뷰"
             >
@@ -303,8 +303,8 @@ export function Toolbar({
               className={cn(
                 'p-1.5 rounded-md transition-colors',
                 viewMode === 'kanban'
-                  ? 'bg-white text-slate-700 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-white text-neutral-700 shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-700'
               )}
               title="칸반 뷰"
             >
@@ -312,7 +312,7 @@ export function Toolbar({
             </button>
           </div>
 
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="h-6 w-px bg-neutral-200" />
 
           {/* AI 템플릿 */}
           <PromptLibrary
@@ -336,7 +336,7 @@ export function Toolbar({
             size="sm"
             onClick={onRefresh}
             disabled={isLoading}
-            className="h-9 w-9 p-0 text-slate-500 hover:text-slate-700"
+            className="h-9 w-9 p-0 text-neutral-500 hover:text-neutral-700"
             title="새로고침"
             aria-label="새로고침"
           >
@@ -349,7 +349,7 @@ export function Toolbar({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-9 gap-1.5 text-sm text-slate-600 hover:text-slate-900"
+                className="h-9 gap-1.5 text-sm text-neutral-600 hover:text-neutral-900"
                 aria-label="내보내기 형식 선택"
               >
                 <Download className="w-4 h-4" aria-hidden="true" />
@@ -358,7 +358,7 @@ export function Toolbar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuLabel className="text-xs text-slate-500">형식 선택</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs text-neutral-500">형식 선택</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onExport?.('excel')} className="gap-2">
                 <span className="w-4 h-4 flex items-center justify-center text-neutral-600">📊</span>
@@ -390,32 +390,32 @@ export function Toolbar({
 
       {/* 통계 바 (optional) */}
       {stats && (
-        <div className="flex items-center gap-4 px-4 py-2 border-t bg-slate-50/50">
+        <div className="flex items-center gap-4 px-4 py-2 border-t bg-neutral-50/50">
           {stats.new !== undefined && stats.new > 0 && (
             <div className="flex items-center gap-1.5 text-xs">
               <div className="w-2 h-2 rounded-full bg-neutral-600" />
-              <span className="text-slate-600">신규</span>
-              <span className="font-semibold text-slate-800">{stats.new}</span>
+              <span className="text-neutral-600">신규</span>
+              <span className="font-semibold text-neutral-800">{stats.new}</span>
             </div>
           )}
           {stats.reviewing !== undefined && stats.reviewing > 0 && (
             <div className="flex items-center gap-1.5 text-xs">
               <div className="w-2 h-2 rounded-full bg-neutral-500" />
-              <span className="text-slate-600">검토중</span>
-              <span className="font-semibold text-slate-800">{stats.reviewing}</span>
+              <span className="text-neutral-600">검토중</span>
+              <span className="font-semibold text-neutral-800">{stats.reviewing}</span>
             </div>
           )}
           {stats.urgent !== undefined && stats.urgent > 0 && (
             <div className="flex items-center gap-1.5 text-xs">
               <Clock className="w-3.5 h-3.5 text-neutral-700" />
-              <span className="text-slate-600">마감 임박</span>
+              <span className="text-neutral-600">마감 임박</span>
               <span className="font-semibold text-neutral-800">{stats.urgent}</span>
             </div>
           )}
           {stats.highMatch !== undefined && stats.highMatch > 0 && (
             <div className="flex items-center gap-1.5 text-xs">
               <TrendingUp className="w-3.5 h-3.5 text-neutral-700" />
-              <span className="text-slate-600">높은 매칭</span>
+              <span className="text-neutral-600">높은 매칭</span>
               <span className="font-semibold text-neutral-800">{stats.highMatch}</span>
             </div>
           )}

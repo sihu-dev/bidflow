@@ -137,7 +137,7 @@ export function PerformanceChart() {
               >
                 {hoveredPoint === i && (
                   <div
-                    className="absolute z-10 px-2.5 py-1.5 rounded bg-[#111113] border border-white/[0.1] -translate-x-1/2 left-1/2"
+                    className="absolute z-10 px-2.5 py-1.5 rounded bg-[#111113] border border-white/[0.1] -tranneutral-x-1/2 left-1/2"
                     style={{
                       bottom: `${((d.value - minValue) / (maxValue - minValue)) * 100}%`,
                       marginBottom: '8px',

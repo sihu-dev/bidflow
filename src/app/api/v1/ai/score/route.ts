@@ -6,15 +6,43 @@ import { logger } from '@/lib/utils/logger';
  * POST /api/v1/ai/score
  * - bidId로 DB 조회하거나
  * - title, organization, description 직접 입력
+ *
+ * Security: withAuth + withRateLimit 적용
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { withAuth, type AuthenticatedRequest } from '@/lib/security/auth-middleware';
+import { withRateLimit } from '@/lib/security/rate-limiter';
 import {
   matchBidToProducts,
   type BidAnnouncement,
   type MatchResult,
 } from '@/lib/matching/enhanced-matcher';
+
+// ============================================================================
+// CORS 허용 도메인
+// ============================================================================
+
+const ALLOWED_ORIGINS = [
+  process.env.NEXT_PUBLIC_APP_URL,
+  'http://localhost:3010',
+  'http://localhost:3000',
+].filter(Boolean) as string[];
+
+function getCorsHeaders(origin: string | null): HeadersInit {
+  const headers: HeadersInit = {
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
 
 // ============================================================================
 // 요청 스키마
@@ -118,7 +146,7 @@ function getRecommendationMessage(code: 'BID' | 'REVIEW' | 'SKIP'): string {
 // API 핸들러
 // ============================================================================
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+async function handlePost(request: AuthenticatedRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
 
@@ -230,16 +258,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 }
 
 // ============================================================================
+// 미들웨어 적용하여 export
+// ============================================================================
+
+export const POST = withRateLimit(
+  withAuth(handlePost, { requireAuth: true, allowedRoles: ['admin', 'user'] }),
+  { type: 'ai' }
+);
+
+// ============================================================================
 // OPTIONS (CORS Preflight)
 // ============================================================================
 
-export async function OPTIONS(): Promise<NextResponse> {
+export async function OPTIONS(request: NextRequest): Promise<NextResponse> {
+  const origin = request.headers.get('origin');
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
+    headers: getCorsHeaders(origin),
   });
 }

@@ -83,7 +83,7 @@ export function PricingPreview() {
               )}
             >
               {plan.highlighted && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-neutral-900 text-white text-xs font-medium rounded-full">
+                <div className="absolute -top-3 left-1/2 -tranneutral-x-1/2 px-4 py-1.5 bg-neutral-900 text-white text-xs font-medium rounded-full">
                   인기
                 </div>
               )}

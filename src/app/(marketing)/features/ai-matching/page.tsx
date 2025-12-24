@@ -95,7 +95,7 @@ export default function AiMatchingPage() {
                   <p className="text-sm text-muted-foreground">{item.description}</p>
                 </div>
                 {index < matchingProcess.length - 1 && (
-                  <ArrowRight className="hidden md:block absolute top-1/2 -right-3 w-6 h-6 text-muted-foreground -translate-y-1/2" />
+                  <ArrowRight className="hidden md:block absolute top-1/2 -right-3 w-6 h-6 text-muted-foreground -tranneutral-y-1/2" />
                 )}
               </div>
             ))}
