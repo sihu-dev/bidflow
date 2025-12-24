@@ -26,7 +26,7 @@ export default function AIDashboardPage() {
   const currentData = useMemo(() => demoDataByProduct[activeTab], [activeTab]);
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6">
+    <main className="min-h-screen bg-neutral-50 p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -121,6 +121,6 @@ export default function AIDashboardPage() {
           <AnomalyAlert alerts={currentData.alerts} />
         </div>
       </div>
-    </div>
+    </main>
   );
 }
