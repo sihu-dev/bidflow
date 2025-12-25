@@ -1,0 +1,53 @@
+# FORGE LABS Git Attributes
+# ============================================
+
+# Auto detect text files and normalize line endings
+* text=auto eol=lf
+
+# Source code
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Config files
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+.prettierrc text eol=lf
+
+# Binary files (no text conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+
+# Lock files (generated, diff not useful)
+pnpm-lock.yaml -diff
+package-lock.json -diff
+yarn.lock -diff
+
+# Large files (consider using Git LFS)
+*.zip binary
+*.tar.gz binary
+*.mp4 binary
+*.mp3 binary
